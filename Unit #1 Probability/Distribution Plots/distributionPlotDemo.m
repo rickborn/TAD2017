@@ -65,6 +65,8 @@ distributionPlot(data1,'widthDiv',[2 1],'histOri','left','color','b','showMM',4)
 distributionPlot(gca,data2,'widthDiv',[2 2],'histOri','right','color','k','showMM',4)
 title('Use widthDiv to compare two series of distributions');
 
+return
+
 %--Christmas trees!
 x=meshgrid(1:10,1:10);
 xx = tril(x);

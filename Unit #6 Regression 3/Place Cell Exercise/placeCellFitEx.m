@@ -27,7 +27,7 @@
 
 
 %% load data
-cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Eden Data\Chapter9'
+%cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Eden Data\Chapter9'
 load placeCellData.mat
 
 %% plot the rat's position over time
@@ -135,10 +135,10 @@ alpha=exp(b2(1)-b2(2)^2/4/b2(3));   %...max firing rate (0.0113)
 
 OPTIONS = optimset('Display','off','TolX',0.001);
 % Look at our occupancy normalized histogram to generate guesses
-%q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
-q0 = [0,0,0];           % BAD guesses
+q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
+%q0 = [0,0,0];           % BAD guesses
 %qFit = fminsearch(@(q)fitFunGauss(q,ds),q0,OPTIONS);
-qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition',spikeTrain),q0,OPTIONS);
+qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
 % Compare qFit with alpha, mu and sigma calculated above. Pretty good.
 % But to see the down side of this approach, try making initial guesses

@@ -16,6 +16,7 @@ function [] = CLTdemo(R,nSum,nSim,whichDist)
 %
 % see chapter 7 in Vickers "What is a p-value anyway?"
 % RTB wrote it, fall of 2012
+% Rebecca's test 5/23/17
 
 % Other distributions to try: exprnd, chi2rnd, betarnd
 

@@ -1,6 +1,7 @@
-% etMouse2SampleDemo.m
+% etMouse2SampleProblem.m
 %
 % RTB wrote it, November 2016
+% RTB adapted it for TaD 2017 on 12 July 2017
 
 % Concepts covered:
 % 1. 'boxplot' for summarizing data
@@ -16,43 +17,30 @@
 myAlpha = 0.05;
 nBoot = 100000;
 
-% Sixteen SOD1 mice (ALS model) were randomly assigned to a treatment group
+% Twenty SOD1 mice (ALS model) were randomly assigned to a treatment group
 % (riluzole) or a control group. Values are their survival times, in days,
-% from the beginning of treatment. [RTB made this up.]
-%rxGrp = [94,197,16,38,99,141,23];   % mean of 86.857, sigma 66.767
-%ctrlGrp = [52,104,146,10,51,30,40,27,46]; % mean of 56.222, sigma 42.476
+% from the beginning of treatment. 
 
-% Newly made up data:
-rxGrp = [144,127,170,164,186,110,136,195,153,160];
-ctrlGrp = [148,202,113,121,137,139,100,90,70,121];
+% Read in the data
+ds = dataset('xlsfile','mouseSurvivalDrugStudy');
 
-muCtrl = mean(ctrlGrp);
-sigmaCtrl = std(ctrlGrp);
-nRx = length(rxGrp); nCtrl = length(ctrlGrp);
+muCtrl = mean(ds.Ctrl);
+sigmaCtrl = std(ds.Ctrl);
+nRx = length(ds.Rx); nCtrl = length(ds.Ctrl);
 
-muDiffHat = mean(rxGrp) - mean(ctrlGrp);
+muDiffHat = mean(ds.Rx) - mean(ds.Ctrl);
 % mean difference = 30.63
 
 % plot the data
 grpLabels = {'Rx';'Rx';'Rx';'Rx';'Rx';'Rx';'Rx';'Rx';'Rx';'Rx'; ...
     'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl';'Ctrl'};
-boxplot([rxGrp';ctrlGrp'],grpLabels);
+boxplot([ds.Rx';ds.Ctrl'],grpLabels);
 xlabel('Treatment Group');
 ylabel('Survival Time (days)');
 tStr = sprintf('Mean Diff = %.2f days',muDiffHat);
 text(1.5,180,tStr);
-%boxplot([[rxGrp,NaN,NaN]',ctrlGrp']);
-%distributionPlot([[rxGrp,NaN,NaN]',ctrlGrp']);
-
-%% Generate a "true population" of survival times
-% rng default;    % for reproducibility
-% 
-% allMouseSurvival = round(normrnd(muCtrl,sigmaCtrl,5000,1));
-% minSurvival = min(allMouseSurvival);
-% if minSurvival < 0
-%     allMouseSurvival = allMouseSurvival - minSurvival;
-% end
-% xlswrite('mouseSurvivalPopulationData.xlsx',allMouseSurvival);
+%boxplot([[ds.Rx,NaN,NaN]',ds.Ctrl']);
+%distributionPlot([[ds.Rx,NaN,NaN]',ds.Ctrl']);
 
 %% Read in population data
 allMouseSurvival = xlsread('mouseSurvivalPopulationData.xlsx');
@@ -74,14 +62,14 @@ ax = axis;
 hl = line([muDiffHat,muDiffHat],[ax(3),ax(4)]);
 set(hl,'Color','r');
 %% Use classical 2-sample t-test
-[hT,pT,ci,statsT] = ttest2(rxGrp,ctrlGrp);
-[pRS,hRS,statsRS] = ranksum(rxGrp,ctrlGrp);
+[hT,pT,ci,statsT] = ttest2(ds.Rx,ds.Ctrl);
+[pRS,hRS,statsRS] = ranksum(ds.Rx,ds.Ctrl);
 
 %% Bootstrap std. error for this difference
 muDiffBoot = zeros(nBoot,1);
 for k = 1:nBoot
-    muDiffBoot(k) = mean(rxGrp(unidrnd(nRx,nRx,1))) - ...
-        mean(ctrlGrp(unidrnd(nCtrl,nCtrl,1)));
+    muDiffBoot(k) = mean(ds.Rx(unidrnd(nRx,nRx,1))) - ...
+        mean(ds.Ctrl(unidrnd(nCtrl,nCtrl,1)));
 end
 se = std(muDiffBoot);
 figure, hist(muDiffBoot,30);
@@ -126,8 +114,8 @@ nOut = sampsizepwr('t2',[56.22 42.48],86.86,0.90);      % n = 42
 % can calculate power directly by simulation, using all the values
 nSim = 10000;
 hSim = zeros(nSim,1);
-ctrlMean = mean(ctrlGrp); ctrlSigma = std(ctrlGrp);
-rxMean = mean(rxGrp); rxSigma = std(rxGrp);
+ctrlMean = mean(ds.Ctrl); ctrlSigma = std(ds.Ctrl);
+rxMean = mean(ds.Rx); rxSigma = std(ds.Rx);
 for k = 1:nSim
     rxSim = normrnd(rxMean,rxSigma,nRx,1);
     ctrlSim = normrnd(ctrlMean,ctrlSigma,nCtrl,1);

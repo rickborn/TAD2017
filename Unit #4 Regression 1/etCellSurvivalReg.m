@@ -32,7 +32,7 @@
 % Column 3 is the proportion of cells surviving after radiation treatment
 
 %% Load data and plot it
-cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
+% cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
 ds = dataset('xlsfile','CellSurvivalData.xlsx');
 ds.logSurvProp = log(ds.survProp);  % add a column
 nPts = length(ds.dose);

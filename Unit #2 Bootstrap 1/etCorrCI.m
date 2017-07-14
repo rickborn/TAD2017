@@ -14,7 +14,7 @@ function [ci,se] = etCorrCI(nBoot,myAlpha)
 % 3. Bootstrapping confidence intervals with built-in 'bootci' function
 % 4. Parametric bootstrap by sampling from a bivariate normal distribution
 
-cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
+% cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
 
 if nargin < 2, myAlpha = 0.05; end
 if nargin < 1, nBoot = 5000; end

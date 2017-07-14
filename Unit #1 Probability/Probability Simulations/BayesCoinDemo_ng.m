@@ -1,4 +1,4 @@
-% BayesCoinDemo.m
+% BayesCoinDemo_ng.m
 %
 % Based on http://www.nature.com/nmeth/journal/v12/n5/full/nmeth.3368.html
 %

@@ -75,11 +75,27 @@ priorFlat = ones(size(pi0)) / nBins;
 % Note that the frequentist p-value ('p3H' calculated above) is a subset of
 % the likelihood we just calculated. That is: likelihood3H(pi0 == 0.5)
 
+
+% NOTE FOR RICK::
+
+% The likelihood doesn't need to be normalized! It's not a probability
+% distribution, it's just the likelihood! sum(P(D|theta)) =/=1, in general.
+% Perhaps one example would be to consider a data set that's just
+% impossible, then P(D|theta) = 0 for all theta. But for a less silly one,
+% imagine there are only two possible theta, and each considers the data
+% unlikely (let's just say P(D|theta) < 0.5 for both theta). Then, again,
+% they don't sum up to 1.
+% All the normalization happens from the "evidence", when you normalize the posterior.
+% It comes out the same because of the last normalization step, where your
+% constant factor you put in the likelihood gets cancelled out, but I think it will
+% confuse the students since it's not actually necessary or part of the
+% likelihood computation.
+
 % In order to get a proper probability distribution, the area under our
 % curve must be 1. We will use the trapezoidal rule to do numeric
 % integration. (If you don't know how this works, look it up or ask one of
 % the instructors.)
-likelihood3H = likelihood3H ./ trapz(likelihood3H); % normalize by area
+%likelihood3H = likelihood3H ./ trapz(likelihood3H); % normalize by area
 
 % Now we use Bayes' rule to calculate the probability of each hypothesis
 % (i.e. the possible values of P(heads) in pi0), known as the 'posterior
@@ -96,7 +112,9 @@ legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Bayes: flat prior');
 
-% QUESTION: 
+% QUESTION:
+% What is the difference between a likelihood and the posterior?
+% How is it that Bayes rule is changing what we think about pi0?
 
 %% Calculate some values of interest
 % Note: This is an opportunity to point out the richness afforded by having
@@ -114,12 +132,16 @@ pi0mean =
 pi0median = 
 
 % TODO: Calculate the most likely value of pi0 (i.e. the mode):
+% HINT: Despite the similar names, this is not about the likelihood!
+% Think about what the posterior distribution is really saying: this is the
+% probability of each value of pi0, given what we already think we know
+% about pi0s in general.
 pi0max = 
 
 % But, in addition, the Bayesian can answer interesting questions that 
 % don't even exist for the frequentist.
 
-% TODO: Calculate the probability that the coin is biased towards heads?
+% TODO: Calculate the probability that the coin has any amount of bias towards heads?
 pBiased = 
 
 % What are the odds the coin is biased towards heads?
@@ -133,48 +155,59 @@ oddsBiased2Heads = pBiased / (1-pBiased);
 
 %% Non-flat priors
 % Now, what if we base our prior on having observed 3H and 1T:
-prior3H1T = (pi0.^3).*(1-pi0);
-prior3H1T = prior3H1T ./ trapz(prior3H1T);
+
+% TODO: "Update" our prior based on the observation of 3 heads and 1 tails
+% HINT: If we originally thought the distribution was uniform (pi0), then
+% another way to think about this prior is as the posterior distribution
+% after we've already observed those 4 trials.
+prior3H1T =
 
 % Then we observe an outcome of 4H:
 likelihood4H = binopdf(4,4,pi0);
-likelihood4H = likelihood4H ./ trapz(likelihood4H);
 
-posterior3H1T = likelihood4H .* prior3H1T;
-posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
+% TODO: Compute the posterior, using our likelihood and prior
+posterior3H1T = 
 
+% Now plot the new posterior distribution
 subplot(2,2,2);
 plot(pi0,prior3H1T,'k-',pi0,likelihood4H,'r--',pi0,posterior3H1T,'b-');
 legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Prior based on 3H1T');
 
+% QUESTION:
+% Is this result any different from using the uniform prior and then
+% observing 7 heads and 1 tail? Should it be?
+
 %% Gaussian prior centered around 0.5, observe 3H1T
 priorGaussFair = normpdf(pi0,0.5,0.25);
 priorGaussFair = priorGaussFair ./ trapz(priorGaussFair);
 
 % Then we observe an outcome of 3H1T:
-likelihood3H1T = binopdf(3,4,pi0);
-likelihood3H1T = likelihood3H1T ./ trapz(likelihood3H1T);
+% TODO: Compute the likelihood and posterior distributions
+likelihood3H1T = 
 
-posterior3H1T = likelihood3H1T .* priorGaussFair;
-posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
+posterior3H1T = 
 
 subplot(2,2,3);
 plot(pi0,priorGaussFair,'k-',pi0,likelihood3H1T,'r-',pi0,posterior3H1T,'b-');
 legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Gaussian prior around 0.5');
+
+% QUESTION:
+% How is this prior different from the one we imposed above using "previous
+% observations?" Not just numerically, but philosophically. What is the ideological
+% distinction between the two types of priors?
 %% Gaussian prior tightly centered around 0.5, observe 3H1T
-priorGaussFair = normpdf(pi0,0.5,0.1);
-priorGaussFair = priorGaussFair ./ trapz(priorGaussFair);
 
-% Then we observe an outcome of 3H1T:
-likelihood3H1T = binopdf(3,4,pi0);
-likelihood3H1T = likelihood3H1T ./ trapz(likelihood3H1T);
+% TODO: Create a Gaussian prior with a standard deviation of 0.1, then
+% compute the posterior after observing an outcome of 3H1T
+priorGaussFair = 
 
-posterior3H1T = likelihood3H1T .* priorGaussFair;
-posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
+likelihood3H1T = 
+
+posterior3H1T = 
 
 subplot(2,2,4);
 plot(pi0,priorGaussFair,'k-',pi0,likelihood3H1T,'r-',pi0,posterior3H1T,'b-');

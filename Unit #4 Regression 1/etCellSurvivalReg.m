@@ -32,7 +32,7 @@
 % Column 3 is the proportion of cells surviving after radiation treatment
 
 %% Load data and plot it
-% cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
+
 ds = dataset('xlsfile','CellSurvivalData.xlsx');
 ds.logSurvProp = log(ds.survProp);  % add a column
 nPts = length(ds.dose);
@@ -47,7 +47,14 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 % Note that we do not include an intercept term, because we know that a
 % dose of zero gives survival proportion of 1, and y = log(1) = 0;
 
-% There are many ways to do this. Method #1: 'glmfit'
+% MATLAB has a couple of different ways to fit a GLM. We'll show you both.
+% One is designed to work "out of the box" whereas in the other one, you
+% have much more control.
+
+% Method #1: 'glmfit'
+
+% TODO: use the function "glmfit" to fit a GLM using a model in which the
+% value we retrieve is a normally distributed random 
 [b,~,stats] = glmfit([ds.dose, ds.dose.^2],ds.logSurvProp,'normal','constant','off');
 b14 = b;
 SE14 = stats.se;    % store the values for the std. errors of the params

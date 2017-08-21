@@ -24,7 +24,7 @@ p3H = 1 - binocdf(2,3,0.5); % 0.125 for 1-tailed (Heads only)
 % Here we consider an entire range of possible hypotheses concerning the
 % probability of heads:
 % range of possible values for P(heads)
-pi0 = 0:0.01:1;
+pi0 = 0:0.001:1;
 nBins = length(pi0);
 
 % If we have no clue as to what the true value of p(heads) is, we could
@@ -104,6 +104,10 @@ likelihood3H1T = likelihood3H1T ./ trapz(likelihood3H1T);
 
 posterior3H1T = likelihood3H1T .* priorGaussFair;
 posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
+
+% Given this posterior distribution, what is the probability that the coin
+% is biased?
+pBiasedNow = trapz(posterior3H1T(pi0 > 0.5));
 
 subplot(2,2,3);
 plot(pi0,priorGaussFair,'k-',pi0,likelihood3H1T,'r-',pi0,posterior3H1T,'b-');

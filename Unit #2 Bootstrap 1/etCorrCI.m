@@ -97,3 +97,46 @@ pbsFishSE = std(pbsFishersZ)
 figure, hist(pbsFishersZ,30);
 xlabel('Fisher''s transformation of the correlation coefficient');
 ylabel('#');
+
+% Checking the 'untransform' calculation -- looks right
+pbsRhosUT = (exp(2.*pbsFishersZ)-1) ./ (exp(2.*pbsFishersZ)+1);
+
+% Code below is from Rebecca Senft, 7-31-2017
+% BONUS: Calculate a 95% confidence interval using Fisher's transformation
+% of rho. Un-transform your calculated interval using the following
+% equation: untransformed = (exp(2.*Z-score)-1)/(exp(2.*Z-score)+1)
+% Name the transformed upper bound 'upper' and the lower bound 'lower'. How
+% does this compare to the CI we calculated when using the bootci function?
+ 
+% Transformed CI:
+boundupper = prctile(pbsFishersZ,97.5);
+boundlower = prctile(pbsFishersZ,2.5);
+
+%Converting back to untransformed units:
+utupper=(exp(2.*boundupper)-1)/(exp(2.*boundupper)+1);
+utlower=(exp(2.*boundlower)-1)/(exp(2.*boundlower)+1);
+
+ciFisher=[utlower,utupper]
+upperbs = prctile(bsRhos,97.5);
+lowerbs = prctile(bsRhos,2.5);
+ciUncorrected=[lowerbs, upperbs];
+
+%Plot the transformed bounds on the Fisher's transformed distribution
+yL = get(gca,'YLim');
+line([boundupper boundupper],yL,'Color','r','LineWidth',3);
+hold on
+line([boundlower ;boundlower],yL,'Color','r','LineWidth',3);
+
+% Plot the back-transformed CIs on Figure 4
+figure(4);
+yL = get(gca,'YLim');
+line([utupper utupper],yL,'Color','r','LineWidth',2);
+hold on
+line([utlower;utlower],yL,'Color','r','LineWidth',2);
+% compare with CIs calculated with 'bootci' and percentile method
+line([ci(2) ci(2)],yL,'Color','g','LineWidth',2);
+line([ci(1);ci(1)],yL,'Color','g','LineWidth',2);
+% compare with CIs calculated with 'bootci' and BCA method
+ciBCA = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha,'type','bca');
+line([ciBCA(2) ciBCA(2)],yL,'Color','y','LineWidth',2);
+line([ciBCA(1);ciBCA(1)],yL,'Color','y','LineWidth',2);

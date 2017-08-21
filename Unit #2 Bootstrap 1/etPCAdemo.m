@@ -6,10 +6,10 @@
 % Demo version of etPCAstats.m (function version)
 
 % Concepts covered:
-1. z-scoring to see relationships among different measures
-2. PCA to capture maximal variance ('scientific IQ')
-3. bootstrap to estimate std. error of our PCA-based statistic
-4. bootstrap for confidence intervals: std. normal vs. percentile
+% 1. z-scoring to see relationships among different measures
+% 2. PCA to capture maximal variance ('scientific IQ')
+% 3. bootstrap to estimate std. error of our PCA-based statistic
+% 4. bootstrap for confidence intervals: std. normal vs. percentile
 
 %% Load and plot data
 nBoot = 200;

@@ -16,9 +16,9 @@
 p3H = 1 - binocdf(2,3,0.5); % 0.125 for 1-tailed (Heads only)
 % or could use: binopdf(3,3,0.5)
 
-% We might also calculate a 95% confidence interval
-[pHat,pCI] = binofit(3,3,0.05);
-% pHat = 1; pCI = 0.2924    1.0000
+% We might also calculate a 99% confidence interval
+[pHat,pCI] = binofit(3,3,0.01);
+% pHat = 1; pCI95 = 0.2924    1.0000; pCI99 = 0.1710 to 1.00
 
 %% Bayesian approach: We flip a coin 3 times and get 3 heads
 % Here we consider an entire range of possible hypotheses concerning the

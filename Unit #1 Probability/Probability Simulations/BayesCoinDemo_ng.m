@@ -33,7 +33,7 @@ p3H =
 % QUESTION: What would our probability be if we allowed for either 3 heads
 % OR 3 tails on 3 tosses?
 
-% TODO: Use 'binofit' to calculate a 95% confidence interval for P(heads)
+% TODO: Use 'binofit' to calculate a 99% confidence interval for P(heads)
 % given that we got 3 heads on 3 tosses.
 
 
@@ -75,31 +75,9 @@ priorFlat = ones(size(pi0)) / nBins;
 % Note that the frequentist p-value ('p3H' calculated above) is a subset of
 % the likelihood we just calculated. That is: likelihood3H(pi0 == 0.5)
 
-
-% NOTE FOR RICK::
-
-% The likelihood doesn't need to be normalized! It's not a probability
-% distribution, it's just the likelihood! sum(P(D|theta)) =/=1, in general.
-% Perhaps one example would be to consider a data set that's just
-% impossible, then P(D|theta) = 0 for all theta. But for a less silly one,
-% imagine there are only two possible theta, and each considers the data
-% unlikely (let's just say P(D|theta) < 0.5 for both theta). Then, again,
-% they don't sum up to 1.
-% All the normalization happens from the "evidence", when you normalize the posterior.
-% It comes out the same because of the last normalization step, where your
-% constant factor you put in the likelihood gets cancelled out, but I think it will
-% confuse the students since it's not actually necessary or part of the
-% likelihood computation.
-
-% In order to get a proper probability distribution, the area under our
-% curve must be 1. We will use the trapezoidal rule to do numeric
-% integration. (If you don't know how this works, look it up or ask one of
-% the instructors.)
-%likelihood3H = likelihood3H ./ trapz(likelihood3H); % normalize by area
-
 % Now we use Bayes' rule to calculate the probability of each hypothesis
 % (i.e. the possible values of P(heads) in pi0), known as the 'posterior
-% probability': P(hypotheis|data). This is just the product of our prior
+% probability': P(hypothesis|data). This is just the product of our prior
 % and our likelihood, followed by normalization:
 posterior3H = likelihood3H .* priorFlat;
 posterior3H = posterior3H ./ trapz(posterior3H);

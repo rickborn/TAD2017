@@ -76,8 +76,8 @@ title('Tests of osmotic mini-pump for drug delivery');
 
 % TO DO: Make a variable, const, which is a column of ones the length of
 % one column of the dataset. We will use const to index into 
-
 const = 
+
 % We will use the regress function to perform  this simple linear
 % regression.
 % 'regress' returns:
@@ -145,6 +145,7 @@ hold on;
 % specification. Also note that column titles are used when assigning model
 % specification.)
 lme = 
+
 % Now we need to read out the individual intercepts from the model
 beta = fixedEffects(lme);           % give us the fixed effects (slope & intercept)
 [~,~,STATS] = randomEffects(lme);   % Compute the random-effects statistics
@@ -166,8 +167,6 @@ plot(xVals, yRegC, 'g-');
 % effects for the intercept are significantly different from 0. To see
 % this, look at the STATS variable. What part of STATS tells you an
 % intercept is significantly different from 0?
-
-% We conclude that lot 'A' starts with significantly less drug than lots 'B' or 'C'.
 
 %% Linear mixed effects: allowing for different intercepts AND slopes
 
@@ -196,14 +195,9 @@ yReg2C = (beta(1) + betaRand(1)) + (beta(2)+betaRand(2)).*xVals;
 plot(xVals, yReg2C, 'g-');
 
 % QUESTION: Does any lot elute at a greater rate than the others?
-% We see that lot 'A' elutes drug at a slightly greater rate than the other 
-% two. We can tell this because betaLotA is 32.3044, meaning there is less
-% drug remaining after the same amount of time in lot A vs. B or C, which
-% both have very similar betas.
 
 % BONUS QUESTION: When would devices from each lot, on average, be expected
 % to run out of drug? 
-
 
 %% Application of the bootstrap (p. 111): bootstrap the residuals
 % Classic quote: "Thus reassured that the bootstrap is giving reasonable
@@ -250,7 +244,7 @@ X = [const,ds.hrs];
 % Y. Store the regression coefficients from each run in a row of allBeta
 % (allBeta should be a 1000x2 matrix if completed correctly).
 for 
-    
+    INSERT YOUR CODE
 end
 
 % Then we can take the standard deviation of our "new" coefficients to
@@ -259,6 +253,7 @@ bsSEresid = std(allBeta);
 
 % QUESTION: Compare bsSEresid with mdl1.Coefficients.SE. How similar are
 % they?
+
 
 %% Compare with bootstrapping pairs
 % Instead of resampling residuals and applying them to fitted data, we can
@@ -273,7 +268,6 @@ end
 bsSEpairs = std(allBeta);
 
 % QUESTION: Compare to bsSEresid and mdl1.Coefficients.SE
-
 %% Whis is better?
 % E & T state that "Bootstrapping pairs is less sensitive to assumptions
 % than bootstrapping residuals." BS of residuals assumes that the error
@@ -385,7 +379,6 @@ CVfull = sum(CVresiduals.^2) / nPts;
 
 % QUESTION: By how many percent does meanRSE underestimate the prediction 
 % error?
-
 %% Compare residuals with CV residuals
 
 % It looks like 'fitlme' does not automatically calculate residuals, which
@@ -454,10 +447,10 @@ CVresidualsSimple = zeros(nPts,1);
 % a third line (still within the loop) will allow us to get the kth entry 
 % in CVresidualsSimple by taking the difference between the amount of drug 
 % left in the real data and the model's predicted value.
-
-for k=1:nPts
-    
+for k = 1:nPts
+    INSERT YOUR CODE
 end
+
 CVsimple = sum(CVresidualsSimple.^2) / nPts;    % E&T get 5.89; I get 6.0
 
 % Need to get real residuals for the simple model

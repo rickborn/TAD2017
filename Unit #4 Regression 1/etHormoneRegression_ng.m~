@@ -362,7 +362,7 @@ for k = 1:nPts
     % TO DO: specify the multi-slope model using fitlme(). Exclude the kth
     % point from the model fit. Look up fitlme() documentation for help.
     % Define the output as lmeCV.
-    
+    lmeCV = fitlme(ds,'amount ~ hrs + (1|lot)','Exclude',k);
     
     b = fixedEffects(lmeCV);           % give us the fixed effects (slope & intercept)
     [~,~,STATS] = randomEffects(lmeCV);   % Compute the random-effects statistics

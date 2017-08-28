@@ -76,7 +76,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 
 % TO DO: Make a variable, const, which is a column of ones the length of
 % one column of the dataset. We will use const to index into 
-const = 
+const = ones(length(ds),1);
 
 % We will use the regress function to perform  this simple linear
 % regression.
@@ -144,7 +144,7 @@ hold on;
 % remaining and random effect of lot (see above for how to write the model
 % specification. Also note that column titles are used when assigning model
 % specification.)
-lme = 
+lme = fitlme(ds,'amount ~ hrs + (1|lot)');
 
 % Now we need to read out the individual intercepts from the model
 beta = fixedEffects(lme);           % give us the fixed effects (slope & intercept)
@@ -167,6 +167,8 @@ plot(xVals, yRegC, 'g-');
 % effects for the intercept are significantly different from 0. To see
 % this, look at the STATS variable. What part of STATS tells you an
 % intercept is significantly different from 0?
+
+% We conclude that lot 'A' starts with significantly less drug than lots 'B' or 'C'.
 
 %% Linear mixed effects: allowing for different intercepts AND slopes
 
@@ -195,9 +197,20 @@ yReg2C = (beta(1) + betaRand(1)) + (beta(2)+betaRand(2)).*xVals;
 plot(xVals, yReg2C, 'g-');
 
 % QUESTION: Does any lot elute at a greater rate than the others?
+% We see that lot 'A' elutes drug at a slightly greater rate than the other 
+% two. We can tell this because betaLotA is 32.3044, meaning there is less
+% drug remaining after the same amount of time in lot A vs. B or C, which
+% both have very similar betas.
 
 % BONUS QUESTION: When would devices from each lot, on average, be expected
 % to run out of drug? 
+
+% Two possible approaches: 1) Write out the regression
+% equation for each lot, set 'amount' to 0 and solve for x. 2) Brute force:
+% xVals = 450:800;                          %Look at x values beyond the data
+% yReg2C = (beta(1) + betaRand(1)) + (beta(2)+betaRand(2)).*xVals; % Redo the regression for these xVals.
+% tMin = find(yReg2C== min(abs(yReg2C)));   % find y-val closest to 0
+% lifeTimeC = xVals(tMin);                  % x-val corresponding to y=0
 
 %% Application of the bootstrap (p. 111): bootstrap the residuals
 % Classic quote: "Thus reassured that the bootstrap is giving reasonable
@@ -243,8 +256,9 @@ X = [const,ds.hrs];
 % Then, recompute the regression, only with yStar instead of the original
 % Y. Store the regression coefficients from each run in a row of allBeta
 % (allBeta should be a 1000x2 matrix if completed correctly).
-for 
-    INSERT YOUR CODE
+for k = 1:nBoot
+    yStar = mdl1.Fitted.LinearPredictor + mdl1.Residuals.Raw(unidrnd(nPts,nPts,1));
+    [allBeta(k,:)] = regress(yStar,X);
 end
 
 % Then we can take the standard deviation of our "new" coefficients to
@@ -253,7 +267,8 @@ bsSEresid = std(allBeta);
 
 % QUESTION: Compare bsSEresid with mdl1.Coefficients.SE. How similar are
 % they?
-
+% mdl1.Coefficients.SE = 0.8672, 0.0045
+% bsSEresid = 0.8124, 0.0042
 
 %% Compare with bootstrapping pairs
 % Instead of resampling residuals and applying them to fitted data, we can
@@ -358,7 +373,7 @@ for k = 1:nPts
     % TO DO: specify the multi-slope model using fitlme(). Exclude the kth
     % point from the model fit. Look up fitlme() documentation for help.
     % Define the output as lmeCV.
-    lmeCV = 
+    lmeCV = fitlme(ds,'amount ~ hrs + (1|lot)','Exclude',k);
     
     b = fixedEffects(lmeCV);           % give us the fixed effects (slope & intercept)
     [~,~,STATS] = randomEffects(lmeCV);   % Compute the random-effects statistics
@@ -379,6 +394,8 @@ CVfull = sum(CVresiduals.^2) / nPts;
 
 % QUESTION: By how many percent does meanRSE underestimate the prediction 
 % error?
+underEstPerCent = ((CVfull - meanRSE) / CVfull) * 100;
+% 28% ! 
 %% Compare residuals with CV residuals
 
 % It looks like 'fitlme' does not automatically calculate residuals, which
@@ -404,7 +421,7 @@ for k = 1:nPts
     % This is the difference between the amount of drug left in the dataset
     % and the predicted amount by our model. Think about what our model
     % is here!
-    realResiduals(k) = 
+    realResiduals(k) = ds.amount(k) - (b0 + b(2).*ds.hrs(k));
 end
 
 % CHECK: As a reality check, if performed correctly above, myMeanRSE should
@@ -448,7 +465,9 @@ CVresidualsSimple = zeros(nPts,1);
 % in CVresidualsSimple by taking the difference between the amount of drug 
 % left in the real data and the model's predicted value.
 for k = 1:nPts
-    INSERT YOUR CODE
+    lmeCV = fitlme(ds,'amount ~ hrs','Exclude',k);
+    b = fixedEffects(lmeCV);           % give us the fixed effects (slope & intercept)
+    CVresidualsSimple(k) = ds.amount(k) - (b(1) + b(2).*ds.hrs(k));
 end
 
 CVsimple = sum(CVresidualsSimple.^2) / nPts;    % E&T get 5.89; I get 6.0

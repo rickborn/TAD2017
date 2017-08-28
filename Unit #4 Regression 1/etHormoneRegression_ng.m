@@ -77,7 +77,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 % TO DO: Make a variable, const, which is a column of ones the length of
 % one column of the dataset. We will use const to index into 
 
-
+const = 
 % We will use the regress function to perform  this simple linear
 % regression.
 % 'regress' returns:
@@ -144,7 +144,7 @@ hold on;
 % remaining and random effect of lot (see above for how to write the model
 % specification. Also note that column titles are used when assigning model
 % specification.)
-
+lme = 
 % Now we need to read out the individual intercepts from the model
 beta = fixedEffects(lme);           % give us the fixed effects (slope & intercept)
 [~,~,STATS] = randomEffects(lme);   % Compute the random-effects statistics
@@ -249,7 +249,9 @@ X = [const,ds.hrs];
 % Then, recompute the regression, only with yStar instead of the original
 % Y. Store the regression coefficients from each run in a row of allBeta
 % (allBeta should be a 1000x2 matrix if completed correctly).
-
+for 
+    
+end
 
 % Then we can take the standard deviation of our "new" coefficients to
 % estimate standard error.
@@ -362,7 +364,7 @@ for k = 1:nPts
     % TO DO: specify the multi-slope model using fitlme(). Exclude the kth
     % point from the model fit. Look up fitlme() documentation for help.
     % Define the output as lmeCV.
-    
+    lmeCV = 
     
     b = fixedEffects(lmeCV);           % give us the fixed effects (slope & intercept)
     [~,~,STATS] = randomEffects(lmeCV);   % Compute the random-effects statistics
@@ -409,7 +411,7 @@ for k = 1:nPts
     % This is the difference between the amount of drug left in the dataset
     % and the predicted amount by our model. Think about what our model
     % is here!
-    realResiduals(k) = ds.amount(k) - (b0 + b(2).*ds.hrs(k));
+    realResiduals(k) = 
 end
 
 % CHECK: As a reality check, if performed correctly above, myMeanRSE should
@@ -453,6 +455,9 @@ CVresidualsSimple = zeros(nPts,1);
 % in CVresidualsSimple by taking the difference between the amount of drug 
 % left in the real data and the model's predicted value.
 
+for k=1:nPts
+    
+end
 CVsimple = sum(CVresidualsSimple.^2) / nPts;    % E&T get 5.89; I get 6.0
 
 % Need to get real residuals for the simple model

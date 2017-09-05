@@ -67,9 +67,10 @@ xlabel('Student ID#'); ylabel('z-scored test score');
 legend('Mechanics','Vectors','Algebra','Analysis','Statistics');
 title('Z-scored test scores from Mardia et al. 1979');
 
-% QUESTION: Looking at Figure 1 and Figure 2, does there seem to be any
-% relationship between a student's scores on the different tests? Do
-% students who do well on one test tend to do well on others?
+% QUESTION (Q1): Looking at Figure 1 and Figure 2, does there seem to be any
+% relationship between a student's scores on the different tests? How would
+% you get a sense for how well different tests track together on this type
+% of plot?
 %% How well correlated are students on two randomly chosen tests
 
 testNames = {'Mechanics','Vectors','Algebra','Analysis','Statistics'};
@@ -93,6 +94,8 @@ ylabel(yStr);
 lsline; % plot least squares regression line
 title('Correlation between two randomly selected tests');
 
+%QUESTION (Q2): Run this block of code several times. Do tests appear to be
+%correlated (again this is only by eye at this point). In what direction?
 %% Also look at correlation matrix:
 rhoCols = corr(X);
 figure, imagesc(rhoCols,[0,1]); colorbar;
@@ -103,7 +106,7 @@ set(gca, 'YTick', 1:nTests); % center y-axis ticks on bins
 set(gca, 'XTickLabel', testNames);
 set(gca, 'YTickLabel', testNames);
 
-% QUESTION: Which tests appear to be the most correlated with one another?
+% QUESTION (Q3): Which tests appear to be the most correlated with one another?
 % In general, are the test scores highly correlated with one another?
 
 %% PCA to capture sources of maximal variance
@@ -131,7 +134,7 @@ set(gca, 'YTickLabel', testNames);
 
 % TO DO: Using the knowledge above, assign the variable thHat 
 % to be the proportion of the total variance explained by the 1st PC. What
-% is this percentage?
+% is this percentage (Q4)?
 thHat = latent(1) / sum(latent);    % 0.6191
 
 %% Bootstrap to calculate standard error of our measure.
@@ -180,7 +183,7 @@ thCI = [thHat - dev, thHat + dev];
 h1 = line([thCI(1),thCI(1)],[ax(3),ax(4)],'Color','r');
 line([thCI(2),thCI(2)],[ax(3),ax(4)],'Color','r');
 
-% QUESTION: How would you modify the above code if you wanted to get a 99%
+% QUESTION (Q5): How would you modify the above code if you wanted to get a 99%
 % CI?
 % change myAlpha to 0.01
 
@@ -193,7 +196,7 @@ h2=line([thCI2(1),thCI2(1)],[ax(3),ax(4)],'Color','g');
 line([thCI2(2),thCI2(2)],[ax(3),ax(4)],'Color','g');
 
 legend([h1,h2],'Standard Normal CI','Percentile CI');
-% QUESTION: How similar are the standard normal CI and percentile CIs? 
+% QUESTION (L1): How similar are the standard normal CI and percentile CIs? 
 % Why might they be slightly different? 
 % 
 % They are very close, but a very slight difference may come from the fact
@@ -215,7 +218,7 @@ legend([h1(1),h2(1),h3(1)],'PC1','PC2','PC3');
 xlabel('Coefficient'); ylabel('Coefficient value');
 title('Bootstrap replicates of 1st three PCs');
 
-% QUESTION: Looking at the plot, what PCs are most variable? Is there a 
+% QUESTION (L2): Looking at the plot, what PCs are most variable? Is there a 
 % pattern to this variation? 
 % The PCs are eigenvectors, which are still valid when sign-inverted. 
 % The pattern matters more here, and as a somewhat aribtrary choice is 
@@ -235,11 +238,13 @@ lambda = diag(D);   % lambda for the 1st PC is lambda(5), seemingly backwards
 
 % For E&T p. 67-8 on interpretation of PCs:
 
-% TO DO: Compute the first eigenvector (the first PC) by taking the last
+% We can compute the first eigenvector (the first PC) by taking the last
 % column of the matrix V. Transpose this into a horizontal vector. Also
 % take the second eigenvector (the second to last column).
 
 % First eigenvector (PC1) = V(:,end)' = [0.505,0.368,0.3456,0.451,0.535]
+
+% TO DO (Q6): Compute the second eigenvector (PC2)
 % Second eigenvector (PC2) = V(:,end-1)' = [-0.75,-0.21,0.08,0.30,0.55]
 
 % If we wanted to best summarize each student's performance with one
@@ -248,7 +253,8 @@ lambda = diag(D);   % lambda for the 1st PC is lambda(5), seemingly backwards
 loadPC1 = X(:,:) * V(:,5);  % Scientific IQ for each of the 88 students
 loadPC2 = X(:,:) * V(:,4);  % loading onto 2nd PC
 
-% QUESTION: The weights assigned by PCA can tell us about the structure of
+
+% QUESTION(L3): The weights assigned by PCA can tell us about the structure of
 % the multivariate data set. Interpretation of the principal components
 % can sometimes be challenging. The 1st PC puts positive and roughly equal 
 % weights on each of the five tests, so 'loadPC1' can be thought of as the 

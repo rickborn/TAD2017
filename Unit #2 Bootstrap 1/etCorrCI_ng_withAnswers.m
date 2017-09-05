@@ -36,6 +36,7 @@ nBoot = 5000
 ds82 = dataset('xlsfile','Law_School_82.xlsx'); % All law schools (census)
 ds15 = dataset('xlsfile','Law_School_15.xlsx'); % random sample of 15
 %% Plot GPA and LSAT scores
+figure
 plot(ds82.LSAT,ds82.GPA,'k+');
 hold on
 plot(ds15.LSAT,ds15.GPA,'ro');
@@ -44,15 +45,16 @@ xlabel('LSAT Score'); ylabel('GPA');
 lsline
 legend('Census', 'Sample','Sample', 'Census');
 
-% QUESTION: Do these variables appear correlated? How strongly? How
-% different is the sample from the census data?
-
 %% Calculate correlation coefficients
 rhoHat82 = corr(ds82.LSAT,ds82.GPA);
 rhoHat15 = corr(ds15.LSAT,ds15.GPA);
+% QUESTION (Q1): What is a correlation coefficient?
 
-% QUESTION: How different are the correlation coefficients between the full
-% census and the sample of 15 schools?
+% QUESTION (Q2): How different are the correlation coefficients between the full
+% census and the sample of 15 schools? 
+
+% QUESTION (Q3): Based on the correlation coefficient and the graph, would 
+% you guess LSAT score and GPA are correlated?
 
 %% Get a bootstrap sample of correlation coefficients the old fashioned way,
 % with a 'for' loop
@@ -70,10 +72,12 @@ for k = 1:nBoot
     %Compute the correlation of LSAT score ans GPA for this sample
     bsRhosFL(k) = corr(ds15.LSAT(thisSample),ds15.GPA(thisSample));
 end
-% Since standard error is the standard deviation of the distribution of a 
-% sample statistic, we take the standard deviation of our list of
-% correlation coefficients. 
+% Compute standard error of our correlation coefficient
 seBSfl = std(bsRhosFL);
+
+% QUESTION (L1): Why is it that we're using the standard deviation command
+% to estimate the standard error of our correlation coefficient? Why don't
+% we use a standard error command here?
 
 %% Do the same thing using built-in 'bootstrp' function
 rng default  % For reproducibility
@@ -91,12 +95,18 @@ title('Distribution of rhos from bootstrap samples of size 15')
 bsAxis = axis;
 seBS = std(bsRhos);
 
+% QUESTION (Q4): Describe the distribution. What are the mean (Q3) and standard
+% deviation (Q5) to four decimal points?
+
 % We can use the bootci function to calculate a confidence interval for 
 % the correlation coefficient. 
 % Note: 'bootci' uses the bias corrected and accelerated method by default.
 % To specify method, use 
 ci = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha,'type','percentile');
 
+% QUESTION (Q6): Think about this confidence interval and your earlier
+% guess about whether LSAT score and GPA are correlated. Based on CI, what
+% can you say about the relationship between LSAT and GPA?
 %% Now compare this to distribution obtained from random samples of size 15
 % from the 'census' distribution of all 82 law schools
 % Instead of re-sampling our sample of 15 with replacement, let's sample
@@ -114,22 +124,21 @@ allSamples = unidrnd(nTotal,sampSize,nBoot);
 % coefficients between LSAT and GPA. Corr will output a larger matrix and
 % you need to extract only values from matching indices. 
 tsRhos = diag(corr(ds82.LSAT(allSamples),ds82.GPA(allSamples)));
+
 figure, hist(tsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
 title('Distribution of rhos from true random samples of size 15 from total population of 82')
 tsAxis = axis;
 axis([bsAxis(1), bsAxis(2), tsAxis(3), tsAxis(4)]);
 
-% QUESTION: How does this distribution compare to the bootstrapped
+% QUESTION (L2): How does this distribution compare to the bootstrapped
 % resampling of 15 schools? Consider the general skew, spread, location 
 % (i.e. mean,median) of the distributions.
 
-% TO DO: Compute the standard deviation of tsRhos to find the standard
-% error of the correlation coefficient. 
+% TO DO (Q7): Compute the standard error of the correlation coefficient for
+% the samples bootstrapped from the population.
 seBSts =std(tsRhos)
-% QUESTION: How does this number compare to our previous methods of 
-% estimating standard error? Does this suggest our sample of 15 schools was 
-% representative of the population or not?
+
 %% Now compare to a 'parametric bootstrap' (p. 53 of E&T)
 % "Instead of sampling with replacement from the data, we draw B samples of
 % size n from the parametric estimate of the population."
@@ -153,16 +162,20 @@ for k = 1:nBoot
     pbsRhos(k) = corr(R(:,1),R(:,2));
 end
 
+% TO DO (Q8): What is the standard error of the correlation coefficient
+% with parametric bootstrapping?
 pbsSE = std(pbsRhos)
+
 figure, hist(pbsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
 title('Distribution of rhos from parametric bootstrap samples of size 15')
 pbsAxis = axis;
 axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
 
-% QUESTION: What is the SE of the correlation coefficient? How does this
-% compare to our other bootstrapping strategies? If it's different, why do
-% you think this may be so?
+% QUESTION (L3): How does the SE of the correlation coefficient compare to our
+% other bootstrapping strategies? If it's different, why do you think this
+% may be so?
+
 % Ans: When a model fits the data properly, simulating from the model as we 
 % have above generates more accurate estimates for the same sampling n than 
 % re-sampling our data. Thus, the standard error for the correlation 
@@ -173,7 +186,7 @@ axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
 %% Finally, use Fisher's transformation of rhos to get a distribution that
 % should look normal with s.d. of 1/sqrt(n-3)
 % Fisher's transformation is useful when the population correlation 
-% coefficient is greater than 0, which causes the sampling distribution of 
+% coefficient is not 0, which causes the sampling distribution of 
 % correlation coefficients to be skewed. Without the variance-stabilizing 
 % Fisher transformation, the variance would become smaller as the
 % population correlation coefficient rho approaches 1. 
@@ -184,5 +197,21 @@ xlabel('Fisher''s transformation of the correlation coefficient');
 ylabel('#');
 hold on
 
-% QUESTION: Why is the standard error of the Fisher-transformed
+% QUESTION (Q9): Why is the standard error of the Fisher-transformed
 % distribution different than our other bootstrapping distributions?
+
+% TO DO (Q10): Compute a confidence interval for the correlation coefficient 
+% with fisher's transformation of rhos. 
+upper = mean(pbsRhos)+1.96.*pbsFishSE;
+lower = mean(pbsRhos)-1.96.*pbsFishSE;
+
+% QUESTION (Q11): What is the untransformed CI?
+utupper=(exp(2.*upper)-1)/(exp(2.*upper)+1);
+utlower=(exp(2.*lower)-1)/(exp(2.*lower)+1);
+ciFish=[utlower,utupper]
+
+% QUESTION (L4): Today we've explored bootstrapping as a means of
+% estimating correlation coefficients, standard errors of rho, and CIs for
+% rho. Which of these measures are the most robust across our different
+% ways of bootstrapping and estimating? Which are more sensitive to the
+% method we chose?

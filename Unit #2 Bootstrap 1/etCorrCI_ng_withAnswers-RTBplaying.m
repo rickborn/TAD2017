@@ -27,7 +27,8 @@
 % 4. Parametric bootstrap by sampling from a bivariate normal distribution
 % 
 % The data here is LSAT and GPA scores from a census of 82 law schools.
-% We have a subset of 15 schools from this census as well. 
+% We have a random subset of 15 schools from this census as well.
+
 %% Load data
 myAlpha = 0.05;
 nBoot = 5000;
@@ -43,7 +44,86 @@ plot(ds15.LSAT,ds15.GPA,'ro');
 xlabel('LSAT Score'); ylabel('GPA');
 % plot least squares regression line for each data set
 lsline
-legend('Census', 'Sample','Sample', 'Census');
+legend('Census', 'Sample','Sample', 'Census','Location','NorthWest');
+
+%% Calculate the mean LSAT for your sample and its standard error (SE)
+
+meanLSAT = mean(ds15.LSAT);
+seLSAT = std(ds15.LSAT) / sqrt(length(ds15.LSAT));
+
+%% "True" standad error by actually sampling from the population
+
+% draw 10000 samples of size 15 from the census of 82, each time calculating
+% the sample mean
+nSamp = 15;
+nPop = 82;
+nBoot = 10000;
+allMeans = zeros(nBoot,1);
+
+for k = 1:nBoot
+    allMeans(k) = mean(ds82.LSAT(randi(nSamp,nSamp,1)));
+end
+
+figure, hist(allMeans);
+seLSATsamp = std(allMeans);
+
+% NOTE: The students might note that the standard error (SE) computed by the
+% formula is a bit larger than the "true" SE calculated by sampling from
+% the full population. This is a teachable moment. First, the SE we
+% calculate with the formula is an *estimate*, just like the sample mean.
+% We aren't guaranteed that it will be "right" any more than we are
+% guaranteed that the sample mean (m) will equal the population mean (mu).
+% Second, the formula for the standard error assumes that the sample size
+% is much smaller than the population size, which, in this case, is not
+% true. Our sample is actually about 18% of the population. In the case of
+% a large sampling fraction (> 5%), we would apply a "finite population
+% correction":
+FPC = sqrt((nPop-nSamp)/(nPop-1));
+
+% For more details see: Isserlis, L. (1918). "On the value of a mean as
+% calculated from a sample". Journal of the Royal Statistical Society.
+% 81(1): 75–81.
+
+%% Bootstrap standard error by sampling from the sample
+nSamp = 15;
+nBoot = 10000;
+allMeans = zeros(nBoot,1);
+
+for k = 1:nBoot
+    allMeans(k) = mean(ds15.LSAT(randi(nSamp,nSamp,1)));
+end
+
+figure, hist(allMeans);
+seLSATboot = std(allMeans);
+
+% Compare your bootstrap estimate of the SE with that from the formula
+
+%% Compare formula SE with bootstrap SE for a bunch of different samples
+nSamp = 15;
+nPop = 82;
+nTests = 1000;
+nBoot = 5000;
+allSEformula = zeros(nTests,1);
+allSEboot = zeros(nTests,1);
+
+for j = 1:nTests
+    thisSample = ds82.LSAT(randi(nSamp,nSamp,1));
+    allSEformula(j) = std(thisSample) / sqrt(length(thisSample));
+    
+    for k = 1:nBoot
+        allMeans(k) = mean(thisSample(randi(nSamp,nSamp,1)));
+    end
+    allSEboot(j) = std(allMeans);
+end
+
+figure, plot(allSEformula,allSEboot,'b*');
+hold on;
+ax = axis;
+line([min(ax),max(ax)],[min(ax),max(ax)]);
+xlabel('SEM by formula');
+ylabel('SEM by bootstrap');
+
+meanError = mean(allSEboot ./ allSEformula);
 
 %% Calculate correlation coefficients
 rhoHat82 = corr(ds82.LSAT,ds82.GPA);
@@ -67,7 +147,7 @@ for k = 1:nBoot
     % numbers of length n whose maximum value can be n. Importantly, we
     % want to sample with replacement, so thisSample also must sample with
     % replacement from 1:n).
-    thisSample = 
+    thisSample = unidrnd(n,n,1);
     
     %Compute the correlation of LSAT score ans GPA for this sample
     bsRhosFL(k) = corr(ds15.LSAT(thisSample),ds15.GPA(thisSample));
@@ -87,7 +167,7 @@ rng default  % For reproducibility
 % the sample of 15 law schools (ds15) nBoot times, generating a correlation
 % coefficient between LSAT scores and GPA each time. The output should be
 % called bsRhos and will be a 5000 x 1 matrix of correlation coefficients. 
-bsRhos = 
+bsRhos = bootstrp(nBoot,'corr',ds15.LSAT,ds15.GPA);
 
 figure, hist(bsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
@@ -123,7 +203,7 @@ allSamples = unidrnd(nTotal,sampSize,nBoot);
 % HINT: You want to match indexes when computing the correlation 
 % coefficients between LSAT and GPA. Corr will output a larger matrix and
 % you need to extract only values from matching indices. 
-tsRhos = 
+tsRhos = diag(corr(ds82.LSAT(allSamples),ds82.GPA(allSamples)));
 
 figure, hist(tsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
@@ -137,7 +217,7 @@ axis([bsAxis(1), bsAxis(2), tsAxis(3), tsAxis(4)]);
 
 % TO DO (Q7): Compute the standard error of the correlation coefficient for
 % the samples bootstrapped from the population.
-seBSts =
+seBSts =std(tsRhos)
 
 %% Now compare to a 'parametric bootstrap' (p. 53 of E&T)
 % "Instead of sampling with replacement from the data, we draw B samples of
@@ -158,12 +238,13 @@ covHat = cov(ds15.LSAT,ds15.GPA);
 pbsRhos = zeros(nBoot,1);
 
 for k = 1:nBoot
-    INSERT YOUR CODE
+    R = mvnrnd(muHat,covHat,sampSize);
+    pbsRhos(k) = corr(R(:,1),R(:,2));
 end
 
 % TO DO (Q8): What is the standard error of the correlation coefficient
 % with parametric bootstrapping?
-pbsSE = 
+pbsSE = std(pbsRhos)
 
 figure, hist(pbsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
@@ -175,6 +256,13 @@ axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
 % other bootstrapping strategies? If it's different, why do you think this
 % may be so?
 
+% Ans: When a model fits the data properly, simulating from the model as we 
+% have above generates more accurate estimates for the same sampling n than 
+% re-sampling our data. Thus, the standard error for the correlation 
+% coefficient is smaller here than our other bootstrapping methods. 
+% HOWEVER, this assumption only works if our model is appropriate. If 
+% inappropriate, we will converge on an incorrect answer. This is one 
+% example of a trade-off between bias and variance. 
 %% Finally, use Fisher's transformation of rhos to get a distribution that
 % should look normal with s.d. of 1/sqrt(n-3)
 % Fisher's transformation is useful when the population correlation 
@@ -194,12 +282,12 @@ hold on
 
 % TO DO (Q10): Compute a confidence interval for the correlation coefficient 
 % with fisher's transformation of rhos. 
-upper = 
-lower = 
+upper = mean(pbsRhos)+1.96.*pbsFishSE;
+lower = mean(pbsRhos)-1.96.*pbsFishSE;
 
 % QUESTION (Q11): What is the untransformed CI?
-utupper=
-utlower=
+utupper=(exp(2.*upper)-1)/(exp(2.*upper)+1);
+utlower=(exp(2.*lower)-1)/(exp(2.*lower)+1);
 ciFish=[utlower,utupper]
 
 % QUESTION (L4): Today we've explored bootstrapping as a means of

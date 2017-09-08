@@ -75,7 +75,7 @@ title('Z-scored test scores from Mardia et al. 1979');
 
 testNames = {'Mechanics','Vectors','Algebra','Analysis','Statistics'};
 % TO DO: We want to randomly choose two tests to plot against each other.
-% Define testX and testY to be variables that will a random whole number
+% Define testX and testY to be variables that will be a random whole number
 % from 1 to the number of tests (this information is stored in the variable
 % nTests).
 testX = 

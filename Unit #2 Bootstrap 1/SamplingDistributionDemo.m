@@ -120,8 +120,8 @@ for k = 1:length(Ns)
     % t-distribution is good and normal is bad; vice versa when we
     % normalize with known SD of 1.
     % t-statistic is the mean normalized by the standard error
-    %tStats = sqrt(Ns(k)) .* (mean(X) ./ std(X));
-    tStats = sqrt(Ns(k)) .* (mean(X) ./ 1);
+    tStats = sqrt(Ns(k)) .* (mean(X) ./ std(X));
+    %tStats = sqrt(Ns(k)) .* (mean(X) ./ 1);
     
     % compare with t distribution
     figure(h1);

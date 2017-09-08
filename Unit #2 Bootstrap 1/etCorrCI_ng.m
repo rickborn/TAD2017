@@ -21,18 +21,20 @@
 % Adapted by RTB, date unknown
 % Developed for homework by RAS and RTB, July-August 2017
 %% Concepts covered:
-% 1. Calculating correlation coefficients with 'corr'
-% 2. Bootstrapping standard errors with built-in 'bootstrp' function
-% 3. Bootstrapping confidence intervals with built-in 'bootci' function
-% 4. Parametric bootstrap by sampling from a bivariate normal distribution
+% 1. Standard error of the mean calculated 3 ways:
+%       a) formula, b) population sampling, c) bootstrap sampling
+% 2. Calculating correlation coefficients with 'corr'
+% 3. Bootstrapping standard errors with built-in 'bootstrp' function
+% 4. Bootstrapping confidence intervals with built-in 'bootci' function
+% 5. Parametric bootstrap by sampling from a bivariate normal distribution
 % 
 % The data here is LSAT and GPA scores from a census of 82 law schools.
-% We have a subset of 15 schools from this census as well. 
-%% Load data
-myAlpha = 0.05;
-nBoot = 5000;
+% We also have a random sample of 15 schools from this census as well.
 
-% Note: MATLAB has the random sample of 15 built in as 'lawdata'
+%% Define a few constants and load the data
+nBoot = 10000;
+
+% Read in the data
 ds82 = dataset('xlsfile','Law_School_82.xlsx'); % All law schools (census)
 ds15 = dataset('xlsfile','Law_School_15.xlsx'); % random sample of 15
 %% Plot GPA and LSAT scores
@@ -43,43 +45,98 @@ plot(ds15.LSAT,ds15.GPA,'ro');
 xlabel('LSAT Score'); ylabel('GPA');
 % plot least squares regression line for each data set
 lsline
-legend('Census', 'Sample','Sample', 'Census');
+legend('Census','Sample','Sample','Census','Location','NorthWest');
 
-%% Calculate correlation coefficients
-rhoHat82 = corr(ds82.LSAT,ds82.GPA);
-rhoHat15 = corr(ds15.LSAT,ds15.GPA);
-% QUESTION (Q1): What is a correlation coefficient?
+%% TODO: Calculate the mean LSAT score for your sample and its standard error (SE)
+% We start with something that is easy to compute directly:
 
-% QUESTION (Q2): How different are the correlation coefficients between the full
-% census and the sample of 15 schools? 
+meanLSAT = ;
+semLSAT = ;
 
-% QUESTION (Q3): Based on the correlation coefficient and the graph, would 
+% QUESTION (Q1): What is the value of semLSAT to 2 decimal places?
+
+%% "True" standad error by sampling from the population
+
+% TODO: Draw nBoot samples of size 15 from the CENSUS of 82, each time calculating
+% the sample mean. Save each mean in 'allMeans'
+nSamp = 15;
+nCensus = 82;
+allMeans = zeros(nBoot,1);
+
+rng 'default'; % for consistency across class; You would not normally do this.
+for k = 1:nBoot
+    allMeans(k) = ;
+end
+
+% look at the sampling distribution of the mean
+figure, hist(allMeans);
+xlabel('mean SAT score'); ylabel('# of samples of size 15');
+
+% TODO: calculate the standard error of the mean from this sample:
+semLSATsamp = ;
+
+% QUESTION (Q2): What is the value of semLSATsamp to 2 decimal places?
+
+%% Bootstrap standard error by sampling from the sample
+
+% TODO: Calculate another SEM as you did above, but now, instead of drawing
+% your samples from the CENSUS, you will draw your samples from the sample.
+% You do this by sampling WITH REPLACEMENT from your original actual sample
+% of the 15 law schools.
+
+allMeans = zeros(nBoot,1);
+rng default;
+for k = 1:nBoot
+    allMeans(k) = ;
+end
+
+figure, hist(allMeans);
+
+% TODO: calculate the standard error of the mean from this sample:
+semLSATboot = ;
+% QUESTION (Q3): What is the value of semLSATboot to 2 decimal places?
+
+% TODO: Compare your bootstrap estimate of the SE with that from the formula
+percentError = ;
+% QUESTION (Q4): What is the error (in %) of the bootstrap estimate w/r/t
+% that of the formula? Round to the nearest whole number in %.
+
+%% TODO: Use the 'corr' function to calculate correlation coefficients of both the census and sample
+rhoHat82 = ;
+rhoHat15 = ;
+
+% QUESTION (Q5): What is a correlation coefficient?
+
+% QUESTION (Q6): What is the correlation coeeficient for the census? 
+
+% QUESTION (Q7): Based on the correlation coefficient and the graph, would 
 % you guess LSAT score and GPA are correlated?
 
 %% Get a bootstrap sample of correlation coefficients the old fashioned way,
 % with a 'for' loop
 rng default  % For reproducibility
 bsRhosFL = zeros(nBoot,1); 
-n = length(ds15.LSAT);
+nSamp = length(ds15.LSAT);
 for k = 1:nBoot
     % TO DO: Generate a variable thisSample, which will allow you to
     % randomly sample the data set by generating a list of positive whole
     % numbers of length n whose maximum value can be n. Importantly, we
     % want to sample with replacement, so thisSample also must sample with
     % replacement from 1:n).
-    thisSample = 
+    thisSample = ;
     
-    %Compute the correlation of LSAT score ans GPA for this sample
-    bsRhosFL(k) = corr(ds15.LSAT(thisSample),ds15.GPA(thisSample));
+    %TODO: Compute the correlation of LSAT score ans GPA for this sample
+    bsRhosFL(k) = ;
 end
-% Compute standard error of our correlation coefficient
-seBSfl = std(bsRhosFL);
 
-% QUESTION (L1): Why is it that we're using the standard deviation command
+% Compute standard error of our correlation coefficient
+seRhoBootFL = std(bsRhosFL);
+
+% QUESTION (Q8): Why is it that we're using the standard deviation command
 % to estimate the standard error of our correlation coefficient? Why don't
 % we use a standard error command here?
 
-%% Do the same thing using built-in 'bootstrp' function
+%% Do the same thing using MATLAB's built-in 'bootstrp' function
 rng default  % For reproducibility
 
 % TO DO: Look up the documentation for bootstrp and write a single line of
@@ -87,61 +144,63 @@ rng default  % For reproducibility
 % the sample of 15 law schools (ds15) nBoot times, generating a correlation
 % coefficient between LSAT scores and GPA each time. The output should be
 % called bsRhos and will be a 5000 x 1 matrix of correlation coefficients. 
-bsRhos = 
+bsRhos = ;
 
 figure, hist(bsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
 title('Distribution of rhos from bootstrap samples of size 15')
 bsAxis = axis;
-seBS = std(bsRhos);
+seRhoBoot = std(bsRhos);
 
-% QUESTION (Q4): Describe the distribution. What are the mean (Q3) and standard
-% deviation (Q5) to four decimal points?
+% QUESTION (Q9): What is the mean of this distribution to 2 decimal places?
 
-% We can use the bootci function to calculate a confidence interval for 
-% the correlation coefficient. 
-% Note: 'bootci' uses the bias corrected and accelerated method by default.
-% To specify method, use 
-ci = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha,'type','percentile');
+% QUESTION (Q10): What is the s.d. of this distribution to 2 decimal places?
 
-% QUESTION (Q6): Think about this confidence interval and your earlier
-% guess about whether LSAT score and GPA are correlated. Based on CI, what
-% can you say about the relationship between LSAT and GPA?
-%% Now compare this to distribution obtained from random samples of size 15
-% from the 'census' distribution of all 82 law schools
-% Instead of re-sampling our sample of 15 with replacement, let's sample
-% the 'population' of 82 law schools with replacement. 
-nTotal = length(ds82); sampSize = 15;
-allSamples = unidrnd(nTotal,sampSize,nBoot);
+% QUESTION (Q11): How do these values compare between the 2 methods you
+% used (i.e. 'for' loop vs. 'bootstrp')?
 
-% TO DO: We need to sample correlation coefficients from the samples of 15 
-% schools drawn from the census. allSamples is a 15 by 5000 matrix of
-% numbers between 1 and 82 that we can use to sample the original dataset.
-% Write a single line of code to compute correlation coefficients of LSAT 
-% scores and GPA for these samples using allSamples to index the original
-% datset. 
-% HINT: You want to match indexes when computing the correlation 
-% coefficients between LSAT and GPA. Corr will output a larger matrix and
-% you need to extract only values from matching indices. 
-tsRhos = 
+% Compare our two distributions of re-sampled correlation coefficients:
+distDiff = sum(bsRhosFL - bsRhos)
 
-figure, hist(tsRhos,30);
+% QUESTION (Q12): How can distributions using the two different methods be
+% identical if they were generated by RANDOM re-sampling?
+
+%% Sample from the census:
+
+% TODO: As we did above for the mean, we can take advantage of the fact that we
+% have data for the complete population (i.e. census), and see how our
+% estimate of rho is distributed when we repeatedly sample from the
+% population. That is, instead of re-sampling our sample of 15 with
+% replacement, we sample the 'population' of 82 law schools with replacement.
+nCensus = length(ds82);
+nSamp = length(ds15);
+allRhoTS = zeros(nBoot,1);
+
+rng default
+for k = 1:nBoot
+    thisSample = ;
+    allRhoTS(k) = ;
+end
+
+figure, hist(allRhoTS,30);
 xlabel('Correlation coefficient'); ylabel('#');
 title('Distribution of rhos from true random samples of size 15 from total population of 82')
 tsAxis = axis;
 axis([bsAxis(1), bsAxis(2), tsAxis(3), tsAxis(4)]);
 
-% QUESTION (L2): How does this distribution compare to the bootstrapped
+% QUESTION (Q13): How does this distribution compare to the bootstrapped
 % resampling of 15 schools? Consider the general skew, spread, location 
 % (i.e. mean,median) of the distributions.
 
-% TO DO (Q7): Compute the standard error of the correlation coefficient for
+% TO DO (Q14): Compute the standard error of the correlation coefficient for
 % the samples bootstrapped from the population.
-seBSts =
+seRhoBootTS = ;
 
-%% Now compare to a 'parametric bootstrap' (p. 53 of E&T)
+%% The 'parametric bootstrap' (p. 53 of E&T)
+
 % "Instead of sampling with replacement from the data, we draw B samples of
 % size n from the parametric estimate of the population."
+
 % The parametric bootstrap differs from the traditional bootstrap in that
 % we fit a model to the data and then draw random numbers from this fitted
 % model, rather than resampling the data itself.
@@ -151,19 +210,21 @@ muHat = mean([ds15.LSAT, ds15.GPA]);
 covHat = cov(ds15.LSAT,ds15.GPA);
 
 % TO DO: Using what we learned from bootstrapping by hand, create a for 
-% loop that uses the mvnrnd function to draw nBoot samples of size sampSize 
-% from a bivariate normal distribution with mean muHat andcovariance covHat.
-% Compute the correlation coefficient for each sample and store in a 
+% loop that uses the 'mvnrnd' function to draw nBoot samples of size nSamp 
+% from a bivariate normal distribution with mean, muHat, and covariance,
+% covHat, and store this in variable R.
+% Compute the correlation coefficient for each sample, R, and store in a 
 % variable called pbsRhos, which has been initialized for you below. 
 pbsRhos = zeros(nBoot,1);
-
+rng default
 for k = 1:nBoot
-    INSERT YOUR CODE
+    R = ;
+    pbsRhos(k) = ;
 end
 
-% TO DO (Q8): What is the standard error of the correlation coefficient
-% with parametric bootstrapping?
-pbsSE = 
+% QUESTION (Q15): What is the standard error of the correlation coefficient
+% as determined by parametric bootstrapping?
+seRhoPBS = ;
 
 figure, hist(pbsRhos,30);
 xlabel('Correlation coefficient'); ylabel('#');
@@ -171,39 +232,117 @@ title('Distribution of rhos from parametric bootstrap samples of size 15')
 pbsAxis = axis;
 axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
 
-% QUESTION (L3): How does the SE of the correlation coefficient compare to our
+% QUESTION (Q16): How does the SE of the correlation coefficient compare to our
 % other bootstrapping strategies? If it's different, why do you think this
 % may be so?
 
-%% Finally, use Fisher's transformation of rhos to get a distribution that
-% should look normal with s.d. of 1/sqrt(n-3)
-% Fisher's transformation is useful when the population correlation 
-% coefficient is not 0, which causes the sampling distribution of 
-% correlation coefficients to be skewed. Without the variance-stabilizing 
-% Fisher transformation, the variance would become smaller as the
-% population correlation coefficient rho approaches 1. 
-pbsFishersZ = 0.5 .* log((1 + pbsRhos) ./ (1 - pbsRhos));
-pbsFishSE = std(pbsFishersZ)
-figure, hist(pbsFishersZ,30);
-xlabel('Fisher''s transformation of the correlation coefficient');
-ylabel('#');
+%% Confidence intervals:
+
+% We have used several different strategies to create sampling
+% distributions:
+%   1. Repeated sampling from the entire population.
+%   2. Repeated re-sampling from our original sample (bootstrap)
+%   3. Repeated sampling from a population defined by parameters derived
+%      from our original sample (parametric bootstrap)
+%
+% But in each case, we have generated an estimate of the sampling
+% distribution for a given statistic. Thus far, we have used these
+% distributions to generate a single estimate of precision: the standard
+% error. However, we can use these same distributions to calculate other
+% measures of precision, such as confidence intervals. After all, under
+% normal assumptions, a standard error is a kind of confidence interval,
+% since we expect about 68% of the distribution to be within +/- s.d. That
+% is, for example, the SEM can be thought of as defining a 68% CI for our
+% estimate of the mean. But we can go further.
+
+%% CI by asymptotic normal distribution theory
+
+% Since the std. error is the 68% CI, we can get any other CI by just
+% calculating the appropriate number of standard deviates from the normal
+% distribution. Let's use our distribution of bsRhos, calculated above.
+figure, hist(bsRhos,30);
 hold on
+xlabel('Correlation coefficient'); ylabel('#');
+title('Distribution of rhos from bootstrap samples of size 15')
+bsAxis = axis;
 
-% QUESTION (Q9): Why is the standard error of the Fisher-transformed
-% distribution different than our other bootstrapping distributions?
+% This is our mean correlation:
+meanRhoBoot = mean(bsRhos);
 
-% TO DO (Q10): Compute a confidence interval for the correlation coefficient 
-% with fisher's transformation of rhos. 
-upper = 
-lower = 
+% This is our 68% CI
+seRhoBoot = std(bsRhos);
 
-% QUESTION (Q11): What is the untransformed CI?
-utupper=
-utlower=
-ciFish=[utlower,utupper]
+% For a 95% CI:
+myAlpha = 0.05;
 
-% QUESTION (L4): Today we've explored bootstrapping as a means of
-% estimating correlation coefficients, standard errors of rho, and CIs for
-% rho. Which of these measures are the most robust across our different
-% ways of bootstrapping and estimating? Which are more sensitive to the
-% method we chose?
+% You probably remember that a 95% CI is +/- 1.96 standard deviates. So we
+% could calculate our CI as meanRhoBoot +/- 1.96*seRhoBoot. But say we
+% wanted to be able to calculate any arbitrary confidence interval. For a
+% 99% CI, we would set myAlpha to 0.01.
+
+% TODO: Write a line of MATLAB code that will convert a desired CI,
+% expressed as myAlpha, to the appropriate number of standard deviates:
+numStdDeviates = ;
+
+% QUESTION (Q17): What is numStdDeviates for myAlpha = 0.001?
+
+% TODO: Calculate the upper and lower bounds for the 95% CI
+rho95CIlow = ;
+rho95CIhi = ;
+
+% QUESTION (Q18): What is the value of rho95CIhi?
+% QUESTION (Q19): Does this value make sense? Why or why not?
+
+% TODO: Draw lines for the 95%CI on our histogram in red ink:
+line( );
+line( );
+
+%% CI by percentile method:
+
+% In this case, we generated 10,000 samples, so a more intuitive,
+% brute-force way to calculate the 95% CI is just to sort our bootstrap
+% replicates and then  find the values corresponding to 250th and the
+% 9750th index in the sorted array.
+
+% Sort our bootstrap replicates
+bsRhosSorted = sort(bsRhos);
+
+% TODO: Based on myAlpha, find the indices corresponding to the lower and
+% upper bounds of our confidence interval:
+idxLow = ;   % index corresponding to lower bound
+idxHi = ;    % index corresponding to upper bound
+
+% Use these indices to read out the corresponding values:
+rho95CIpercentileLow = bsRhosSorted(idxLow);
+rho95CIpercentileHi = bsRhosSorted(idxHi);
+
+% TODO: Draw lines for the 95%CI on our histogram in green ink:
+line( );
+line( );
+
+%% CI using MATLAB's built-in 'bootci' function
+
+% Note: 'bootci' uses the bias corrected and accelerated method by default.
+% To specify method, indicate 'type' as 'percentile' (see help on bootci)
+
+% TODO: Use 'bootci' to calculate the 95% CI by the percentile method:
+rng default
+ci = ;
+
+% Draw lines for the 95%CI on our histogram in yellow ink:
+line([ci(1),ci(1)],[bsAxis(3),bsAxis(4)],'Color','y');
+line([ci(2),ci(2)],[bsAxis(3),bsAxis(4)],'Color','y');
+
+% QUESTION (Q20): What is the lower bound of the 95% CI returned by
+% 'bootci'?
+
+% QUESTION (Q21): Think about this confidence interval and your earlier
+% guess about whether LSAT score and GPA are correlated. How can you use
+% this to generate a hypothesis test? (i.e. Can we say that LSAT and GPA
+% are significantly correlated at p < 0.05?)
+
+% QUESTION (Q22): Today we've explored bootstrapping as a way to estimate
+% standard errors and confidence intervals for means and correlation
+% coefficients. Which of these measures are the most robust across our
+% different ways of bootstrapping and estimating? Which are more sensitive
+% to the method we chose?

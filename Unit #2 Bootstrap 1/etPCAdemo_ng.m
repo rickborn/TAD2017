@@ -6,14 +6,19 @@
 % statistics through resampling data to generate standard errors and
 % confidence intervals that may otherwise be difficult to compute directly.
 
-% What to do: Each section begins with a '%%'. Read through the comments
-% and follow the instructions provided. In some cases you will be asked to
-% answer a question, clearly indicated by 'QUESTION'--please do so using
-% comments (i.e., by starting each line with a '%'). In other cases, you be
-% asked to supply missing code, indicated by 'TODO'. Once you have supplied
-% the required code, you can execute that section by mouse-clicking in that
-% section (The block will turn yellow.) and then simultaneously hitting the
-% 'ctrl' and 'enter' keys (PC) or 'command' and 'enter' keys (Mac).
+% What to do: Login to learning catalytics and join the session for the
+% module entitled "etPCAdemo, self-test". You will answer a series of
+% questions based on the guided programming below. Each section begins with
+% a '%%'. Read through the comments and follow the instructions provided.
+% In some cases you will be asked to answer a question, clearly indicated
+% by 'QUESTION'. In other cases, you be asked to supply missing code,
+% indicated by 'TODO'. The corresponding question in learning catalytics
+% will be indicated in parentheses (e.g. Q1). If there is no 'Q#'
+% accompanying a 'QUESTION' just type your answer into this script and
+% discuss it with your team. Once you have supplied the required code, you
+% can execute that section by mouse-clicking in that section (The block
+% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
+% keys (PC) or 'command' and 'enter' keys (Mac).
 %
 % The data here are students' scores across tests in different subjects
 % from Mardia, Kent and Bilby (1979)
@@ -45,7 +50,7 @@
 %4. bootstrap for confidence intervals: std. normal vs. percentile
 
 %% Load and plot data
-nBoot = 200;
+nBoot = 5000;
 myAlpha = 0.05;
 
 load MardiaTestScores.mat
@@ -86,7 +91,7 @@ testY =
 % array X. Make the points black and open circles. The lines after will set
 % up axes and titles.
 figure
-YOUR CODE HERE
+% YOUR CODE HERE
 
 xStr = sprintf('Score on test in %s', testNames{testX});
 xlabel(xStr);
@@ -98,8 +103,16 @@ title('Correlation between two randomly selected tests');
 %QUESTION (Q2): Run this block of code several times. Do tests appear to be
 %correlated (again this is only by eye at this point). In what direction?
 %% Also look at correlation matrix:
-rhoCols = corr(X);
-figure, imagesc(rhoCols,[0,1]); colorbar;
+
+% TODO: Use the 'corr' function to create a matrix that shows the
+% correlation coefficient for each test with every other. Use 'imagesc' to
+% diplay the matrix, using the color to indicate the correlation
+% coefficient between each pair of tests:
+rhoCols = ;
+figure
+% YOUR CODE HERE
+
+% Label the plot
 xlabel('Test'); ylabel('Test');
 title('Correlation matrix for test scores');
 set(gca, 'XTick', 1:nTests); % center x-axis ticks on bins
@@ -111,10 +124,11 @@ set(gca, 'YTickLabel', testNames);
 % In general, are the test scores highly correlated with one another?
 
 %% PCA to capture sources of maximal variance
-% We first note that the test scores are highly correlated: a student who
-% did well on one test also tended to well on the others. In the limit,
+% We first note that the test scores are correlated: a student who
+% did well on one test also tended to do well on the others. In the limit,
 % each student (x) could be captured by a single number, Q, that would
-% completely describe his performance: x_i = Q_i * v
+% completely describe their performance: x_i = Q_i * v
+%
 % We could think of Q as each student's scientific IQ.
 % In the language of linear algebra (PCA), v is the eigenvector of the
 % covariance matrix (the first principle component) and Q_i is the distance
@@ -123,7 +137,7 @@ set(gca, 'YTickLabel', testNames);
 % so the ratio of the 1st eigenvalue to the sum of all the eigenvalues
 % gives the fraction of variance explained by the first principle
 % component. Thus it tells us how much of the variability among the
-% different stuudents can be explained by a single number, the IQ.
+% different students can be explained by a single number, the IQ.
 
 % Calculate the observed value for the variance explained by the first
 % principle component:
@@ -134,18 +148,23 @@ set(gca, 'YTickLabel', testNames);
 [coef,score,latent] = pca(X);
 
 % TO DO: Using the knowledge above, assign the variable thHat 
-% to be the proportion of the total variance explained by the 1st PC. What
-% is this percentage (Q4)?
-thHat = 
+% to be the proportion of the total variance explained by the 1st PC.
+thHat = ;
+
+% QUESTION (Q4): What is the proportion of the total variance explained by
+% the 1st PC?
 
 %% Bootstrap to calculate standard error of our measure.
-% So the first PC explains 62% of the test score variance (the answer to 
-% the question above!), which is pretty darned good. But how precise is 
-% this value? There is no simple formula for this, like there is for the 
-% std. error of the mean, but we can do it with the bootstrap by taking 
-% random samples of the rows, with replacement:
+% How precise is the value we calculated above? There is no simple formula
+% for this, like there is for the standard error of the mean, but we can do
+% it with the bootstrap by taking random samples of the rows, with
+% replacement:
+
+% Initialize arrays for holding the bootstrap replicates:
 thBoot = zeros(nBoot,1);
 coefBoot = zeros(nTests,nTests,nBoot);
+
+rng default
 for k = 1:nBoot
     % TO DO: write a single line of code to randomly sample the rows of our
     % dataset X with replacement. The resulting variable bootSamp, will be
@@ -154,7 +173,7 @@ for k = 1:nBoot
     % accomplished with the use of the unidrnd function to draw numbers
     % from a random uniform distribution with the maximum value set at the
     % number of students.
-    bootSamp = 
+    bootSamp = ;
     
     [bsCoef,~,bsLatent] = pca(bootSamp);
     thBoot(k) = bsLatent(1) / sum(bsLatent);
@@ -166,16 +185,19 @@ hold on
 xlabel('Fraction of variance explained by 1st PC');
 ylabel('#');
 title('Bootstrap replicates of proportion of the total variance explained by the 1st PC');
+
+% Recall that the standard error of any statistic is defined as the
+% standard deviation of its sampling distribution:
 thSE = std(thBoot);
+
+% Line showing the value we actually obtained:
 ax = axis;
 line([thHat,thHat],[ax(3),ax(4)],'Color','y');
 
 %% Bootstrap of confidence intervals
-% There are two ways to compute confidence intervals with the bootstrap.
-% One is to do a huge number of bootstrap replicates and then sort them and
-% find the cut-offs. E.g. If we do 1000 replicates, and we want the 95% CI,
-% we sort and find the 25th and 975th values.
-% The other way is to use asymptotic normal distribution theory. Recall
+% There are two general approaches to computing confidence intervals with the bootstrap:
+%
+% One way is to use asymptotic normal distribution theory. Recall
 % that the std. error IS a confidence interval, the 68% CI. So to get any
 % other CI, we just calculate the appropriate number of standard deviates
 % from the normal distribution:
@@ -184,35 +206,52 @@ thCI = [thHat - dev, thHat + dev];
 h1 = line([thCI(1),thCI(1)],[ax(3),ax(4)],'Color','r');
 line([thCI(2),thCI(2)],[ax(3),ax(4)],'Color','r');
 
-% QUESTION (Q5): How would you modify the above code if you wanted to get a 99%
-% CI?
+% QUESTION (Q5): How would you modify the above code if you wanted to get a
+% 99% CI?
 
-%% Here is the brute force way: percentile method
-thBootSorted = sort(thBoot);
-iLo = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
-iHi = nBoot - iLo;                  % index corresponding to upper bound
+%% CI by percentile method
+% The other way is to do a huge number of bootstrap replicates and then
+% sort them and find the cut-offs. E.g. If we do 1000 replicates, and we
+% want the 95% CI, we sort and find the 25th and 975th values.
+
+% TODO: Using your bootstrap replicates in 'thBoot', use the percential
+% method to calculate the lower and upper bounds for the 95% CI. Store them
+% in 'thCIlow' and 'thCIhi', respectively:
+thCIlow = ;
+thCIhi = ;
 thCI2 = [thBootSorted(iLo),thBootSorted(iHi)];
-h2=line([thCI2(1),thCI2(1)],[ax(3),ax(4)],'Color','g');
-line([thCI2(2),thCI2(2)],[ax(3),ax(4)],'Color','g');
+h2=line([thCIlow, thCIlow],[ax(3),ax(4)],'Color','g');
+line([thCIhi, thChi],[ax(3),ax(4)],'Color','g');
+
+% QUESTION (Q6): What is the value of your lower bound ('thCIlow')?
 
 legend([h1,h2],'Standard Normal CI','Percentile CI');
-% QUESTION (L1): How similar are the standard normal CI and percentile CIs? 
+% QUESTION (Q7): How similar are the standard normal CI and percentile CIs? 
 % Why might they be slightly different? 
 
 %% We can also look at the variability of the PC coefficients themselves:
+
+% subsample of 200 for viewing clarity:
+whichRows = randi(nBoot,200,1);
+
 figure,
-h1=plot(squeeze(coefBoot(:,1,:)),'k-');         % 1st PC
+h1=plot(squeeze(coefBoot(:,1,whichRows)),'k-'); % 1st PC
 hold on
-h2=plot(squeeze(coefBoot(:,2,:)),'r-');            % 2nd PC
-h3=plot(squeeze(coefBoot(:,3,:)),'g-');            % 3rd PC
+h2=plot(squeeze(coefBoot(:,2,whichRows)),'r-'); % 2nd PC
+h3=plot(squeeze(coefBoot(:,3,whichRows)),'g-'); % 3rd PC
 legend([h1(1),h2(1),h3(1)],'PC1','PC2','PC3');
 xlabel('Coefficient'); ylabel('Coefficient value');
 title('Bootstrap replicates of 1st three PCs');
 
-% QUESTION (L2): Looking at the plot, what PCs are most variable? Is there a 
+% QUESTION (Q8): Looking at the plot, what PCs are most variable? Is there a 
 % pattern to this variation? 
 
-%% Computation of the PC's.
+%% Bonus: Under the hood of 'pca': Computation of the PC's.
+
+% This section is for those wishing a more detailed explanation of what PCA
+% does in terms of linear algebra operations. You can also read the
+% excellent tutorial by Jon Shlens, available on the D2L course web site.
+
 % Start with the covariance matrix:
 G = cov(X);
 % The PC are obtained as the eigenvectors of the covariance matrix:
@@ -229,10 +268,11 @@ lambda = diag(D);   % lambda for the 1st PC is lambda(5), seemingly backwards
 % column of the matrix V. Transpose this into a horizontal vector. Also
 % take the second eigenvector (the second to last column).
 
-% First eigenvector (PC1) = V(:,end)' = [0.505,0.368,0.3456,0.451,0.535]
+% First eigenvector:
+PC1 = V(:,end)';    % [0.505,0.368,0.3456,0.451,0.535]
 
-% TO DO (Q6): Compute the second eigenvector (PC2)
-
+% TO DO (Q9): Compute the second eigenvector (PC2)
+PC2 = ;
 
 % If we wanted to best summarize each student's performance with one
 % number, we would multiply each test score by the corresponding
@@ -241,7 +281,7 @@ loadPC1 = X(:,:) * V(:,5);  % Scientific IQ for each of the 88 students
 loadPC2 = X(:,:) * V(:,4);  % loading onto 2nd PC
 
 
-% QUESTION(L3): The weights assigned by PCA can tell us about the structure of
+% QUESTION(Q10): The weights assigned by PCA can tell us about the structure of
 % the multivariate data set. Interpretation of the principal components
 % can sometimes be challenging. The 1st PC puts positive and roughly equal 
 % weights on each of the five tests, so 'loadPC1' can be thought of as the 

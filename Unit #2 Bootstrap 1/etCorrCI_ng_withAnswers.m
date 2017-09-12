@@ -6,17 +6,23 @@
 % statistics through resampling data to generate standard errors and
 % confidence intervals that may otherwise be difficult to compute directly.
 
-% What to do: Each section begins with a '%%'. Read through the comments
-% and follow the instructions provided. In some cases you will be asked to
-% answer a question, clearly indicated by 'QUESTION'--please do so using
-% comments (i.e., by starting each line with a '%'). In other cases, you be
-% asked to supply missing code, indicated by 'TODO'. Once you have supplied
-% the required code, you can execute that section by mouse-clicking in that
-% section (The block will turn yellow.) and then simultaneously hitting the
-% 'ctrl' and 'enter' keys (PC) or 'command' and 'enter' keys (Mac).
+% What to do: Login to learning catalytics and join the session for the
+% module entitled "etCorrCI, self-test". You will answer a series of
+% questions based on the guided programming below. Each section begins with
+% a '%%'. Read through the comments and follow the instructions provided.
+% In some cases you will be asked to answer a question, clearly indicated
+% by 'QUESTION'. In other cases, you be asked to supply missing code,
+% indicated by 'TODO'. The corresponding question in learning catalytics
+% will be indicated in parentheses (e.g. Q1). If there is no 'Q#'
+% accompanying a 'QUESTION' just type your answer into this script and
+% discuss it with your team. Once you have supplied the required code, you
+% can execute that section by mouse-clicking in that section (The block
+% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
+% keys (PC) or 'command' and 'enter' keys (Mac).
 % 
-% Original source of exercise:Efron, B. & Tibshirani Robert, J. (1993) 
-% An introduction to the bootstrap. Chapman & Hall, London u.a.Table 3.2 on p. 21
+% Original source of exercise:Efron, B. & Tibshirani Robert, J. (1993) An
+% introduction to the bootstrap. Chapman & Hall, London u.a.Table 3.2 on p.
+% 21
 % 
 % Adapted by RTB, date unknown
 % Developed for homework by RAS and RTB, July-August 2017

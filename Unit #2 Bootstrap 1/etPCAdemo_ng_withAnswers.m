@@ -6,14 +6,19 @@
 % statistics through resampling data to generate standard errors and
 % confidence intervals that may otherwise be difficult to compute directly.
 
-% What to do: Each section begins with a '%%'. Read through the comments
-% and follow the instructions provided. In some cases you will be asked to
-% answer a question, clearly indicated by 'QUESTION'--please do so using
-% comments (i.e., by starting each line with a '%'). In other cases, you be
-% asked to supply missing code, indicated by 'TODO'. Once you have supplied
-% the required code, you can execute that section by mouse-clicking in that
-% section (The block will turn yellow.) and then simultaneously hitting the
-% 'ctrl' and 'enter' keys (PC) or 'command' and 'enter' keys (Mac).
+% What to do: Login to learning catalytics and join the session for the
+% module entitled "etPCAdemo, self-test". You will answer a series of
+% questions based on the guided programming below. Each section begins with
+% a '%%'. Read through the comments and follow the instructions provided.
+% In some cases you will be asked to answer a question, clearly indicated
+% by 'QUESTION'. In other cases, you be asked to supply missing code,
+% indicated by 'TODO'. The corresponding question in learning catalytics
+% will be indicated in parentheses (e.g. Q1). If there is no 'Q#'
+% accompanying a 'QUESTION' just type your answer into this script and
+% discuss it with your team. Once you have supplied the required code, you
+% can execute that section by mouse-clicking in that section (The block
+% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
+% keys (PC) or 'command' and 'enter' keys (Mac).
 %
 % The data here are students' scores across tests in different subjects
 % from Mardia, Kent and Bilby (1979)
@@ -45,7 +50,7 @@
 %4. bootstrap for confidence intervals: std. normal vs. percentile
 
 %% Load and plot data
-nBoot = 200;
+nBoot = 5000;
 myAlpha = 0.05;
 
 load MardiaTestScores.mat
@@ -145,6 +150,8 @@ thHat = latent(1) / sum(latent);    % 0.6191
 % random samples of the rows, with replacement:
 thBoot = zeros(nBoot,1);
 coefBoot = zeros(nTests,nTests,nBoot);
+
+rng default
 for k = 1:nBoot
     % TO DO: write a single line of code to randomly sample the rows of our
     % dataset X with replacement. The resulting variable bootSamp, will be
@@ -191,9 +198,10 @@ line([thCI(2),thCI(2)],[ax(3),ax(4)],'Color','r');
 thBootSorted = sort(thBoot);
 iLo = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
 iHi = nBoot - iLo;                  % index corresponding to upper bound
-thCI2 = [thBootSorted(iLo),thBootSorted(iHi)];
-h2=line([thCI2(1),thCI2(1)],[ax(3),ax(4)],'Color','g');
-line([thCI2(2),thCI2(2)],[ax(3),ax(4)],'Color','g');
+thCIlow = thBootSorted(iLo);
+thCIhi = thBootSorted(iHi);
+h2=line([thCIlow,thCIlow],[ax(3),ax(4)],'Color','g');
+line([thCIhi,thCIhi],[ax(3),ax(4)],'Color','g');
 
 legend([h1,h2],'Standard Normal CI','Percentile CI');
 % QUESTION (L1): How similar are the standard normal CI and percentile CIs? 
@@ -209,11 +217,15 @@ legend([h1,h2],'Standard Normal CI','Percentile CI');
 % calculation doesn't limit the CI values found in the sampled variances.
 
 %% We can also look at the variability of the PC coefficients themselves:
+
+% subsample of 200 for viewing clarity:
+whichRows = randi(nBoot,200,1);
+
 figure,
-h1=plot(squeeze(coefBoot(:,1,:)),'k-');         % 1st PC
+h1=plot(squeeze(coefBoot(:,1,whichRows)),'k-');         % 1st PC
 hold on
-h2=plot(squeeze(coefBoot(:,2,:)),'r-');            % 2nd PC
-h3=plot(squeeze(coefBoot(:,3,:)),'g-');            % 3rd PC
+h2=plot(squeeze(coefBoot(:,2,whichRows)),'r-');            % 2nd PC
+h3=plot(squeeze(coefBoot(:,3,whichRows)),'g-');            % 3rd PC
 legend([h1(1),h2(1),h3(1)],'PC1','PC2','PC3');
 xlabel('Coefficient'); ylabel('Coefficient value');
 title('Bootstrap replicates of 1st three PCs');
@@ -242,10 +254,11 @@ lambda = diag(D);   % lambda for the 1st PC is lambda(5), seemingly backwards
 % column of the matrix V. Transpose this into a horizontal vector. Also
 % take the second eigenvector (the second to last column).
 
-% First eigenvector (PC1) = V(:,end)' = [0.505,0.368,0.3456,0.451,0.535]
+% First eigenvector:
+PC1 = V(:,end)';    % [0.505,0.368,0.3456,0.451,0.535]
 
 % TO DO (Q6): Compute the second eigenvector (PC2)
-% Second eigenvector (PC2) = V(:,end-1)' = [-0.75,-0.21,0.08,0.30,0.55]
+PC2 = V(:,end-1)';  % [-0.75,-0.21,0.08,0.30,0.55]
 
 % If we wanted to best summarize each student's performance with one
 % number, we would multiply each test score by the corresponding

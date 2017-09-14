@@ -336,10 +336,10 @@ line([rho95CIhi,rho95CIhi],[bsAxis(3),bsAxis(4)],'Color','r');
 % Sort our bootstrap replicates
 bsRhosSorted = sort(bsRhos);
 
-idxLow = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
-idxHi = nBoot - iLo;                  % index corresponding to upper bound
+idxLo = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
+idxHi = nBoot - idxLo;               % index corresponding to upper bound
 
-rho95CIpercentileLow = bsRhosSorted(idxLow);
+rho95CIpercentileLow = bsRhosSorted(idxLo);
 rho95CIpercentileHi = bsRhosSorted(idxHi);
 
 % TODO: Draw lines for the 95%CI on our histogram in green ink:
@@ -371,3 +371,12 @@ line([ci(2),ci(2)],[bsAxis(3),bsAxis(4)],'Color','y');
 % coefficients. Which of these measures are the most robust across our
 % different ways of bootstrapping and estimating? Which are more sensitive
 % to the method we chose?
+
+%% Extra: bias corrected and accelerated CI
+
+rng default
+ci2 = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha);
+
+% TODO: Draw lines for the 95%CI on our histogram in black ink:
+line([ci2(1),ci2(1)],[bsAxis(3),bsAxis(4)],'Color','k');
+line([ci2(2),ci2(2)],[bsAxis(3),bsAxis(4)],'Color','k');

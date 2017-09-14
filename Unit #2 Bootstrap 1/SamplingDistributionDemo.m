@@ -24,6 +24,62 @@ for k = 1: length(Ns)
     title([num2str(Ns(k)) ' Coin Tosses']);
 end
 
+%% Simple version of sums from uniform discrete random distribution
+% Example: rolling a die
+
+% What is the expectation?
+muDie = sum([1:6] .* (1/6));    % 3.5, (n+1)/2
+
+% What is the variance?
+varDie = sum(([1:6].^2) .* (1/6)) - (3.5).^2;   % 2.9167, (n^2 - 1)/12
+
+% Let's roll a die 10 times and take the sum
+nRolls = 10;
+nSims = 10000;
+allRolls = unidrnd(6,nRolls,nSims);
+
+figure, histogram(sum(allRolls),'Normalization','pdf');
+hold on;
+xlabel('sum of 10 rolls of a die');
+ylabel('probability');
+
+% How well does this match the normal approximation?
+ax = axis;
+xVals = ax(1):0.1:ax(2);
+yVals = normpdf(xVals,muDie*nRolls,sqrt(varDie*nRolls));
+plot(xVals,yVals,'r-','LineWidth',2);
+
+% Look at this using qqplot
+figure, qqplot(sum(allRolls));
+
+%% Similar but with coin tosses
+% What is the expectation?
+% Let's flip a coin 10 times and take the sum of the # of heads
+nFlips = 10;
+nSims = 10000;
+pHead = 0.5;
+allFlips = round(rand(nFlips,nSims));
+
+% What is the expectation?
+muCoin = nFlips * pHead;
+
+% What is the variance?
+varCoin = nFlips * pHead * (1 - pHead);
+
+figure, histogram(sum(allFlips),'Normalization','pdf');
+hold on;
+xlabel('sum of # of heads on 10 flips of a fair coin');
+ylabel('probability');
+
+% How well does this match the normal approximation?
+ax = axis;
+xVals = ax(1):0.1:ax(2);
+yVals = normpdf(xVals,muCoin,sqrt(varCoin));
+plot(xVals,yVals,'r-','LineWidth',2);
+
+% Look at this using qqplot
+figure, qqplot(sum(allFlips));
+
 %% When is the normal a reasonable approximation to the binomial?
 Ns = [2,4,8,10:10:1000];
 p = 0.5;
@@ -73,36 +129,64 @@ figure, qqplot(A);
 %  heights of 99 five-year-old British boys in cm
 load boysHgtsCm
 
-figure('Name','Heights of 99 five-year-old British boys in cm');
-subplot(2,2,1)
-hist(H,2);
+%figure('Name','Heights of 99 five-year-old British boys in cm');
+% subplot(2,2,1)
+% hist(H,2);
+% xlabel('Height (cm)');
+% ylabel('#');
+% subplot(2,2,2)
+% hist(H,6);
+% xlabel('Height (cm)');
+% ylabel('#');
+% subplot(2,2,3)
+% hist(H,15);
+% xlabel('Height (cm)');
+% ylabel('#');
+% subplot(2,2,4)
+% hist(H,50);
+hf = figure;
+h = histogram(H,'Normalization','pdf');
+% Probability density function estimate. The height of each bar is, (number
+% of observations in the bin) / (total number of observations * width of
+% bin). The area of each bar is the relative number of observations. The
+% sum of the bar areas is 1.
+hold on;
 xlabel('Height (cm)');
-ylabel('#');
-subplot(2,2,2)
-hist(H,6);
-xlabel('Height (cm)');
-ylabel('#');
-subplot(2,2,3)
-hist(H,15);
-xlabel('Height (cm)');
-ylabel('#');
-subplot(2,2,4)
-hist(H,50);
-xlabel('Height (cm)');
-ylabel('#');
+ylabel('Probability');
+title('Heights of 99 five-year-old British boys in cm');
+
+% To normalize on our own:
+figure;
+h = histogram(H);
+pdf = h.Values ./ (h.BinWidth * sum(h.Values));
+binCtrs = h.BinEdges(1:end-1) + h.BinWidth/2;
+figure, bar(binCtrs,pdf);
 
 % Jarque-Bera test for normality; 1 means we reject H0 that data is
 % normally distributed
 figure, qqplot(H);
-[h,p] = jbtest(H);
-muHgt = mean(H);
-sigmaHgt = std(H);
+%[h,p] = jbtest(H);
+
+% Compare with t-distribution
+% nBoys = length(H);
+% B = 10000;
+% ps = linspace(1/(B+1),1-1/(B+1),B);
+% tPercentiles = tinv(ps,length(H)-1);
+% figure, qqplot(H,tPercentiles);
 
 % The true beauty and power is that, now, knowing just these two numbers, I
 % can tell you the probability that a given boy is in soome height range.
 % E.g. What is the probability that a boy is between 100 and 120 cm?
+muHgt = mean(H);
+sigmaHgt = std(H);
 pHgt = normcdf(120,muHgt,sigmaHgt) - normcdf(100,muHgt,sigmaHgt);
 
+% superimpose nl distribution on histogram
+figure(hf);
+ax = axis;
+xVals = ax(1):0.01:ax(2);
+yVals = normpdf(xVals,muHgt,sigmaHgt);
+plot(xVals,yVals,'r-');
 %% Distribution of the t-statistic
 Ns = [5:5:30];
 B = 10000;

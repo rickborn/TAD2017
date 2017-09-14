@@ -45,11 +45,17 @@ if pFlag
     % jitter each variable randomly over [-0.25 to +0.25]
     xJitter = ((rand(size(nTransitions)) - 0.5)/2) + nTransitions;
     yJitter = ((rand(size(maxRuns)) - 0.5)/2) + maxRuns;
-    figure, plot(xJitter,yJitter,'k.');
+    %figure, plot(xJitter,yJitter,'k.');
+    figure
+    scatterhist(xJitter,yJitter,'Kernel','on','Location','Northwest',...
+        'Direction','out','Marker','.');
+    hold on
+    hp = plot(median(nTransitions),median(maxRuns),'rs','LineWidth',2,'MarkerSize',10);
     xlabel('Number of switches');
     ylabel('Length of longest run');
     tStr = sprintf('%d simulations of %d coin tosses',nSims,nTosses);
     title(tStr);
+    legend('Individual sims','Median');
 end
 
 end

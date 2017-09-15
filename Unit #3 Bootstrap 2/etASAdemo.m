@@ -148,7 +148,7 @@ MIdata = table([104;189],[11037-104;11034-189],...
 %              OddsRatio: 0.5458
 %     ConfidenceInterval: [0.4290 0.6944]
 
-%% Compare with the Fisher Exact Test for MI data
+%% Compare with the Fisher Exact Test for stroke data
 strokeData = table([119;98],[11037-119;11034-98],...
     'VariableNames',{'Stroke','NoStroke'},'RowNames',{'ASA','NoASA'});
 [hStroke,pStroke,statsStroke] = fishertest(strokeData,'Tail','both','Alpha',0.05);

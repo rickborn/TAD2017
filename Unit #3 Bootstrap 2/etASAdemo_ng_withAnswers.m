@@ -1,16 +1,16 @@
-% etASAdemo_ng.m: Bootstrap example for MI data from pp. 3-5 of Efron &
-% Tibshirani
+% etASAdemo_ng_withAnswers.m: 
+% Bootstrap example for MI data from pp. 3-5 of Efron & Tibshirani
 % 
 % RTB wrote it 29 October 2016 (derived from BS_ex1.m)
-% RTB modified it 30 Jan 2017: combined etASAhypoth.m and etASAstats.m 
-% into one file that is modular for my stats class.
+% RTB modified it 30 Jan 2017: combined etASAhypoth.m and etASAstats.m into
+% one file that is modular for my stats class.
 
-% Concepts covered: 
-% 1. Test for proportions: odds ratio 
-% 2. Comparing resampling tests with Fisher's exact test 
+% Concepts covered:
+% 1. Test for proportions: odds ratio
+% 2. Comparing resampling tests with Fisher's exact test
 % 3. Std. error and confidence intervals through bootstrapping
-% 4. Relationship between CI and hypothesis test 
-% 5. Permutation test for strong test of H0. 
+% 4. Relationship between CI and hypothesis test
+% 5. Permutation test for strong test of H0.
 % 6. One-tailed vs. two-tailed tests.
 
 % A study was done to see if low-dose aspirin would prevent heart attacks
@@ -19,7 +19,7 @@
 % aspirin (ASA) or placebo. The summary statistics as they appeared in the
 % NY Times on Jan. 27, 1987:
 %
-% aspirin group (n=11037): 104 heart attacks (MI) 
+% aspirin group (n=11037): 104 heart attacks (MI)
 % placebo group (n=11034): 189 heart attacks
 %
 % Does aspirin help to prevent heart attacks?
@@ -56,7 +56,7 @@ nTotal = nRx + nCtrl;
 % the number who did not have an MI. The denominator is the same, but for
 % the control group.
 % TODO: calculate the odds ratio for this study
-orHat = ;
+orHat = (nMIrx / (nRx-nMIrx)) / (nMIctrl / (nCtrl-nMIctrl));
 
 % QUESTION (Q1): What is your odds ratio to 4 decimal places?
 
@@ -66,11 +66,11 @@ orHat = ;
 % sample. Thus far, we only have proportions, but we want to have the full
 % information in the original sample.
 
-% TODO: Create a column vector that is the size of each group and
+% TODO: Create a column vector that is the size of each treatment group and
 % that contains 1s for each person who had an MI and 0s for each person
-% who did not: 1=had MI; 0=no MI. HINT: length(rxGrp) should = 11037.
-rxGrp = ;  % aspirin group for heart attacks
-ctrlGrp = ;  % non-aspirin group for heart attacks
+% that did not: 1=had MI; 0=no MI
+rxGrp = [ones(104,1);zeros(10933,1)];  % aspirin group for heart attacks
+ctrlGrp = [ones(189,1);zeros(10845,1)];  % non-aspirin group for heart attacks
 
 %% First method: with a 'for' loop
 orStar = zeros(nBoot,1);    % holds each bootstrap calc. of the odds ratio
@@ -79,9 +79,9 @@ for k = 1:nBoot
     % TODO: Re-sample from each group WITH REPLACEMENT to create two new
     % samples: rxStar and ctrlStar. Then use these two bootstrap samples to
     % calculate an odds ratio and store it in orStar.
-    rxStar = ;
-    ctrlStar = ;
-    orStar(k) = ;
+    rxStar = rxGrp(unidrnd(nRx,nRx,1));
+    ctrlStar = ctrlGrp(unidrnd(nCtrl,nCtrl,1));
+    orStar(k) = (sum(rxStar) / sum(~rxStar)) / (sum(ctrlStar) / sum(~ctrlStar));
 end
 
 %% Make a histogram of our bootstrapped ORs
@@ -93,15 +93,17 @@ title('Distribution of bootstrapped odds ratios');
 % distribution of bootstrap replications. Does it make sense?
 ax = axis;
 line([orHat,orHat],[ax(3),ax(4)],'Color','y');
+
 %% Calculate the standard error and the confidence intervals
 
 % QUESTION (Q2): What is the value of the standard error of the odds ratio?
-semBoot = ;
+semBoot = std(orStar);
 
-% TODO: Use the percentile method to determine the 95% confidence interval
-% based on your distribution of bootstrap replications.
-
-confInterval = ;
+% TODO: Use the percentile method to determine the 95% confidence interval.
+orStarSorted = sort(orStar);
+idxLo = floor((myAlpha/2) * nBoot);   % index corresponding to lower bound
+idxHi = nBoot - idxLo;                  % index corresponding to upper bound
+confInterval = [orStarSorted(idxLo),orStarSorted(idxHi)];
 
 % QUESTION (Q3): What is the 95% CI based on your bootstrap distribution?
 
@@ -111,22 +113,22 @@ confInterval = ;
 % perform a hypothesis test?
 
 % QUESTION (Q6): Can we reject H0 at an alpha of 0.05?
+% Ans. Yes. Our 95% CI does not include the null value of 1.
 
 %% Plot CIs on histogram
 line([confInterval(1),confInterval(1)],[ax(3),ax(4)],'Color','r');
 line([confInterval(2),confInterval(2)],[ax(3),ax(4)],'Color','r');
 
 %% Perform an explicit hypothesis test by modeling our OR under H0
-
-% In this case, we will use a permutation test, where we resample WITHOUT
-% replacement. The logic is that we are essentially randomly assigning each
-% patient to the treatment or control group, then recalculating our odds
-% ratio. Here, we are testing the most extreme version of H0, which is that
-% the two distributions are the SAME.
+% In this case, we will use a permutation test, where we resample
+% WITHOUT replacement. The logic is that we are essentially randomly
+% assigning each patient to the treatment or control group, then
+% recalculating our odds ratio. Here, we are testing the most extreme version of
+% H0, which is that the two distributions are the SAME.
 
 % TODO: Perform resampling as though the patients all belonged to the
 % same group (called H0data), shuffle this data, then arbitraily assign
-% each patient to the treatment or control group and compute the odds ratio. 
+% each patient to the treatment or control group and compute the odd ratio. 
 % Store each bootstrapped odds ratio in orPerm
 
 % Pool all the data:
@@ -136,10 +138,10 @@ orPerm = zeros(nBoot,1);
 
 rng default
 for k = 1:nBoot
-    % Shuffle and assign to rxStar and ctrlStar (ALL values are used!)
-    
-    % Compute the odds ratio for the shuffled data
-    orPerm(k) = ;
+    shuffledData = H0data(randperm(nTotal));
+    rxStar = shuffledData(1:nRx);
+    ctrlStar = shuffledData(nRx+1:end);
+    orPerm(k) = (sum(rxStar) / sum(~rxStar)) / (sum(ctrlStar) / sum(~ctrlStar));
 end
 
 % plot the distrubtion of permuted ORs
@@ -148,23 +150,42 @@ hold on
 xlabel('Permuted ORs'); ylabel('#');
 title('Distribution of ORs under H0');
 
-% Draw a line for our actual odds ratio
+% draw a line for our actual odds ratio
 ax = axis;
 line([orHat,orHat],[ax(3),ax(4)],'Color','r');
-%% Calcualte a one-tailed p-value
+%% Calcualte a p-value
+% This is a one-tailed test:
+if orHat < 1
+    pVal1s = sum(orPerm <= orHat) / nBoot;
+else
+    pVal1s = sum(orPerm >= orHat) / nBoot;
+end
 
-% TODO: Calculate a one-tailed p-value based on your permuted samples (i.e.
-% orPerm) and store it in a variable called 'pVal1s'
-
+% The p-value can never be 0. The logic is that we could have found a
+% significant value on our next iteration. Good teaching point.
+if pVal1s == 0
+    pVal1s = 1 / (nBoot+1);
+end
 
 % QUESTION (Q7): What is our one-tailed p-value for the odds ratio?
 
 %% Calculate a 2-tailed p-value
+if orHat < 1
+    pVal2s = (sum(orPerm <= orHat) + sum(orPerm >= 1/orHat)) / nBoot;
+else
+    pVal2s = (sum(orPerm >= orHat) + sum(orPerm <= 1/orHat)) / nBoot;
+end
 
-% TODO: Calculate a two-tailed p-value based on your permuted samples (i.e.
-% orPerm) and store it in a variable called 'pVal2s'
+if pVal2s == 0
+    pVal2s = 1 / (nBoot+1);
+end
 
-% QUESTION (Q8): What is our two-tailed p-value for the odds ratio?
+% Note: This is a good teaching point. The students will initially
+% calculate a 1-tailed p-value, which is the most intuitive thing to do.
+% When they compare this to the results of Fisher's exact test, they may
+% note that their p-value is about 1/2 of the FET p-value. Make them think
+% about the other tail and how to find it. Key is that for an odds ratio,
+% it is just 1/orHat.
 
 % Philosophical interlude: The difference in implementation between
 % 2-tailed and 1-tailed p-value is pretty clear. The philosophical
@@ -190,15 +211,15 @@ line([orHat,orHat],[ax(3),ax(4)],'Color','r');
 MIdata = table([nMIrx;nMIctrl],[nRx-nMIrx;nCtrl-nMIctrl],...
     'VariableNames',{'MI','NoMI'},'RowNames',{'ASA','NoASA'});
 
-% TODO: Calculate a 2-tailed p-value and 95% confidence interval using
-% Fisher's Exact Test
+% TODO: Calculate a p-value and 95% confidence interval using Fisher's
+% Exact Test
+[hMI,pMI,statsMI] = fishertest(MIdata,'Tail','both','Alpha',0.05);
 
-% QUESTION (Q9): What p-value does Fisher's Exact Test give?
-
-% QUESTION (Q10): Why might your results differ from Fisher's Exact Test
-
-% QUESTION (Q11): What is the 95% CI from Fisher's Exact Test?
-% Be sure to compare this with your values from the bootstrap!
+% h = 1
+% p = 5.0328e-07
+% stats = 
+%              OddsRatio: 0.5458
+%     ConfidenceInterval: [0.4290 0.6944]
 
 %% Extra: Repeat calculations for a different data set:
 
@@ -207,6 +228,22 @@ MIdata = table([nMIrx;nMIctrl],[nRx-nMIrx;nCtrl-nMIctrl],...
 rxGrp = [ones(119,1);zeros(10918,1)];    % aspirin group for strokes
 ctrlGrp = [ones(98,1);zeros(10936,1)];   % non-aspirin group for strokes
 
+% useful numbers
+nRx = length(rxGrp);      % number of patients in the treatment group (ASA)
+nCtrl = length(ctrlGrp);  % number of patients in the control group (placebo)
+nTotal = nRx + nCtrl;
+% Odds ratio for stroke data:
+orHat = (sum(rxGrp) / sum(~rxGrp)) / (sum(ctrlGrp) / sum(~ctrlGrp));
+
 % TODO: Repeat the above analysis for the stroke data.
-% Be sure to compare the p-values and confidence intervals that you obtain
+% Be sure to compare you p-values and confidence intervals that you obtain
 % through bootstrapping to those obtained with Fisher's Exact Test.
+
+strokeData = table([119;98],[11037-119;11034-98],...
+    'VariableNames',{'Stroke','NoStroke'},'RowNames',{'ASA','NoASA'});
+[hStroke,pStroke,statsStroke] = fishertest(strokeData,'Tail','both','Alpha',0.05);
+% h = 0
+% p = 0.1723
+% stats = 
+%              OddsRatio: 1.2163
+%     ConfidenceInterval: [0.9297 1.5912]

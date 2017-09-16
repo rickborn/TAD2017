@@ -52,7 +52,7 @@ plot((ones(1,nCtrl) .* xVals(2)) + (randn(1,nCtrl).*jFactor),ctrlGrp,'ko');
 
 %% Use classical 2-sample t-test and a non-parametric test
 [hT,pValTtest,ci,statsT] = ttest2(rxGrp,ctrlGrp,'Tail','right');
-% [pValWRST,hRS,statsRS] = ranksum(rxGrp,ctrlGrp,'Tail','right');
+[pValWRST,hRS,statsRS] = ranksum(rxGrp,ctrlGrp,'Tail','right');
 
 %% Permutation test for this difference
 % Key step: Our null hypothesis is that the two data sets came from the
@@ -61,7 +61,7 @@ plot((ones(1,nCtrl) .* xVals(2)) + (randn(1,nCtrl).*jFactor),ctrlGrp,'ko');
 % have come equally well from either of the treatment groups." (E&T p.
 % 205). So we just pool the data, shuffle it, then take the first nRx
 % values to be our Rx group (under H0) and the remaining to be the ctrl
-% group.Note that this works for any statistic. For example, compare
+% group. Note that this works for any statistic. For example, compare
 % looking at the difference with 'mean' vs. 'trimmean' (the trimmed mean).
 H0data = [rxGrp, ctrlGrp];
 nTotal = length(H0data);

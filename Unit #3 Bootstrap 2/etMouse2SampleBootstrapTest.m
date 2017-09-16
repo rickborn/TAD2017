@@ -10,7 +10,7 @@
 
 %% Read in and plot the data
 myAlpha = 0.05;
-nBoot = 100000;
+nBoot = 10000;
 
 % Sixteen SOD1 mice (ALS model) were randomly assigned to a treatment group
 % (riluzole) or a control group. Values are their survival times, in days,

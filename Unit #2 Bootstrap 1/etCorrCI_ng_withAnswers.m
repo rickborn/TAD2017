@@ -72,6 +72,7 @@ allMeans = zeros(nBoot,1);
 rng 'default'; % for consistency across class; You would not normally do this.
 for k = 1:nBoot
     allMeans(k) = mean(ds82.LSAT(randi(nCensus,nSamp,1)));
+    %allMeans(k) = mean(datasample(ds82.LSAT,nSamp,'Replace',true));
 end
 
 % look at the sampling distribution of the mean

@@ -1,4 +1,4 @@
-% etHormoneRegression_ng_withAnswers.m
+% etDrugRegression_ng_withAnswers.m
 %
 % Instructions:
 % The goal of this exercise is to become familiar with the technique of
@@ -7,7 +7,7 @@
 % confidence intervals that may otherwise be difficult to compute directly.
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "etHormoneRegression". You will answer a series of
+% module entitled "etDrugRegression". You will answer a series of
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated
@@ -59,7 +59,7 @@
 % 7. estimating prediction error using cross-validation
 %% Load and plot data
 % load data, p. 107 of E&T
-ds = dataset('xlsfile','HormoneData.xlsx');
+ds = dataset('xlsfile','DrugData.xlsx');
 
 % plot it with different symbols for the different lots:
 figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
@@ -106,7 +106,7 @@ b1 = mdl1.Coefficients{2,'Estimate'};
 
 % plot the regression line
 ax = axis;
-xVals = [ax(1):ax(2)];
+xVals = ax(1):ax(2);
 yRegression = b0 + b1.*xVals;
 plot(xVals, yRegression, 'k-');
 hold on;
@@ -237,10 +237,13 @@ end
 % estimate standard error.
 bsSEresid = std(allBeta);  
 
-% QUESTION: Compare bsSEresid with mdl1.Coefficients.SE. How similar are
-% they?
+% THOUGHT QUESTION (no LC component): Compare bsSEresid with
+% mdl1.Coefficients.SE. How similar are they?
 % mdl1.Coefficients.SE = 0.8672, 0.0045
 % bsSEresid = 0.8542, 0.0043
+
+% QUESTION (Q9): What is your estimate of the standard error of the slope
+% coefficient based on bootstrapping residuals?
 
 %% Bootstrapping with pairs
 
@@ -260,22 +263,25 @@ for k = 1:nBoot
 end
 bsSEpairs = std(allBeta);
 
-% QUESTION: Compare to bsSEresid and mdl1.Coefficients.SE
+% TODO: Compare bsSEpairs to bsSEresid and mdl1.Coefficients.SE
 % mdl1.Coefficients.SE = 0.8672, 0.0045
 % bsSEresid = 0.8542, 0.0043
 % bsSEpairs = 0.7781, 0.0043
+
+% QUESTION (Q10): What is your estimate of the standard error of the slope
+% coefficient based on bootstrapping pairs?
 
 %% Whis is better?
 % E & T state that "Bootstrapping pairs is less sensitive to assumptions
 % than bootstrapping residuals." BS of residuals assumes that the error
 % distribution (i.e. residuals) does not depend on x_i, and this is not
 % always the case. It depends a lot on how good our assumption of linearity
-% is and on the homoscedasticity of the data. See fig. 9.2 on p. 114
+% is and on the homoscedasticity of the data. See fig. 9.2 on p. 114 of E&T
 
 % So regression diagnostics are important. Let's look at two measures:
 % 1) Residuals vs. Fitted: 
 % What we want to see: random scatter and no gross departures from linearity 
-% and homoscedasticity
+% and homoscedasticity.
 figure, plot(mdl1.Fitted.LinearPredictor,mdl1.Residuals.Raw,'ko');
 hold on;
 ax = axis;
@@ -283,14 +289,16 @@ line([ax(1),ax(2)],[0,0]);
 xlabel('Linear Predictor'); ylabel('Residual');
 title('Residuals vs. Fitted');
 
-% QUESTION: What does the plot of residuals vs. fitted look like? Are our
+% THOUGHT QUESTIONS: What does the plot of residuals vs. fitted look like? Are our
 % assumptions met?
+
+%QUESTION (Q11): What do we mean by 'homoscedasticity'?
 
 % 2) Normal quantile plot (Q-Q Plot) of residuals
 % What we want to see: points fall on main diagonal
 figure, qqplot(mdl1.Residuals.Raw);
 
-% QUESTION: What does the Q-Q Plot look like? Are our assumptions met? See
+% THOUGHT QUESTIONS: What does the Q-Q Plot look like? Are our assumptions met? See
 % the next section for a better intuition on what Q-Q plots look like with
 % matching vs. non-matching distributions.
 
@@ -357,18 +365,21 @@ meanRSE = sum(resid.^2) / nPts;
 % cross-validation. A common method is K=n, referred to as "leave-one-out"
 % cross-validation.
 
+% TO DO: Perform a leave-one-out cross-validation in order to calculate our
+% 'CVresiduals':
 CVresiduals = zeros(nPts,1);
 for k = 1:nPts
     sV = true(nPts,1);      % define a selection vector
-    % TO DO: Fit the model to the data, excluding the kth point:
     sV(k) = 0;
     [betaFit] = regress(ds.amount(sV),[const(sV),ds.hrs(sV)]);
     CVresiduals(k) = ds.amount(k) - (betaFit(1) + betaFit(2).*ds.hrs(k));
 end
+
+% TODO: Calculate the mean squared error of our cross-validated residuals.
 CVfull = sum(CVresiduals.^2) / nPts;
 
-% QUESTION: By how many percent does meanRSE underestimate the prediction 
-% error?
+% QUESTION (Q12): By how many percent does meanRSE underestimate the prediction 
+% error as computed by cross-validation? Use 'CVfull' as the gold standard.
 underEstPerCent = ((CVfull - meanRSE) / CVfull) * 100;  % 13%
 
 %% Compare actual residuals with the residuals obtained by cross-validation
@@ -383,18 +394,21 @@ xlabel('Time implanted (hrs)'); ylabel('residual');
 title('Real vs. CV Residuals');
 legend([h1,h2],'Actual residuals','Cross-validated residuals','Location','southeast');
 
-% QUESTION: How similar are the actual and cross-validated residuals?
+% THOUGHT QUESTION: How similar are the actual and cross-validated residuals?
 
 %% Other estimates of prediction error
 
 % As covered on  pp. 242-243 of E&T, other measures of prediction error
 % include adjusted RSE, Akaike Information Criterion (AIC) and Bayesian
-% Information Criterion (BIC). We get these for free from both 'fitglm' and
-% 'fitlme'.
+% Information Criterion (BIC). 
+
+% TODO: Read up on 'Akaike Information Criterion', then figure out how to
+% derive these values for our two models. HINT: We get these for free from
+% both 'fitglm' and 'fitlme'.
 
 AICsimple = mdl1.ModelCriterion.AIC;
 BICsimple = mdl1.ModelCriterion.BIC;
 AIClme = lme.ModelCriterion.AIC;   
 BIClme = lme.ModelCriterion.BIC;
 
-% QUESTION (Q#): Based on these values, which is the "better" model.
+% QUESTION (Q13): Based on the AIC values, which is the "better" model?

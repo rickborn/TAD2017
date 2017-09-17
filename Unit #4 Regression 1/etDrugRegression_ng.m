@@ -1,4 +1,4 @@
-% etHormoneRegression_ng_withAnswers.m
+% etDrugRegression_ng_withAnswers.m
 %
 % Instructions:
 % The goal of this exercise is to become familiar with the technique of
@@ -7,7 +7,7 @@
 % confidence intervals that may otherwise be difficult to compute directly.
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "etHormoneRegression". You will answer a series of
+% module entitled "etDrugRegression". You will answer a series of
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated
@@ -59,7 +59,7 @@
 % 7. estimating prediction error using cross-validation
 %% Load and plot data
 % load data, p. 107 of E&T
-ds = dataset('xlsfile','HormoneData.xlsx');
+ds = dataset('xlsfile','DrugData.xlsx');
 
 % plot it with different symbols for the different lots:
 figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
@@ -83,16 +83,16 @@ title('Tests of osmotic mini-pump for drug delivery');
 % ones to represent the constant (y-intercept) for our independent
 % variable:
 const = ones(length(ds),1);
-[betaFit,betaCI,resid,residInt,stats] = regress(ds.amount,[const,ds.hrs]);
+[] = regress();
 
-% QUESTION (Q2): Do the confidence intervals for our beta coefficients indicate
-% a significant linear regression relationship between amount of time
-% implanted and the amount of drug remaining in the device?
+% QUESTION (Q2): Do the confidence intervals for our beta coefficients
+% indicate a significant linear regression relationship between amount of
+% time implanted and the amount of drug remaining in the device?
 
 %% Simple linear regression using the GLM
 
 % TODO: Use the function 'fitglm' to perform the same regression:
-mdl1 = fitglm(ds.hrs,ds.amount,'linear','Distribution','normal','Link','identity');
+mdl1 = fitglm();
 
 % Double-click on 'mdl1' in the Workspace. We see that mdl1 is a struct
 % with a whole bunch of members, including, 'Coefficients', which is itself
@@ -101,12 +101,12 @@ mdl1 = fitglm(ds.hrs,ds.amount,'linear','Distribution','normal','Link','identity
 
 % TODO: extract the value of the y-intercept to a variable called 'b0' and
 % the slope to 'b1':
-b0 = mdl1.Coefficients{1,'Estimate'};
-b1 = mdl1.Coefficients{2,'Estimate'};
+b0 = ;
+b1 = ;
 
 % plot the regression line
 ax = axis;
-xVals = [ax(1):ax(2)];
+xVals = ax(1):ax(2);
 yRegression = b0 + b1.*xVals;
 plot(xVals, yRegression, 'k-');
 hold on;
@@ -157,7 +157,7 @@ hold on;
 % remaining and random effect of lot (see above for how to write the model
 % specification. Also note that column titles are used when assigning model
 % specification.)
-lme = fitlme(ds,'amount ~ hrs + (1|lot)');
+lme = fitlme();
 
 % Now we need to read out the individual intercepts from the model
 betaFit = fixedEffects(lme);           % give us the fixed effects (slope & intercept)
@@ -196,9 +196,7 @@ plot(xVals, yRegC, 'g-');
 
 % Recall that from our simple regression with the GLM, we get estimates of the
 % standard error for each of our coefficients:
-mdl1.Coefficients.SE;
-% intercept SE = 0.8672
-% slope SE = 0.0045
+mdl1.Coefficients.SE
 
 % We also get everything we need for the bootstrap:
 % The fitted values (i.e. the predicted values for our actual x-values):
@@ -206,11 +204,8 @@ figure(1)
 hP = plot(ds.hrs,mdl1.Fitted.LinearPredictor,'ko');
 set(hP,'MarkerSize',3,'MarkerFaceColor','k');
 
-% . . . and the residuals (in 4 different flavors; 
-nBoot = 1000;
-nPts = length(ds.hrs);  % number of data points in original
-allBeta = zeros(nBoot,2);
-X = [const,ds.hrs];
+% . . . and the residuals (in 4 different flavors; we'll use the 'raw')
+mdl1.Residuals.Raw;
 
 % TO DO: Write the 'for' loop that will bootstrap the residuals to allow us
 % to estimate our regression coefficients (betas). We've already run 
@@ -227,20 +222,26 @@ X = [const,ds.hrs];
 % (allBeta should be a nBoot-x-2 matrix if completed correctly). We want to
 % use 'regress' within our 'for' loop, because 'fitglm' is much slower (It
 % is calculating a bunch of stuff that we don't need in the bootstrap.)
+nBoot = 1000;
+nPts = length(ds.hrs);      % number of data points in original
+allBeta = zeros(nBoot,2);   % place to store our bootstrap replicates
+X = [const,ds.hrs];
+
 rng default
 for k = 1:nBoot
-    yStar = mdl1.Fitted.LinearPredictor + mdl1.Residuals.Raw(unidrnd(nPts,nPts,1));
+    yStar = ;
     [allBeta(k,:)] = regress(yStar,X);
 end
 
-% Then we can take the standard deviation of our "new" coefficients to
-% estimate standard error.
-bsSEresid = std(allBeta);  
+% TODO: Calculate the bootstrap estimate of the standard error or your beta
+% coeficients:
+bsSEresid = ;  
 
-% QUESTION: Compare bsSEresid with mdl1.Coefficients.SE. How similar are
-% they?
-% mdl1.Coefficients.SE = 0.8672, 0.0045
-% bsSEresid = 0.8542, 0.0043
+% THOUGHT QUESTION (no LC component): Compare bsSEresid with
+% mdl1.Coefficients.SE. How similar are they?
+
+% QUESTION (Q9): What is your estimate of the standard error of the slope
+% coefficient based on bootstrapping residuals?
 
 %% Bootstrapping with pairs
 
@@ -251,31 +252,34 @@ bsSEresid = std(allBeta);
 % We then perform regression on these bootstrapped pairs. Again, use the
 % 'regress' function.
 
+allBeta = zeros(nBoot,2);   % place to store our bootstrap replicates
 rng default
 for k = 1:nBoot
-    bsIdx = unidrnd(nPts,nPts,1);
-    yStar = ds.amount(bsIdx);
-    xStar = [const, ds.hrs(bsIdx)];
-    allBeta(k,:) = regress(yStar,xStar);
+    % TODO: Your code here!
+    
+    allBeta(k,:) = ;
 end
+
+% Calculate the standard errors for this method:
 bsSEpairs = std(allBeta);
 
-% QUESTION: Compare to bsSEresid and mdl1.Coefficients.SE
-% mdl1.Coefficients.SE = 0.8672, 0.0045
-% bsSEresid = 0.8542, 0.0043
-% bsSEpairs = 0.7781, 0.0043
+% TODO: Compare bsSEpairs to bsSEresid and mdl1.Coefficients.SE
 
-%% Whis is better?
+% QUESTION (Q10): What is your estimate of the standard error of the slope
+% coefficient based on bootstrapping pairs?
+
+%% Whis method is better?
+
 % E & T state that "Bootstrapping pairs is less sensitive to assumptions
 % than bootstrapping residuals." BS of residuals assumes that the error
 % distribution (i.e. residuals) does not depend on x_i, and this is not
 % always the case. It depends a lot on how good our assumption of linearity
-% is and on the homoscedasticity of the data. See fig. 9.2 on p. 114
+% is and on the homoscedasticity of the data. See fig. 9.2 on p. 114 of E&T
 
 % So regression diagnostics are important. Let's look at two measures:
 % 1) Residuals vs. Fitted: 
 % What we want to see: random scatter and no gross departures from linearity 
-% and homoscedasticity
+% and homoscedasticity.
 figure, plot(mdl1.Fitted.LinearPredictor,mdl1.Residuals.Raw,'ko');
 hold on;
 ax = axis;
@@ -283,66 +287,43 @@ line([ax(1),ax(2)],[0,0]);
 xlabel('Linear Predictor'); ylabel('Residual');
 title('Residuals vs. Fitted');
 
-% QUESTION: What does the plot of residuals vs. fitted look like? Are our
+% THOUGHT QUESTIONS: What does the plot of residuals vs. fitted look like? Are our
 % assumptions met?
+
+%QUESTION (Q11): What do we mean by 'homoscedasticity'?
 
 % 2) Normal quantile plot (Q-Q Plot) of residuals
 % What we want to see: points fall on main diagonal
 figure, qqplot(mdl1.Residuals.Raw);
 
-% QUESTION: What does the Q-Q Plot look like? Are our assumptions met? See
+% THOUGHT QUESTIONS: What does the Q-Q Plot look like? Are our assumptions met? See
 % the next section for a better intuition on what Q-Q plots look like with
 % matching vs. non-matching distributions.
 
 %% Bonus on intuition for Q-Q Plot
-% from MATLAB' documentation:
-% A quanitle-quantile plot (also called a q-q plot) visually assesses
-% whether sample data comes from a specified distribution. Alternatively, a
-% q-q plot assesses whether two sets of sample data come from the same
-% distribution.
-% 
-% A q-q plot orders the sample data values from smallest to largest, then
-% plots these values against the expected value for the specified
-% distribution at each quantile in the sample data. The quantile values of
-% the input sample appear along the y-axis, and the theoretical values of
-% the specified distribution at the same quantiles appear along the x-axis.
-% If the resulting plot is linear, then the sample data likely comes from
-% the specified distribution.
-% 
-% The q-q plot selects quantiles based on the number of values in the
-% sample data. If the sample data contains n values, then the plot uses n +
-% 1 quantiles. Plot the ith ordered value (also called the ith order
-% statistic) against the i (n+1) th quantile of the specified distribution.
-% 
-% A q-q plot can also assesses whether two sets of sample data have the
-% same distribution, even if you do not know the underlying distribution.
-% The quantile values for the first data set appear on the x-axis and the
-% corresponding quantile values for the second data set appear on the
-% y-axis. Since q-q plots rely on quantiles, the number of data points in
-% the two samples does not need to be equal. If the sample sizes are
-% unequal, the q-q plot chooses the quantiles based on the smaller data
-% set. If the resulting plot is linear, then the two sets of sample data
-% likely come from the same distribution.
+
+% TODO: Read the MATLAB documentation on 'qqplot'
 
 % Start with a non-normal distribution we have good intuition about:
 % TODO: Take 10,000 draws from a uniform discrete random distribution with
 % a maximum of 10 and store it in a variable called 'A'
-A = unidrnd(10,10000,1);
+A = ;
 figure, subplot(3,1,1)
 histogram(A);
 
 % TODO: Make a q-q plot vs. the percentiles in a normal distribution
 subplot(3,1,2);
-qqplot(A);
+% Your code here
  
 % TODO: Now use qqplot to compare it to the 'right' distribution (uniform)
-pd = makedist('Uniform','Lower',1,'Upper',10);
 subplot(3,1,3);
-qqplot(A,pd);
+% Your code here
 
 %% Cross-validation to measure prediction error
 
-% Calculate the mean residual squared error of our original, simple model:
+% Calculate the mean residual squared error of our original, simple model.
+% This is just the summed squared error divided by the number of data
+% points:
 meanRSE = sum(resid.^2) / nPts;
 
 % The meanRSE is a measure of how well our model describes the data. But it
@@ -357,19 +338,20 @@ meanRSE = sum(resid.^2) / nPts;
 % cross-validation. A common method is K=n, referred to as "leave-one-out"
 % cross-validation.
 
+% TO DO: Perform a leave-one-out cross-validation in order to calculate our
+% 'CVresiduals':
 CVresiduals = zeros(nPts,1);
 for k = 1:nPts
-    sV = true(nPts,1);      % define a selection vector
-    % TO DO: Fit the model to the data, excluding the kth point:
-    sV(k) = 0;
-    [betaFit] = regress(ds.amount(sV),[const(sV),ds.hrs(sV)]);
-    CVresiduals(k) = ds.amount(k) - (betaFit(1) + betaFit(2).*ds.hrs(k));
+    % Your code here
+    CVresiduals(k) = ;
 end
-CVfull = sum(CVresiduals.^2) / nPts;
 
-% QUESTION: By how many percent does meanRSE underestimate the prediction 
-% error?
-underEstPerCent = ((CVfull - meanRSE) / CVfull) * 100;  % 13%
+% TODO: Calculate the mean squared error of our cross-validated residuals.
+CVfull = ;
+
+% QUESTION (Q12): By how many percent does meanRSE underestimate the prediction 
+% error as computed by cross-validation? Use 'CVfull' as the gold standard.
+underEstPerCent = ;
 
 %% Compare actual residuals with the residuals obtained by cross-validation
 
@@ -383,18 +365,16 @@ xlabel('Time implanted (hrs)'); ylabel('residual');
 title('Real vs. CV Residuals');
 legend([h1,h2],'Actual residuals','Cross-validated residuals','Location','southeast');
 
-% QUESTION: How similar are the actual and cross-validated residuals?
+% THOUGHT QUESTION: How similar are the actual and cross-validated residuals?
 
 %% Other estimates of prediction error
 
 % As covered on  pp. 242-243 of E&T, other measures of prediction error
 % include adjusted RSE, Akaike Information Criterion (AIC) and Bayesian
-% Information Criterion (BIC). We get these for free from both 'fitglm' and
-% 'fitlme'.
+% Information Criterion (BIC). 
 
-AICsimple = mdl1.ModelCriterion.AIC;
-BICsimple = mdl1.ModelCriterion.BIC;
-AIClme = lme.ModelCriterion.AIC;   
-BIClme = lme.ModelCriterion.BIC;
+% TODO: Read up on 'Akaike Information Criterion', then figure out how to
+% derive these values for our two models. HINT: We get these for free from
+% both 'fitglm' and 'fitlme'.
 
-% QUESTION (Q#): Based on these values, which is the "better" model.
+% QUESTION (Q13): Based on the AIC values, which is the "better" model?

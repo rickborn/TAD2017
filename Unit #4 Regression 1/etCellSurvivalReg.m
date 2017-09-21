@@ -66,7 +66,7 @@ plot(xVals,yFit,'k-');
 
 % Method 2: 'fitglm'--gives much more information
 modelspec = 'logSurvProp ~ -1 + dose + dose^2';
-mdl14 = fitglm(ds,modelspec,'Distribution','normal')
+mdl14 = fitglm(ds,modelspec,'Distribution','normal');
 % mdl1 gives results in a much more user friendly format, but may be harder
 % to extract info in a script. Double-click on 'mdl1' in Workspace. We see
 % that mdl1 is a struct with a whole bunch of members, including,
@@ -202,7 +202,7 @@ ylabel('log proportion alive');
 title('Cell Survival Data, E&T fig. 9.3, 13 plates');
 
 modelspec = 'logSurvProp ~ -1 + dose + dose^2';
-mdl13 = fitglm(ds,modelspec,'Distribution','normal','Exclude',suspiciousPlates)
+mdl13 = fitglm(ds,modelspec,'Distribution','normal','Exclude',suspiciousPlates);
 SE13ls = mdl13.Coefficients.SE;
 beta13ls = mdl13.Coefficients.Estimate;
 

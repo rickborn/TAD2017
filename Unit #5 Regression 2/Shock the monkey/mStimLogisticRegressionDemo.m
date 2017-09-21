@@ -28,14 +28,15 @@ fileName = 'es5bRaw.xlsx';
 ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
-% motion display whose signal strength is varied systematically (Coh) and whose
-% direction is chosen according to the preferred direction of neurons at
-% the stimulation site. At the end of each trial, the monkey chose one of
-% two possible directions: preferred direction (PDchoice = 1) or the null
-% direction (PDchoice = 0). Positive values of Coh indicate a stimulus movming in
-% the preferred direction; negative values indicate null direction motion.
-% On any given trial, microstimulation was applied to the electrode with a
-% probability of 0.5 (Mstim = 1 on microstim trials; 0 on control trials).
+% motion display whose signal strength is varied systematically (Coh) and
+% whose direction is chosen according to the preferred direction of neurons
+% at the stimulation site. At the end of each trial, the monkey chose one
+% of two possible directions: preferred direction (PDchoice = 1) or the
+% null direction (PDchoice = 0). Positive values of Coh indicate a stimulus
+% movming in the preferred direction; negative values indicate null
+% direction motion. On any given trial, microstimulation was applied to the
+% electrode with a probability of 0.5 (Mstim = 1 on microstim trials; 0 on
+% control trials).
 % Columns:
 % 1) Mstim: 0/1 for absence/presence of microstimulation
 % 2) Coh: Stimulus coherence

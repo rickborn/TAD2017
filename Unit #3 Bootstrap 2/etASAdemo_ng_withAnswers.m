@@ -232,6 +232,9 @@ ctrlGrp = [ones(98,1);zeros(10936,1)];   % non-aspirin group for strokes
 nRx = length(rxGrp);      % number of patients in the treatment group (ASA)
 nCtrl = length(ctrlGrp);  % number of patients in the control group (placebo)
 nTotal = nRx + nCtrl;
+nBoot = 10000;
+myAlpha = 0.05;
+
 % Odds ratio for stroke data:
 orHat = (sum(rxGrp) / sum(~rxGrp)) / (sum(ctrlGrp) / sum(~ctrlGrp));
 

@@ -53,6 +53,15 @@ xlabel('LSAT Score'); ylabel('GPA');
 lsline
 legend('Census','Sample','Sample','Census','Location','NorthWest');
 
+%% Teaching point: distributions:
+
+figure, scatterhist(ds82.LSAT,ds82.GPA,'Kernel','off','Location','Northwest',...
+        'Direction','out','Marker','+');
+hold on
+scatter(ds15.LSAT,ds15.GPA,'ro')
+xlabel('LSAT');
+ylabel('GPA');
+
 %% TODO: Calculate the mean LSAT score for your sample and its standard error (SE)
 % We start with something that is easy to compute directly:
 

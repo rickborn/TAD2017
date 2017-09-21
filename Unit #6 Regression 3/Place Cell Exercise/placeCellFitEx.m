@@ -96,6 +96,7 @@ ylabel('Occupancy normalized counts (spikes/s)')
 title('Model 1: Position only covariate');
 
 %% Improve model fit by adding a squared term for position: Model #2
+
 [b2,dev2,stats2] = glmfit([ratPosition, ratPosition.^2],spikeTrain,'poisson','log');
 
 % Look at the fit
@@ -107,8 +108,6 @@ ylabel('Occupancy normalized counts (spikes/s)')
 title('Model 2: Position and Position-squared as covariates');
 
 % QUESTION: What kind of statistical distribution does our model resemble?
-
-
 
 %% Re-cast the model for easier interpretation of beta coefficients
 
@@ -144,6 +143,7 @@ qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 % But to see the down side of this approach, try making initial guesses
 % that are less well guided by the histogram. Do we always converge to the
 % correct answer?
+
 %% Analysis of residuals
 
 % Residuals tell us, on a point-by-point basis, the difference between the
@@ -193,21 +193,21 @@ set(hp,'MarkerSize',10);    % make dots bigger
 
 
 
-%% Include direction of motion in the model: Model #4
-% Note: There is no model #3.
+%% Include direction of motion in the model: Model #3
+% 
 
 % So we need a covariate for direction. Let's start with a simple
 % indicator variable: 1 if rat is moving in positive direction, 0 otherwise
 ratDirection = [0; diff(ratPosition) > 0];
 
 % Now we just throw this into the model as another covariate:
-[b4,dev4,stats4] = glmfit([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'poisson','log');
+[b3,dev3,stats3] = glmfit([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'poisson','log');
 
 % Is the directional coefficient statistically significant?
-pBeta3 = stats4.p(4)    % darn tootin'
+pBeta3 = stats3.p(4);    % darn tootin'
 
 % and now re-do our cumulative residuals plot: much better
-cumResid = cumsum(stats4.resid);
+cumResid = cumsum(stats3.resid);
 figure, subplot(2,1,1);
 plot(expTime,cumResid);
 axis(ax);   % same axis as other residual plot, for comparison
@@ -252,12 +252,12 @@ nBins = size(positionBins);
 
 % Evaluate our direction model in direction 0 (position decreases):
 % glmval returns both the mean and the upper and lower CIs
-[lambdaDown, CIloDown, CIhiDown] = glmval(b4,[positionBins,positionBins.^2,zeros(nBins)],...
-    'log',stats4);
+[lambdaDown, CIloDown, CIhiDown] = glmval(b3,[positionBins,positionBins.^2,zeros(nBins)],...
+    'log',stats3);
 
 % Evaluate our direction model in direction 1 (position increases):
-[lambdaUp, CIloUp, CIhiUp] = glmval(b4,[positionBins,positionBins.^2,ones(nBins)],...
-    'log',stats4);
+[lambdaUp, CIloUp, CIhiUp] = glmval(b3,[positionBins,positionBins.^2,ones(nBins)],...
+    'log',stats3);
 
 % plot the results
 errorbar(positionBins,lambdaUp.*1000,CIloUp.*1000,CIhiUp.*1000,'b');
@@ -377,28 +377,28 @@ ylabel('Empirical CDF')
 axis([0,1,0,1]);
 title('Fig. 9.8: KS plot of rescaled data for model 2');
 
-%% Comparing model #4 (with direction term) vs. model #2
-dAIC = (dev2 + 2*length(b2)) - (dev4 + 2*length(b4));
-p2vs4 = 1 - chi2cdf(dev2-dev4,length(b4) - length(b2));       % Wald test
+%% Comparing model #3 (with direction term) vs. model #2
+dAIC = (dev2 + 2*length(b2)) - (dev3 + 2*length(b3));
+p2vs3 = 1 - chi2cdf(dev2-dev3,length(b3) - length(b2));       % Wald test
 
 % Sequential F-test
-resSSfull = sum(stats4.resid.^2);   % residual sum of squares for full model
+resSSfull = sum(stats3.resid.^2);   % residual sum of squares for full model
 resSSred = sum(stats2.resid.^2);    % residual sum of squares for reduced model
-Fval = ((resSSred - resSSfull) ./ (length(b4)-length(b2))) ./ (resSSfull ./ (stats4.dfe));
-pValFtest = 1 - fcdf(Fval, length(b4)-length(b2), stats4.dfe);
+Fval = ((resSSred - resSSfull) ./ (length(b3)-length(b2))) ./ (resSSfull ./ (stats3.dfe));
+pValFtest = 1 - fcdf(Fval, length(b3)-length(b2), stats3.dfe);
 
-%For model 4, compute 95% CI for last parameter,
-CIbeta3 = [b4(4)-2*stats4.se(4), b4(4)+2*stats4.se(4)];
-p_beta3 = stats4.p(4);	%... and significance level.
+%For model 3, compute 95% CI for last parameter,
+CIbeta3 = [b3(4)-2*stats3.se(4), b3(4)+2*stats3.se(4)];
+p_beta3 = stats3.p(4);	%... and significance level.
 
-% KS plot for model #4
-lambda4 = exp(b4(1) + b4(2)*ratPosition + b4(3)*ratPosition.^2 + b4(4)*ratDirection);
+% KS plot for model #3
+lambda3 = exp(b3(1) + b3(2)*ratPosition + b3(3)*ratPosition.^2 + b3(4)*ratDirection);
 
 % Re-scale the waiting times
 Z = zeros(nSpikes,1);
-Z(1) = sum(lambda4(1:spikeIndex(1)));	%1st rescaled waiting time.
+Z(1) = sum(lambda3(1:spikeIndex(1)));	%1st rescaled waiting time.
 for i=2:nSpikes							%... and the rest.
-  Z(i)=sum(lambda4(spikeIndex(i-1):spikeIndex(i)));
+  Z(i)=sum(lambda3(spikeIndex(i-1):spikeIndex(i)));
 end
 
 [eCDF, zVals] = ecdf(Z);                    %Define empirical CDF,
@@ -409,6 +409,6 @@ plot([0 1], [0 1]+1.36/sqrt(nSpikes),'k')	%Upper confidence bound.
 plot([0 1], [0 1]-1.36/sqrt(nSpikes),'k')	%Lower confidence bound.
 xlabel('Model CDF'); ylabel('Empirical CDF');
 axis([0,1,0,1]);
-title('Figure 9.10: KS plot of rescaled data for model #4');
+title('Figure 9.10: KS plot of rescaled data for model #3');
 
-% Overall conclusion: Model #4 = pretty darned good.
+% Overall conclusion: Model #3 = pretty darned good.

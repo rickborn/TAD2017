@@ -43,9 +43,10 @@ title('Fig. 1: Rat position vs. time');
 %ANSWER
 spikeTrain = ismember(expTime,spikeTimes);
 %
+% Alternate ANSWER:
+% spikeTrain = hist(spikeTimes,expTime);
 
 % Find the index of each spike and name that variable 'spikeIndex' (220 x 1).
-
 %ANSWER
 spikeIndex = find(spikeTrain);
 %
@@ -135,14 +136,22 @@ title('Occupancy normalized histogram');
 
 %ANSWER
 [b1,dev1,stats1] = glmfit(ratPosition,spikeTrain,'poisson','log');
-%
 
 %QUESTION
 % What are each of these output terms (b1,dev1,stats1)?
-%
 
+% QUESTION (Q3): What is our predicted firing rate when the rat is at position
+% 0? (HINT: Write down the model!)
 
+% ANSWER: 
+% log(E(Y|X)) = beta(1) + beta(2:end)'*X
+% E(Y|X) = exp(intercept + beta(2:end)'*X)
 
+% log(E(spikes | ratPosition)) = b1(1) + b1(2)'* ratPosition
+
+%When the position is 0, E(Spikes | x = 0) = exp(intercept + b1(2)*0) =
+%exp(intercept)
+rate0 = exp(b1(1)) * 1000;  % 0.5879 spikes/sec
 
 %re-plot occupancy norm. hist.
 subplot(nr,nc,2*nc+1)
@@ -158,7 +167,6 @@ title('Model 1: Position only covariate');
 
 %ANSWER
 [b2,dev2,stats2] = glmfit([ratPosition, ratPosition.^2],spikeTrain,'poisson','log');
-%
 
 % look at the fit
 subplot(nr,nc,2*nc+2)

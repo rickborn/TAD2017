@@ -91,7 +91,7 @@ end
 
 %% Plot the model fits
 
-coh = min(ds.Coh):0.1:max(ds.Coh);
+coh = min(ds.Coh):0.01:max(ds.Coh);
 const = ones(size(coh));
 mStim = ones(size(coh));
 pNoStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*~mStim + b(3).*coh)));
@@ -101,15 +101,40 @@ plot(coh,pStim,'r-');
 
 %% Determine the equivalent visual stimulus for microstimulation
 
-equivVisualStimulus = b(2) / b(3);  % Why does this work?
+% Two possible methods:
+% 1) Using the regression equation, solve for the signal strength at which
+% the animal is equally likely to report pref. or null. This is referred to
+% in the psychophysical literature as the "Point of Subjective Equality."
+% The key mathematical point is that this is where the lefthand side of our
+% regression equation, log(p/1-p), is equal to 0. So we calculate the
+% signal strength at PSE for the stim curve and subtract this from the
+% signal strength at PSE for the ctrl curve. This ends up to be b(2)/b(3)
+equivVisualStimulus = b(2) / b(3);
 eqv = round(equivVisualStimulus * 10) / 10;
 tStr = [fileName ': Equiv. Visual Stimulus = ',num2str(eqv), '%coh'];
 title(tStr);
 
-% NOTE: You could also find the eqv using a brute force approach:
+% 2) Brute force approach. We have the regression equation, so we can input
+% a very finely spaced set of coh values and find the one that gives us a
+% value of 0.5. Since we're unlikely to get exactly 0.5, we would choose some
+% narrow range straddling 0.5 and then take the average. 
 EVS = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
-     mean(coh(pStim < 0.505 & pStim > 0.495));
- 
+      mean(coh(pStim < 0.505 & pStim > 0.495));
+
+% We can encourage the students to break this down into steps. First create
+% a logical selection vector that has ones where the y-value (pNoStim or
+% pStim) are within some narrow range around 0.5. Use these to find the
+% corresponding x-values (in coh), then take the average of these values.
+PSEnoStim = mean(coh(pNoStim < 0.505 & pNoStim > 0.495));
+PSEstim = mean(coh(pStim < 0.505 & pStim > 0.495));
+
+% Draw lines for the respective PSEs
+ax = axis;
+line([ax(1),PSEstim],[0.5,0.5],'Color','r','LineStyle','-');
+line([PSEstim,PSEstim],[ax(3),0.5],'Color','r','LineStyle','--');
+line([ax(1),PSEnoStim],[0.5,0.5],'Color','k','LineStyle','--');
+line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
+
  %% Using the 'predict' function, we can get CIs on our estimates
  
  % Re-plot raw data

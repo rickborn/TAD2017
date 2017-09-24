@@ -23,8 +23,8 @@
 % 7. Confidence intervals on model predictions
 
 %% Read in the data from a Newsome lab microstimulation experiment
-fileName = 'es5bRaw.xlsx';
-%fileName = 'js25aRaw.xlsx';
+%fileName = 'es5bRaw.xlsx';
+fileName = 'js25aRaw.xlsx';
 ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
@@ -33,7 +33,7 @@ ds = dataset('xlsfile',fileName);
 % at the stimulation site. At the end of each trial, the monkey chose one
 % of two possible directions: preferred direction (PDchoice = 1) or the
 % null direction (PDchoice = 0). Positive values of Coh indicate a stimulus
-% movming in the preferred direction; negative values indicate null
+% moving in the preferred direction; negative values indicate null
 % direction motion. On any given trial, microstimulation was applied to the
 % electrode with a probability of 0.5 (Mstim = 1 on microstim trials; 0 on
 % control trials).
@@ -43,6 +43,9 @@ ds = dataset('xlsfile',fileName);
 % 3) PDchoice: 0/1 for monkey choice in the null/pref direction
 %
 % To see these: fieldnames(ds)
+%
+% Our scientific question is "Did the microstimulation influence the
+% monkey's perceptual decisions? If so, by how much?"
 %% Plot the data
 % We want a plot like those in fig. 4 of Salzman et al. 1992:
 % x-axis is the signed correlation value; y-axis is proportion of preferred
@@ -61,12 +64,14 @@ end
 % Now plot: stim trials in red; no-stim trials in black
 stimIdx = logical(allDataProp(:,1));
 figure
-plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro');
+plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
 plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko');
 xlabel('Motion Strength (%coh)'); ylabel('Proportion Preferred Decisions');
 ax = axis;
 axis([ax(1),ax(2),0,1]);
+legend('Stim','No Stim','Location','Northwest');
+title(fileName);
 
 %% Fit full model using glmfit
 % ln(P/1-P) = b0 + b1*stim + b2*corr + b3*stim*corr
@@ -139,7 +144,7 @@ line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
  
  % Re-plot raw data
 figure
-plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro');
+plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
 plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko');
 xlabel('Correlation (%)'); ylabel('Proportion Preferred Decisions');

@@ -11,8 +11,7 @@
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated
-% by 'QUESTION'--please do so using comments (i.e., by starting each line
-% with a '%'). In other cases, you be asked to supply missing code,
+% by 'QUESTION'. In other cases, you be asked to supply missing code,
 % indicated by 'TODO'. Once you have supplied the required code, you can
 % execute that section by mouse-clicking in that section (The block will
 % turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter' keys

@@ -44,6 +44,7 @@ ylabel('log proportion alive');
 title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 
 %% Do least squares regression with quadratic model
+
 % Note that we do not include an intercept term, because we know that a
 % dose of zero gives survival proportion of 1, and y = log(1) = 0;
 
@@ -51,7 +52,7 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 % One is designed to work "out of the box" whereas in the other one, you
 % have much more control.
 
-% Method #1: 'glmfit'
+%% Method #1: 'glmfit'
 
 % TODO: use the function "glmfit" to fit a GLM using a model in which the
 % value we retrieve is a normally distributed random 
@@ -64,7 +65,8 @@ xVals = ax(1):ax(2);
 yFit = b(1).*xVals + b(2).*xVals.^2;
 plot(xVals,yFit,'k-');
 
-% Method 2: 'fitglm'--gives much more information
+%% Method 2: 'fitglm'--gives much more information
+
 modelspec = 'logSurvProp ~ -1 + dose + dose^2';
 mdl14 = fitglm(ds,modelspec,'Distribution','normal');
 % mdl1 gives results in a much more user friendly format, but may be harder

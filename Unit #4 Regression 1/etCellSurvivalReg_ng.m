@@ -3,6 +3,7 @@
 % E & T example of cell survival data, pp. 115-121
 %
 % RTB wrote it, Christmas eve eve, post-bikeride w/ Branfman et al.
+% Converted to teaching module by SCT and RTB, August/September 2017
 
 % Concepts covered:
 % 1. quadratic regression using either 'glmfit' or 'fitglm'
@@ -11,13 +12,17 @@
 % 4. regression diagnostics: Cook's distance to identify worrisome data
 % 5. bootstrapping pairs to calculate SEs with LMS regression
 
-% A radiologist has run an experiment involving 14 bacterial plates. The
-% plates were exposed to various doses of radiation, and the proportion of
-% surviving cells measured. Larger doses lead to smaller survival
-% proportions, as would be expected. There is a question mark associated
-% with plate #13, as the investigator thinks it might be spurious.
+% What to do: Login to learning catalytics and join the session for the
+% module entitled "etCellSurvivalRegression, combined". You will answer a
+% series of questions based on the guided programming below. Each section
+% begins with a '%%'. Read through the comments and follow the instructions
+% provided. In some cases you will be asked to answer a question, clearly
+% indicated by 'QUESTION'. In other cases, you be asked to supply missing
+% code, indicated by 'TODO'. Once you have supplied the required code, you
+% can execute that section by mouse-clicking in that section (The block
+% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
+% keys (PC) or 'command' and 'enter' keys (Mac).
 
-% Neurobiology version, made up by RTB:
 % A neurobiologist wants to test the sensitivity of a particular brain
 % tumor cell line to radiation. She takes 14 plates containing tumor cells
 % and exposes them to various doses of radiation, then measures the
@@ -54,7 +59,7 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 % One is designed to work "out of the box" whereas in the other one, you
 % have much more control.
 
-% Method #1: 'glmfit'
+%% Method #1: 'glmfit'
 
 % TODO: use the function "glmfit" to fit a GLM using a model in which the
 % value we retrieve is a normally distributed random variable whose mean is
@@ -63,8 +68,8 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 
 % first make a matrix corresponding to the predictor variables (these are
 % dose and dose^2)
-%predictors = ;
- predictors = ;
+predictors = ;
+
 % b carries the coefficients, one for each predictor. stats carries all the
 % other information about the GLM.
 % HINT: use help glmfit to look up which commands to pass the function.
@@ -73,9 +78,9 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 b14 = b;
 SE14 = stats.se;    % store the values for the std. errors of the params
 
-% QUESTION: What do the standard errors of our parameters represent? Is it
-% variability in the data, or variability in potential model fits? This is
-% an important distinction!
+% QUESTION (Q1): What do the standard errors of our parameters represent?
+% Is it variability in the data, or variability in potential model fits?
+% This is an important distinction!
 
 % TODO: plot regression line using the coefficients b
 ax = axis;
@@ -83,8 +88,9 @@ xVals = ax(1):ax(2);
 yFit = ;
 plot(xVals,yFit,'k-');
 
-% Method 2: 'fitglm'--gives much more information
-% This method asks for a lot more information about your data, but is
+%% Method 2: 'fitglm'--gives much more information
+
+% This method asks for more information about your data, but is
 % considerably more flexible! First we define a model. Use help fitglm to
 % figure out the syntax! Use the example under "formula" to figure out how
 % to generate a string "modelspec" that specifies our model.
@@ -98,14 +104,12 @@ plot(xVals,yFit,'k-');
 modelspec = ;
 
 mdl14 = fitglm(ds,modelspec,'Distribution','normal');
+
 % mdl14 gives results in a much more user friendly format, but may be harder
 % to extract info in a script. Double-click on 'mdl14' in Workspace. We see
 % that mdl14 is a struct with a whole bunch of members, including,
 % 'Coefficients', which is itself a table containing information on beta's,
 % standard errors and t-statistics. 
-% To get the value of beta0 (= intercept)
-% b0 = mdl14.Coefficients{1,'Estimate'};
-% b1 = mdl14.Coefficients{2,'Estimate'};
 beta14ls = mdl14.Coefficients.Estimate;
 SE14ls = mdl14.Coefficients.SE;
 
@@ -144,14 +148,6 @@ suspiciousPlates = ;
 % Type 'help optimset' to see how you control the search for a minimum
 OPTIONS = optimset('Display','off','TolX',0.001);
 
-% Method #1: Old way by declaring ds as a global. Not ideal
-% bLMS = fminsearch('fitFunMSR',b,OPTIONS);   % use least squares as guess
-
-% Method #2: Using a separate function
-% This is the way to do it without declaring ds as a global (thanks to Till!)
-%bLMS = fminsearch(@(q)fitFunMSR2(q,ds),b,OPTIONS);
-
-% Method #3: completely locally
 x = ds.dose;
 y = ds.logSurvProp;
 % TODO: Write the function you're trying to optimize! i.e. the median of

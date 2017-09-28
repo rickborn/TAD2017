@@ -271,7 +271,7 @@ bsSEpairs = std(allBeta);
 % QUESTION (Q10): What is your estimate of the standard error of the slope
 % coefficient based on bootstrapping pairs?
 
-%% Whis is better?
+%% Which is better?
 % E & T state that "Bootstrapping pairs is less sensitive to assumptions
 % than bootstrapping residuals." BS of residuals assumes that the error
 % distribution (i.e. residuals) does not depend on x_i, and this is not

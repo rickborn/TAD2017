@@ -25,9 +25,9 @@ nFemale = sum(~male);
 figure, gscatter(ds.age,ds.bpf,ds.gender,'br','xo');
 xlabel('age (yrs)'); ylabel('brain parenchymal factor');
 
-figure, scatterhist(ds.age,ds.bpf,'Group',ds.gender,'Location','Northwest',...
-        'Direction','out');
-xlabel('age (yrs)'); ylabel('brain parenchymal factor');
+% figure, scatterhist(ds.age,ds.bpf,'Group',ds.gender,'Location','Northwest',...
+%         'Direction','out');
+% xlabel('age (yrs)'); ylabel('brain parenchymal factor');
 
 figure, boxplot(ds.bpf,male);
 hold on

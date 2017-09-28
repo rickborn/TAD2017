@@ -11,6 +11,18 @@
 % 4. regression diagnostics: Cook's distance to identify worrisome data
 % 5. bootstrapping pairs to calculate SEs with LMS regression
 
+% What to do: Login to Learning Catalytics (LC) and join the session for
+% the module entitled "etCellSurvivalRegression, combined". You will answer
+% a series of questions based on the guided programming below. Each section
+% begins with a '%%'. Read through the comments and follow the instructions
+% provided. In some cases you will be asked to answer a question, clearly
+% indicated by 'QUESTION' and a corresponding 'Q#' that directs you to
+% answer the relevant question in LC. In other cases, you be asked to
+% supply missing code, indicated by 'TODO'. Once you have supplied the
+% required code, you can execute that section by mouse-clicking in that
+% section (The block will turn yellow.) and then simultaneously hitting the
+% 'ctrl' and 'enter' keys (PC) or 'command' and 'enter' keys (Mac).
+
 % A radiologist has run an experiment involving 14 bacterial plates. The
 % plates were exposed to various doses of radiation, and the proportion of
 % surviving cells measured. Larger doses lead to smaller survival
@@ -23,7 +35,8 @@
 % and exposes them to various doses of radiation, then measures the
 % proportion of surviving cells. There is a question mark associated
 % with plate #13, as the investigator thinks it might be spurious due to a
-% malfunction of the radiation machine.
+% malfunction of the radiation machine. This was clearly written in her lab
+% notebook at the time of the experiment.
 
 % The data:
 % Each row corresponds to a plate of cells (n = 14)
@@ -56,13 +69,12 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 
 % TODO: use the function "glmfit" to fit a GLM using a model in which the
 % value we retrieve is a normally distributed random 
-[b,~,stats] = glmfit([ds.dose, ds.dose.^2],ds.logSurvProp,'normal','constant','off');
-b14 = b;
+[b14,~,stats] = glmfit([ds.dose, ds.dose.^2],ds.logSurvProp,'normal','constant','off');
 SE14 = stats.se;    % store the values for the std. errors of the params
 % plot regression line
 ax = axis;
 xVals = ax(1):ax(2);
-yFit = b(1).*xVals + b(2).*xVals.^2;
+yFit = b14(1).*xVals + b14(2).*xVals.^2;
 plot(xVals,yFit,'k-');
 
 %% Method 2: 'fitglm'--gives much more information
@@ -80,8 +92,16 @@ mdl14 = fitglm(ds,modelspec,'Distribution','normal');
 beta14ls = mdl14.Coefficients.Estimate;
 SE14ls = mdl14.Coefficients.SE;
 
-% Compare the results of the two methods.
-% Is the squared term justified?
+% Compare the results of the two methods. They should obviously give you
+% the same answer for the same model with the same data.
+
+% QUESTION (Q1): Is the squared term justified?
+
+% QUESTION (Q2): What average log survival proportion does your
+% least-squares regression GLM fit make for a radiation dose of 6 rads /
+% 100?
+
+% QUESTION (Q3): What is the standard error for the quadratic term?
 
 % Note that we could also include an intercept in our model with:
 % modelspec = 'logSurvProp ~ 1 + dose + dose^2';
@@ -107,10 +127,19 @@ suspiciousPlates = ds.plateNum(mdl14.Diagnostics.CooksDistance > nPts/4);
 
 %% Form the fit using least median of squares (LMS)
 
-% We will use the MATLAB function 'fminsearch':
-% fminsearch finds the minimum of a scalar function of several variables,
-% starting at an initial estimate. This is generally referred to as
-% unconstrained nonlinear optimization.
+% Recall that standard linear regression minimizes the squared distance of
+% the y-value of each data point from the regression line. Using this
+% metric has many mathematical advantages, but there are other so-called
+% "loss functions" that we might choose. One disadvantage of least-squares
+% is that it is very sensitive to outliers: its distance is blown up by the
+% squaring, and then it disproportionately influences the mean. But we know
+% a more robust statistic in such circumstances: the median. Since it is
+% the mid-point of the sorted data, one large outlier won't have much
+% influence on the median. So what we'll do here is to essentially write
+% our own loss function, then use a method called unconstrained nonlinear
+% optimization to find the model parameters that minimize this function.
+% The MATLAB function that performs this optimization is called
+% 'fminsearch'.
 
 % Type 'help optimset' to see how you control the search for a minimum
 OPTIONS = optimset('Display','off','TolX',0.001);
@@ -125,18 +154,35 @@ OPTIONS = optimset('Display','off','TolX',0.001);
 % Method #3: completely locally
 x = ds.dose;
 y = ds.logSurvProp;
-beta14lms = fminsearch(@(q) median((y - (q(1).*x + q(2).*x.^2)).^2),b,OPTIONS);
+
+% use of least-squares regression as a guess
+median_square_error_function = @(q) median((y - (q(1).*x + q(2).*x.^2)).^2);
+beta14lms = fminsearch(median_square_error_function,b14,OPTIONS);
 
 % plot this one, too
 yFitLMS = beta14lms(1).*xVals + beta14lms(2).*xVals.^2;
 plot(xVals,yFitLMS,'k--');
 
+% QUESTION (Q4): Does using the least median square error significantly
+% change the values of the coefficients?
+
+% QUESTION (Q5): Why is your least median square error fit so different
+% from least mean square error?
+
 % up-side: more robust; i.e. not pulled by outlier
 % down-side: now we don't get SE for free (This is where the bootstrap
 % comes in)
 
-%% Show class that you get the exact same answer as least squares when you write 
-% your own objective function. Just change 'median' to 'mean'
+%% Use 'fminsearch' to perform standard least squares regression
+
+% Instead of using 'glmfit', we should be able to achieve the same result
+% by using 'fminsearch' with the appropriate function to minimize (referred
+% to as an "objective function").
+
+% QUESTION (Q6): What do we need to change in our above objective function
+% ('median_square_error_function') to perform standard least-squares
+% regression?
+
 OPTIONS = optimset('Display','off','TolX',0.001);
 x = ds.dose;
 y = ds.logSurvProp;
@@ -146,11 +192,25 @@ bLS = fminsearch(@(q) mean((y - (q(1).*x + q(2).*x.^2)).^2),bGuess,OPTIONS);
 yFitLS = bLS(1).*xVals + bLS(2).*xVals.^2;
 plot(xVals,yFitLS,'r--');
 
+% QUESTION (Q7): Compare the beta coefficients you got with this procedure
+% with those from 'glmfit'. Are they identical?
+% Ans.: No. Slope terms are slightly different.
+% bLS = -1.0488, 0.0343
+% b14 = -1.0491, 0.0343
+
+% QUESTION (Q8): If the answer to the above question is 'no', why are they
+% not identical?
+% The reason for this is the 'fminsearch' stops searching when certain 
+% criteria are met. Look up the documentation on 'optimset' (and hyperlinks
+% therein) to see what might be going on. Empirically, we can get perfect
+% agreement by changing 'TolX' from 0.001 to 0.0001.
+
 %% Calculate SE by bootstrapping pairs, using the LMS objective function
 nBoot = 10000;
 nPts = length(ds.dose);     % number of data points in original
 allBeta = zeros(nBoot,2);   % remember there are two betas
 
+rng default
 for k = 1:nBoot
     bsIdx = unidrnd(nPts,nPts,1);   % random indexes
     x = ds.dose(bsIdx);
@@ -159,6 +219,14 @@ for k = 1:nBoot
 end
 SE14lms = std(allBeta)';
 bHat14lms = mean(allBeta);  % better estimate for the betas?
+
+% Calculate 95% CI for the quadratic term:
+myAlpha = 0.05;
+betaQuadSorted = sort(allBeta(:,2));
+
+idxLo = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
+idxHi = nBoot - idxLo;               % index corresponding to upper bound
+betaQuad95CI = [betaQuadSorted(idxLo), betaQuadSorted(idxHi)];
 
 % NOTE: I get SE values much smaller than reported in line 3 of Table 9.5
 % in E & T. But mine make more sense. When he removes the outlier (i.e.
@@ -170,30 +238,30 @@ bHat14lms = mean(allBeta);  % better estimate for the betas?
 % with Brad Efron on 12/23/2016
 
 %% Re-do with BAD data point removed. Version #1
-ds13 = ds;  % make a copy
-badID = find(ds.plateNum == 13);
-if ~isempty(badID)
-    ds13(badID,:) = [];
-end
-
-figure, plot(ds13.dose,ds13.logSurvProp,'k+');
-hold on;
-xlabel('dose (rads/100)');
-ylabel('log proportion alive');
-title('Cell Survival Data, E&T fig. 9.3, 13 plates');
-
-[b,~,stats] = glmfit([ds13.dose, ds13.dose.^2],ds13.logSurvProp,'normal','constant','off');
-b13 = b;
-SE13 = stats.se;    % store the values for the std. errors of the params
-% plot regression line
-ax = axis;
-xVals = ax(1):ax(2);
-yFit = b(1).*xVals + b(2).*xVals.^2;
-plot(xVals,yFit,'k-');
-
-% plot the LMS fit, too
-yFitLMS = beta14lms(1).*xVals + beta14lms(2).*xVals.^2;
-plot(xVals,yFitLMS,'k--');
+% ds13 = ds;  % make a copy
+% badID = find(ds.plateNum == 13);
+% if ~isempty(badID)
+%     ds13(badID,:) = [];
+% end
+% 
+% figure, plot(ds13.dose,ds13.logSurvProp,'k+');
+% hold on;
+% xlabel('dose (rads/100)');
+% ylabel('log proportion alive');
+% title('Cell Survival Data, E&T fig. 9.3, 13 plates');
+% 
+% [b,~,stats] = glmfit([ds13.dose, ds13.dose.^2],ds13.logSurvProp,'normal','constant','off');
+% b13 = b;
+% SE13 = stats.se;    % store the values for the std. errors of the params
+% % plot regression line
+% ax = axis;
+% xVals = ax(1):ax(2);
+% yFit = b(1).*xVals + b(2).*xVals.^2;
+% plot(xVals,yFit,'k-');
+% 
+% % plot the LMS fit, too
+% yFitLMS = beta14lms(1).*xVals + beta14lms(2).*xVals.^2;
+% plot(xVals,yFitLMS,'k--');
 
 %% Re-do with BAD data point removed. Version #2
 figure, plot(ds.dose,ds.logSurvProp,'k+');
@@ -201,7 +269,7 @@ hold on;
 plot(ds.dose(suspiciousPlates),ds.logSurvProp(suspiciousPlates),'ro');
 xlabel('dose (rads/100)');
 ylabel('log proportion alive');
-title('Cell Survival Data, E&T fig. 9.3, 13 plates');
+title('Cell Survival Data, E&T fig. 9.3');
 
 modelspec = 'logSurvProp ~ -1 + dose + dose^2';
 mdl13 = fitglm(ds,modelspec,'Distribution','normal','Exclude',suspiciousPlates);
@@ -221,7 +289,7 @@ h2 = plot(xVals,yFit,'k-');
 yFitLMS = beta14lms(1).*xVals + beta14lms(2).*xVals.^2;
 h3 = plot(xVals,yFitLMS,'k--');
 
-legend([h1,h2,h3],'Least sqares, 13 plates','Least sqares, 14 plates','Least median of squares, 14 plates');
+legend([h1,h2,h3],'Least squares, 13 plates','Least squares, 14 plates','Least median of squares, 14 plates');
 
 %% Compare betas and standard errors:
 

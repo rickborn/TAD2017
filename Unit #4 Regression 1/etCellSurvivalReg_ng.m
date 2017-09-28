@@ -8,27 +8,30 @@
 % Concepts covered:
 % 1. quadratic regression using either 'glmfit' or 'fitglm'
 % 2. unconstrained nonlinear optimization using 'fminsearch'
-% 3. least median of squares regression (LMS)
-% 4. regression diagnostics: Cook's distance to identify worrisome data
-% 5. bootstrapping pairs to calculate SEs with LMS regression
+% 3. anonymous functions
+% 4. least median of squares regression (LMS)
+% 5. regression diagnostics: Cook's distance to identify worrisome data
+% 6. bootstrapping pairs to calculate SEs with LMS regression
 
-% What to do: Login to learning catalytics and join the session for the
-% module entitled "etCellSurvivalRegression, combined". You will answer a
-% series of questions based on the guided programming below. Each section
+% What to do: Login to Learning Catalytics (LC) and join the session for
+% the module entitled "etCellSurvivalRegression, combined". You will answer
+% a series of questions based on the guided programming below. Each section
 % begins with a '%%'. Read through the comments and follow the instructions
 % provided. In some cases you will be asked to answer a question, clearly
-% indicated by 'QUESTION'. In other cases, you be asked to supply missing
-% code, indicated by 'TODO'. Once you have supplied the required code, you
-% can execute that section by mouse-clicking in that section (The block
-% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
-% keys (PC) or 'command' and 'enter' keys (Mac).
+% indicated by 'QUESTION' and a corresponding 'Q#' that directs you to
+% answer the relevant question in LC. In other cases, you be asked to
+% supply missing code, indicated by 'TODO'. Once you have supplied the
+% required code, you can execute that section by mouse-clicking in that
+% section (The block will turn yellow.) and then simultaneously hitting the
+% 'ctrl' and 'enter' keys (PC) or 'command' and 'enter' keys (Mac).
 
 % A neurobiologist wants to test the sensitivity of a particular brain
 % tumor cell line to radiation. She takes 14 plates containing tumor cells
 % and exposes them to various doses of radiation, then measures the
 % proportion of surviving cells. There is a question mark associated
 % with plate #13, as the investigator thinks it might be spurious due to a
-% malfunction of the radiation machine.
+% malfunction of the radiation machine. This was clearly written in her lab
+% notebook at the time of the experiment.
 
 % The data:
 % Each row corresponds to a plate of cells (n = 14)
@@ -49,7 +52,7 @@ figure, plot(ds.dose,ds.logSurvProp,'k+');
 hold on;
 xlabel('dose (rads/100)');
 ylabel('log proportion alive');
-title('Cell Survival Data, E&T fig. 9.3, 14 plates');
+title('Cell Survival Data, 14 plates');
 
 %% Do least squares regression with quadratic model
 % Note that we do not include an intercept term, because we know that a
@@ -66,23 +69,18 @@ title('Cell Survival Data, E&T fig. 9.3, 14 plates');
 % a linear function of the dose and its square (i.e. logSurvProp ~ normal
 % distribution with mean = a*dose + b*dose^2, where a and b are constants).
 
-% first make a matrix corresponding to the predictor variables (these are
+% First, make a matrix corresponding to the predictor variables (these are
 % dose and dose^2)
 predictors = ;
 
-% b carries the coefficients, one for each predictor. stats carries all the
-% other information about the GLM.
-% HINT: use help glmfit to look up which commands to pass the function.
-% Remember to set the constant term to 0!
-[b,~,stats] = glmfit(predictors,ds.logSurvProp,!!! ADDITIONAL INFO HERE !!!);
-b14 = b;
+% b14 carries the coefficients, one for each predictor. stats carries all
+% the other information about the GLM. HINT: use 'doc glmfit' to look up
+% which commands to pass the function. Remember to set the constant term to
+% 0.
+[b14,~,stats] = glmfit(predictors,ds.logSurvProp,!!! ADDITIONAL INFO HERE !!!);
 SE14 = stats.se;    % store the values for the std. errors of the params
 
-% QUESTION (Q1): What do the standard errors of our parameters represent?
-% Is it variability in the data, or variability in potential model fits?
-% This is an important distinction!
-
-% TODO: plot regression line using the coefficients b
+% TODO: plot regression line using the coefficients b14
 ax = axis;
 xVals = ax(1):ax(2);
 yFit = ;
@@ -100,8 +98,8 @@ plot(xVals,yFit,'k-');
 % will use a constant term. So your modelspec string will look something
 % like modelspec = logSurvProp ~ -1 + <OTHERSTUFF>; Make the names of
 % variables in the string corresponds to the names of the fields in the ds
-% structure!
-modelspec = ;
+% structure.
+modelspec = ' ';
 
 mdl14 = fitglm(ds,modelspec,'Distribution','normal');
 
@@ -113,8 +111,16 @@ mdl14 = fitglm(ds,modelspec,'Distribution','normal');
 beta14ls = mdl14.Coefficients.Estimate;
 SE14ls = mdl14.Coefficients.SE;
 
-% Compare the results of the two methods.
-% Is the squared term justified?
+% Compare the results of the two methods. They should obviously give you
+% the same answer for the same model with the same data.
+
+% QUESTION (Q1): Is the squared term justified?
+
+% QUESTION (Q2): What average log survival proportion does your
+% least-squares regression GLM fit make for a radiation dose of 6 rads /
+% 100?
+
+% QUESTION (Q3): What is the standard error for the quadratic term?
 
 % Note that we could also include an intercept in our model, either by
 % including a constant term using a 1, or simply by omitting a -1 in
@@ -134,50 +140,86 @@ SE14ls = mdl14.Coefficients.SE;
 % included or excluded from the regression analysis.
 
 % Suggested cut-off values for Cook's distance are D_i > 1 or D_i > 4/n.
-
 % TODO: Identify plates that may be spurious.
 suspiciousPlates = ;
 
 %% Form the fit using least median of squares (LMS)
 
-% We will use the MATLAB function 'fminsearch':
-% fminsearch finds the minimum of a scalar function of several variables,
-% starting at an initial estimate. This is generally referred to as
-% unconstrained nonlinear optimization.
+% Recall that standard linear regression minimizes the squared distance of
+% the y-value of each data point from the regression line. Using this
+% metric has many mathematical advantages, but there are other so-called
+% "loss functions" that we might choose. One disadvantage of least-squares
+% is that it is very sensitive to outliers: its distance is blown up by the
+% squaring, and then it disproportionately influences the mean. But we know
+% a more robust statistic in such circumstances: the median. Since it is
+% the mid-point of the sorted data, one large outlier won't have much
+% influence on the median. So what we'll do here is to essentially write
+% our own loss function, then use a method called unconstrained nonlinear
+% optimization to find the model parameters that minimize this function.
+% The MATLAB function that performs this optimization is called
+% 'fminsearch'.
 
 % Type 'help optimset' to see how you control the search for a minimum
 OPTIONS = optimset('Display','off','TolX',0.001);
 
+% This just makes it easier to fit our function on one line:
 x = ds.dose;
 y = ds.logSurvProp;
-% TODO: Write the function you're trying to optimize! i.e. the median of
-% the squared difference between y (the logSurvProp) and your model guess
-% (a constant q(1) * x plus a constant q(2) * x^2).
+
+% TODO: Write the function you want to optimize. i.e. the median of the
+% squared difference between y (the logSurvProp) and your model guess (a
+% constant q(1) * x plus a constant q(2) * x^2).
 % HINT: Use an anonymous function so you don't have to make a separate .m
-% file for this one task. fminsearch will return the values of the arguments which
-% minimize the function
-mdian_square_error_function = @(q) !!! FILL THIS IN;
-beta14lms = fminsearch(median_square_error_function,b,OPTIONS);
+% file for this one task. fminsearch will return the values of the
+% arguments which minimize the function
+median_square_error_function = @(q) !!! FILL THIS IN;
+
+% NOTE: 'fminsearch' requires that we supply an initial guess as to the
+% values of our parameters (this is the 2nd argument passed to
+% 'fminsearch'). Since there is no guarantee that 'fminsearch' will find a
+% global minimum, it may be important to start with a decent guess. Since
+% we have already done least-squares regression, we will use these values
+% as our initial guess for the parameters ('b14').
+beta14lms = fminsearch(median_square_error_function,b14,OPTIONS);
 
 % plot this one, too
 yFitLMS = beta14lms(1).*xVals + beta14lms(2).*xVals.^2;
 plot(xVals,yFitLMS,'k--');
 
-% up-side: more robust; i.e. not pulled by outlier
-% down-side: now we don't get SE for free (This is where the bootstrap
-% comes in)
+% QUESTION (Q4): Does using the least median square error significantly
+% change the values of the coefficients?
 
-%% Show class that you get the exact same answer as least squares when you write 
-% your own objective function. Just change 'median' to 'mean'
+% QUESTION (Q5): Why is your least median square error fit so different
+% from least mean square error?
+
+%% Use 'fminsearch' to perform standard least squares regression
+
+% Instead of using 'glmfit', we should be able to achieve the same result
+% by using 'fminsearch' with the appropriate function to minimize (referred
+% to as an "objective function").
+
+% QUESTION (Q6): What do we need to change in our above objective function
+% ('median_square_error_function') to perform standard least-squares
+% regression?
 OPTIONS = optimset('Display','off','TolX',0.001);
 x = ds.dose;
 y = ds.logSurvProp;
-bGuess = beta14lms;  % Try different guesses for initial betas; [0,0] works just as well
+bGuess = beta14lms;  % Try different guesses for initial betas;
+
+% TODO: Write an objective function for least-squares regression
 function_to_minimize = @(q) !!! USE THE MEAN SQUARED ERROR INSTEAD OF MEDIAN;
+
+% Perform the minimization to find optimal values of the model parameters:
 bLS = fminsearch(function_to_minimize,bGuess,OPTIONS);
 
 yFitLS = bLS(1).*xVals + bLS(2).*xVals.^2;
 plot(xVals,yFitLS,'r--');
+
+% QUESTION (Q7): Compare the beta coefficients you got with this procedure
+% with those from 'glmfit'. Are they identical?
+
+% QUESTION (Q8): If the answer to the above question is 'no', why are they
+% not identical?
 
 %% Calculate SE by bootstrapping pairs, using the LMS objective function
 
@@ -188,6 +230,7 @@ allBeta = zeros(nBoot,2);   % remember there are two betas
 
 % TODO: Make this loop repeeat the estimation procedure but resampling data
 % sets of this same size from our data.
+rng default
 for k = 1:nBoot
     bsIdx = ;   % random indexes
     x = ds.dose(bsIdx); %
@@ -195,81 +238,73 @@ for k = 1:nBoot
     median_square_error_function = @(q) !!! Fill me in, as before.
     allBeta(k,:) = fminsearch(median_square_error_function,beta14lms,OPTIONS);
 end
-SE14lms = std(allBeta)';
+SE14lms = std(allBeta)';    % transpose so that it has the same form as other SEs
 bHat14lms = mean(allBeta);
 
-% Question: Is our new beta estimated by repeated resampling a "better"
-% estimate for the value of beta?
+% QUESTION (Q9): What is your estimate for the quadratic term from taking
+% the mean across your bootstrapped samples?
 
-% NOTE: I get SE values much smaller than reported in line 3 of Table 9.5
-% in E & T. But mine make more sense. When he removes the outlier (i.e.
-% line 2 of table 9.5), he gets an SE for param 1 of 0.094, whereas he
-% calculates the bootstrap SE for the LMS (= least median of squares) for
-% param 1 to be 0.272. But why should the error be bigger for a more robust
-% method? My value of 0.135 (close to the least-squares SE with the outlier removed)
-% makes much more sense to me. Am I missing something? See e-mail exchange
-% with Brad Efron on 12/23/2016
+% QUESTION (Q10): Is our new beta estimated by repeated resampling a
+% "better" estimate for the value of beta?
 
-%% Re-do with BAD data point removed. Version #1
+% TODO: Calculate the 95% CI for the quadratic term using the percentile
+% method:
+!!! Your code here
 
-% TODO: Remove the suspicious data point (Plate 13) and perform the analysis
-% again.
-ds13 = ;  % make a copy with Plate 13 removed (try to do this through MATLAB code instead of finding the indices manually
+% QUESTION (Q11): Based on the bootstrap, does the quadratic term belong in
+% the model?
 
-figure, plot(ds13.dose,ds13.logSurvProp,'k+');
-hold on;
-xlabel('dose (rads/100)');
-ylabel('log proportion alive');
-title('Cell Survival Data, E&T fig. 9.3, 13 plates');
+%% Re-do standard least-squares with suspicious data point removed.
 
-% TODO: Fit a GLM to this data using Method 1
-[b,~,stats] = ;
-b13 = b;
-SE13 = stats.se;    % store the values for the std. errors of the params
-% plot regression line
-ax = axis;
-xVals = ax(1):ax(2);
-yFit = b(1).*xVals + b(2).*xVals.^2;
-plot(xVals,yFit,'k-');
+% You may recall that when we used Method #2 ('fitglm') to do our
+% regression, we used a measure called "Cook's distance" to identify plates
+% that were suspicious on statistical grounds. You might also recall that
+% we were suspicious, a priori, about plate 13 due to a comment in the
+% experimnter's notebook. So let's see what our standard least-squares
+% regression looks like if we omit this data point.
 
-% plot the LMS fit from the full data to the data with Plate 13 removed
-yFitLMS = ;
-plot(xVals,yFitLMS,'k--');
+% TODO: Remove the suspicious data point (Plate 13) and perform the
+% analysis again. Make a copy of the data with Plate 13 removed (try to do
+% this through MATLAB code instead of finding the indices manually
+ds13 = ;  
 
-%% Re-do with BAD data point removed. Version #2
+% Make a new figure and plot all of the data, but with the suspicious plate
+% also circled in red ink:
 figure, plot(ds.dose,ds.logSurvProp,'k+');
 hold on;
 plot(ds.dose(suspiciousPlates),ds.logSurvProp(suspiciousPlates),'ro');
 xlabel('dose (rads/100)');
 ylabel('log proportion alive');
-title('Cell Survival Data, E&T fig. 9.3, 13 plates');
+title('Cell Survival Data');
 
-% Fit a GLM to the data using Method 2
+% Fit our basic quadratic model to ds13 using 'fitglm'
 mdl13 = ;
 SE13ls = mdl13.Coefficients.SE;
 beta13ls = mdl13.Coefficients.Estimate;
 
-% plot regression line
+% Plot the regression line fit to ds13
 ax = axis;
 xVals = ax(1):ax(2);
 yFit = beta13ls(1).*xVals + beta13ls(2).*xVals.^2;
 h1 = plot(xVals,yFit,'r-');
 
+% Re-plot our original regression line to the full data set
 yFit = beta14ls(1).*xVals + beta14ls(2).*xVals.^2;
 h2 = plot(xVals,yFit,'k-');
 
-% TODO: plot the LMS fit, too
+% TODO: Plot the fit made using least MEDIAN squares to the full data set.
 yFitLMS = ;
 h3 = plot(xVals,yFitLMS,'k--');
 
-legend([h1,h2,h3],'Least sqares, 13 plates','Least sqares, 14 plates','Least median of squares, 14 plates');
+legend([h1,h2,h3],'Least sqares, 13 plates','Least squares, 14 plates','Least median of squares, 14 plates');
 
 %% Compare betas and standard errors:
 
-% [beta14ls SE14ls beta13ls SE13ls beta14lms SE14lms]
+% This just formats our results into something easier to grok:
 T = table(beta14ls,SE14ls,beta13ls,SE13ls,beta14lms,SE14lms,'RowNames',{'Beta1','Beta2'})
 
-% QUESTION: Was the plate truly spurious? What does it mean to be spurious
-% in the first place? Think about which metrics can help you decide this,
-% but also think about how they might sometimes fail. Arbitrary thresholds
-% are always useful guides, but rarely reliable rules.
+% THOUGHT QUESTIONS (No LC component): Was plate #13 truly spurious? What
+% does it mean to be spurious in the first place? Think about which metrics
+% can help you decide this, but also think about how they might sometimes
+% fail. Arbitrary thresholds are always useful guides, but rarely reliable
+% rules.

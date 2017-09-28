@@ -25,6 +25,9 @@ x1 = rand(nSamp,1) .* 10;
 x2 = rand(nSamp,1) .* 20;
 y = sqrt(x1.^2 + x2.^2);
 
+% or load in existing file:
+% load pyData.mat
+
 %% Model it with linear regression
 const = ones(length(y),1);
 [betaFit,betaCI,resid,residInt,stats] = regress(y,[const,x1,x2]);

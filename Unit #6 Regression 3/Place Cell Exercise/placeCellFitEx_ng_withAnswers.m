@@ -3,19 +3,17 @@
 % This exercise has been adapted from:
 % Chapter 9, of "Case studies in neural data analysis" by Kramer & Eden 2016
 % 
-% Homework instructions:
-%
-% What to do: Login to learning catalytics and join the session for the
-% module entitled "placeCellFit". You will answer a series of questions
+% What to do: Login to Learning Catalytics (LC) and join the session for
+% the module entitled "placeCellFit". You will answer a series of questions
 % based on the guided programming below. Each section begins with a '%%'.
 % Read through the comments and follow the instructions provided. In some
 % cases you will be asked to answer a question, clearly indicated by
-% 'QUESTION'--please do so using comments (i.e. by starting each line with
-% a '%'). In other cases, you be asked to supply missing code, indicated by
-% 'TODO'. Once you have supplied the required code, you can execute that
-% section by mouse-clicking in that section (The block will turn yellow.)
-% and then simultaneously hitting the 'ctrl' and 'enter' keys (PC) or
-% 'command' and 'enter' keys (Mac).
+% 'QUESTION' and a corresponding 'Q#' that directs you to answer the
+% relevant question in LC. In other cases, you be asked to supply missing
+% code, indicated by 'TODO'. Once you have supplied the required code, you
+% can execute that section by mouse-clicking in that section (The block
+% will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
+% keys (PC) or 'command' and 'enter' keys (Mac).
 %
 % The 1st two sections of code don't require you to do anything, but you
 % still need to execute them in order to load the data and display an

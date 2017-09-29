@@ -228,28 +228,40 @@ mu=-b2(2)/2/b2(3);                  %...place field center,
 sigma=sqrt(-1/(2*b2(3)));           %...place field size,
 alpha=exp(b2(1)-b2(2)^2/4/b2(3));   %...max firing rate.
 
-%% Optional: Gaussian fit directly with unconstrained nonlinear optimization
+%% OPTIONAL: Gaussian fit directly with unconstrained nonlinear optimization
 
 % At this point, you might be asking yourself, "Why go through all of that
 % algebraic gymnastics? Why not just fit a Gaussian model directly?" Well,
 % we can do this using our old friend, 'fminsearch'. What we need to do is
-% write a function, 'fitFunGauss', that will take in 3 parameters:
+% write an objective function, call it 'fitFunGauss', that will take in 3
+% parameters and return some measure of error in the fit to the actual
+% data. The 3 input parameters should be:
+%
 % 'q' : a vector of our 3 parameters (q(1)=alpha, q(2)=mu, q(3)=sigma)
 % 'ratPosition' : our independent variable (x)
 % 'spikeTrain' : our dependent variable (y)
 %
 % This function should first use the parameters to calculate values of
-% lambda from ratPosition. Then it should compute the likelihood of the
-% actual values ('spikeTrain') given the model's current estimate of
-% lambda, and finally return -log of this likelihood:
+% lambda from ratPosition as predicted by the current model (i.e. the
+% parameters in 'q'). Then it should compute the likelihood of the actual
+% values ('spikeTrain') given the model's current estimates of the lambdas,
+% and finally return the fit error as -log of the sum of these likelihoods:
+%
 %   -sum(log(poisspdf(y,lambda)))
+%
 % We then use 'fminsearch' to find the parameters, q, that minimize the
-% value returned by 'fitFunGauss'. In essence, we are calculating a maximum
-% likelihood estimate for our paramters by minimizing -log(likelihood) of
-% the model given the data.
+% value returned by 'fitFunGauss'.
+
+% THOUGHT QUESTION: Why do we have our function return *minus* the sum of
+% the log likelihood? HINT: Think about what 'fminsearch' is doing and the
+% overall goal, which is to maximize the likelihood of our data given the
+% model.
+%
+% ANSWER: We are calculating a maximum likelihood estimate for our
+% paramters by minimizing -log(likelihood) of the model given the data.
 
 OPTIONS = optimset('Display','off','TolX',0.001);
-% Look at our occupancy normalized histogram to generate guesses
+% Look at our occupancy normalized histogram to generate guesses:
 q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
 qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
@@ -260,8 +272,10 @@ qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
 % THOUGHT QUESTION: Can you think of other benefits of using the GLM
 % approach?
-% ANSWER: glmfit is faster, and we automatically get all sorts of useful
-% information, such as standard errors and confidence intervals.
+%
+% ANSWER: glmfit is faster, we are guaranteed to get the right answer, and
+% we automatically get all sorts of useful information, such as standard
+% errors and confidence intervals.
 
 
 %% Let's look at how our model does on the raw data: raw residuals

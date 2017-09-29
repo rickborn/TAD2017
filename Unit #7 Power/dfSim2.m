@@ -38,11 +38,14 @@ if nargin < 6, pFlag= 0; end
 if nargin < 5, nSims = 1000; end
 if nargin < 4, myAlpha = 0.05; end
 if nargin < 3, nMax = 50; end
-if nargin < 2, nAddObs = [1,2,5,10,20]; end
+if nargin < 2, nAddObs = [2,5,10,20]; end
 if nargin < 1, nInit = 10; end
 
 FPrate = ones(length(nInit),length(nAddObs)) .* NaN;
 
+% The logic for this simulation is that we generate all nMax pairs of
+% observations at once. Then, in our innter 'for' loop where we run the
+% t-tests, we just extend the the length of our index into 'allSims'.
 for jVal = 1:length(nInit)
     for iVal = 1:length(nAddObs)
         FP = zeros(nSims,1);
@@ -62,15 +65,20 @@ for jVal = 1:length(nInit)
 end
 
 if pFlag
-    figure, plot(nAddObs,FPrate,'b-'); hold on;
-    hp = plot(nAddObs,FPrate,'ko');
-    set(hp,'MarkerFaceColor','k');
+    figure
+    cStrs = ['b','r'];
+    for k = 1:length(nInit)
+        plot(nAddObs,FPrate(k,:),[cStrs(k),'-']); hold on;
+        hp = plot(nAddObs,FPrate(k,:),'ko');
+        set(hp,'MarkerFaceColor','k');
+        
+        %x = [nAddObs;nAddObs];
+        text(nAddObs(:)-0.5,(FPrate(k,:)+1)',num2str(FPrate(k,:)'));
+    end
     ax = axis;
     axis([ax(1), ax(2), 0, (floor(ax(4)/5)+1)*5]);
     hl = line([ax(1),ax(2)], [myAlpha*100,myAlpha*100]);
     set(hl,'Color','r','LineStyle','--');
-    xlabel('Number of Additional Observations Before Performing Another t-Test');
-    ylabel('Percentage of False-Positive Results');
-    x = [nAddObs;nAddObs];
-    text(x(:)+0.5,FPrate(:)+0.5,num2str(FPrate(:)));
+    xlabel('# of additional observations before performing next test');
+    ylabel('False-positive results (%)');
 end

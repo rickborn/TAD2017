@@ -66,7 +66,7 @@ h = plot(xVals,perCentPerBin,[colStr,'o']);
 set(h,'MarkerFaceColor',colStr);
 ax = axis;
 axis([0.01 0.05 0 80]);
-xlabel('p-value'); ylabel('Percent of p-values');
+xlabel('p-value'); ylabel('% of p-values');
 
 % Label each point with its value:
 yText = num2str(round(perCentPerBin'));

@@ -1,15 +1,21 @@
-function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
+function [FPrate,nSimsActual] = dfSim3(nInit,nAddObs,nMax,myAlpha,pCrit,nSims,pFlag)
 
-% dfSim2: Simulation of expected false positive rates when data collection
+% dfSim3: Simulation of expected false positive rates when data collection
 % ends upon obtaining significance, as a function of the frequency with
 % which significance tests are performed. This replicates figure 1 from
 % Simmons et al. 2011.
+%
+% In this version, I include another parameter, 'pCrit', to try to make the
+% simulation slighly more real. If the first t-test does not look
+% "promising" (i.e. p > pCrit), then we don't bother to launch into our
+% routine, and we don't count this as a simulation.
 %
 % Inputs:
 % - nInit, # of initial observations prior to first t-test (default, 10)
 % - nAddObs, # of additional observations added before next t-test
 % - nMax, maximum # of observations to make (default, 50)
 % - myAlpha, criterion for rejecting H0 (default, 0.05)
+% - pCrit, critical p-value for continuing after the first test (default,0.2)
 % - nSims, # of simulations to run (default, 1000)
 % - pFlag: if 1, plot results
 % 
@@ -17,6 +23,7 @@ function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
 % - FPrate, percentage of simulations yielding a false positive
 %
 % RTB wrote it, winter rain storm, 21 Dec 2012; Gill, MA
+% RTB modified to 'dfSim3.m', 30 Sept 2017; rainy Saturday at homoe in JP
 
 % Reference:
 % Simmons JP, Nelson LD, Simonsohn U. False-positive psychology:
@@ -35,8 +42,9 @@ function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
 rng shuffle;
 %rng default;
 
-if nargin < 6, pFlag= 0; end
-if nargin < 5, nSims = 1000; end
+if nargin < 7, pFlag= 0; end
+if nargin < 6, nSims = 1000; end
+if nargin < 5, pCrit = 0.2; end
 if nargin < 4, myAlpha = 0.05; end
 if nargin < 3, nMax = 50; end
 if nargin < 2, nAddObs = [2,5,10,20]; end
@@ -50,17 +58,23 @@ FPrate = ones(length(nInit),length(nAddObs)) .* NaN;
 for jVal = 1:length(nInit)
     for iVal = 1:length(nAddObs)
         FP = zeros(nSims,1);
+        nSimsActual = 0;
         for jSim = 1:nSims
             allSims = randn(nMax,2);
             allNdx = [nInit(jVal):nAddObs(iVal):nMax];
-            for k = 1:length(allNdx)
+            [~,p] = ttest2(allSims([1:allNdx(1)],1), allSims([1:allNdx(1)],2), ...
+                        'Alpha',myAlpha);
+            if p < pCrit
+                nSimsActual = nSimsActual + 1;
+            for k = 2:length(allNdx)
                 if ttest2(allSims([1:allNdx(k)],1), allSims([1:allNdx(k)],2), ...
                         'Alpha',myAlpha)
                     FP(jSim) = 1;
                     break
                 end
             end
-            FPrate(jVal,iVal) = (sum(FP) / nSims) * 100;
+            end
+            FPrate(jVal,iVal) = (sum(FP) / nSimsActual) * 100;
         end
     end
 end

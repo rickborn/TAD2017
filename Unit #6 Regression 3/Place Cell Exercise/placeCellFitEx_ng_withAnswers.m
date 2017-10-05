@@ -159,7 +159,7 @@ axis([-10,110,ax(3),ax(4)]);
 % predictor. Fill in the inputs below. See help on function 'glmfit'. 
 
 %ANSWER
-[b1,dev1,stats1] = glmfit(ratPosition,spikeTrain,'poisson','log');
+[b1,dev1,stats1] = glmfit(ratPosition,spikeTrain,'poisson','link','log');
 
 %QUESTION
 % What are each of these output terms (b1,dev1,stats1)?
@@ -193,7 +193,7 @@ axis([-10,110,ax(3),ax(4)]);
 %% Improve model fit by adding a squared term for position: Model #2
 
 %ANSWER
-[b2,dev2,stats2] = glmfit([ratPosition, ratPosition.^2],spikeTrain,'poisson','log');
+[b2,dev2,stats2] = glmfit([ratPosition, ratPosition.^2],spikeTrain,'poisson','link','log');
 
 % look at the fit
 subplot(nr,nc,2*nc+2)
@@ -292,7 +292,7 @@ plot(expTime,ratPosition);
 ylabel('Position (cm)');
 
 % QUESTION (Q5): Is there any relationship between the residuals of our model and the
-% direction of motion of the rat
+% direction of motion of the rat?
 
 % ANSWER (A5): Yes, the residuals increase when the rat moves in the
 % positive direction, don't change when the rat is not moving at either
@@ -318,7 +318,7 @@ ylabel('Position (cm)');
 ratDirection = [0; diff(ratPosition) > 0];
 
 % Now we just throw this into the model as another covariate:
-[b3,dev3,stats3] = glmfit([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'poisson','log');
+[b3,dev3,stats3] = glmfit([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'poisson','link','log');
 
 % QUESTION (Q8): Is the directional coefficient statistically significant?
 % Check the p value in our stats output variable for each predictor.

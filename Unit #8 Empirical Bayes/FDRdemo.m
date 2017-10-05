@@ -20,7 +20,7 @@
 % differed between the patients and controls.
 
 %% Load in some real data (courtesy of Brad Efron)
-cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
+% cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Efron Data'
 load prostateData;
 
 %% What does the distribution of p-values look like under H0?
@@ -124,12 +124,14 @@ xlabel('index i'); ylabel('P-value');
 
 % calculate the rejection region for qStar = 0.10
 pValReject = (qStar .* iPvals) ./ nTotal;
-plot(iPvals,pValReject,'r-');
+h1 = plot(iPvals,pValReject,'r-');
 
 % calculate the rejection region for qStar = 0.05
 q05 = 0.05;
 pValReject = (q05 .* iPvals) ./ nTotal;
-plot(iPvals,pValReject,'b-');
+h2 = plot(iPvals,pValReject,'b-');
+
+legend([h1,h2],{'qStar = 0.10','qStar = 0.05'},'Location','Northwest');
 
 %% Repeat the above, but on a semilog plot
 figure, semilogy(iPvals,dataPvalsSorted(iPvals),'k.');

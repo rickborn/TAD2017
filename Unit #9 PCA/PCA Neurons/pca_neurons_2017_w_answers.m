@@ -20,7 +20,7 @@ load('pca_data.mat')
 % data is a 58x5000 matrix, Neurons x Time Points
 % Each row of data is the PSTH of a neuron's response to the stimuli
 % stim is a 1x5000 column vector of the Stimuli over time
-% time is a 1x5000 column vector of the Time in second
+% time is a 1x5000 column vector of the Time in seconds
 %%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -117,7 +117,7 @@ figure, imagesc(dataCov);
 cb = colorbar;
 cb.Label.String = 'Covariance between neurons';
 % =======================
-
+xlabel('neuron #'); ylabel('neuron #');
 
 %% Cluster the covariance matrix
 % use the kmeans function with the covariance matrix as input. Think about

@@ -1,0 +1,1 @@
+Download all of the m-files into a single directory and either 'cd' to that directory or make sure the directory is in your path. Then open 'poissonTutorial.m' in your MATLAB editor and follow the instructions therein. The other m-files are helper functions called by the tutorial.

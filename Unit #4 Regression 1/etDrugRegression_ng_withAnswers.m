@@ -180,6 +180,47 @@ plot(xVals, yRegC, 'g-');
 % random effects for the intercept are significantly different from 0. To
 % see this, look at the STATS variable. What do we conclude?
 
+%% Compare with multiple regression using indicator variables for lot
+
+% create indicator variables for the different lots:
+lotA = strcmp(ds.lot,'A');
+lotB = strcmp(ds.lot,'B');
+
+% fit the model:
+mdl1a = fitglm([ds.hrs,lotA,lotB],ds.amount,...
+    'linear','Distribution','normal','Link','identity');
+
+% When we look at the mdl1a coefficients, we see that, indeed, 'lotA' is
+% significant, while 'lotB' is not.
+ba0 = mdl1a.Coefficients{1,'Estimate'};
+ba1 = mdl1a.Coefficients{2,'Estimate'};
+ba2 = mdl1a.Coefficients{3,'Estimate'};
+ba3 = mdl1a.Coefficients{4,'Estimate'};
+
+% Re-plot the original scatter plot with the simple regression line:
+figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
+hold on
+xlabel('Time implanted (hrs)'); ylabel('Drug remaining (mg)');
+title('Tests of osmotic mini-pump for drug delivery');
+ax = axis;
+xVals = ax(1):ax(2);
+yRegression = b0 + b1.*xVals;
+plot(xVals, yRegression, 'k-');
+
+% Plot the regression line for lotA:
+yVals = ba0 + (ba1 .* xVals) + (ba2 .* ones(size(xVals)));
+plot(xVals,yVals,'b-');
+
+% Plot the regression line for lotB:
+yVals = ba0 + (ba1 .* xVals) + (ba3 .* ones(size(xVals)));
+plot(xVals,yVals,'r-');
+
+% Plot the regression line for lotC:
+yVals = ba0 + (ba1 .* xVals);
+plot(xVals,yVals,'g-');
+
+% We get the same answers as we did with the LME model!
+
 %% Application of the bootstrap (p. 111): bootstrap the residuals
 
 % Classic quote: "Thus reassured that the bootstrap is giving reasonable

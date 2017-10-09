@@ -44,14 +44,16 @@
 % QUESTION (Q1): What is H0 in terms of the probability of getting a head?
 
 % TODO (Q2): Under H0, calculate the probability of getting 3 heads on 3 tosses
-p3H = 
+p3H = binopdf(3,3,0.5);
 
 % QUESTION (Q3): What would our probability be if we allowed for either 3 heads
 % OR 3 tails on 3 tosses?
+% Ans: By logic, 2* p3H; by MATLAB: binopdf(3,3,0.5) + binopdf(0,3,0.5)
 
 % TODO (Q4): Use 'binofit' to calculate a 99% confidence interval for P(heads)
 % given that we got 3 heads on 3 tosses.
-
+[pHat,pCI] = binofit(3,3,0.01);
+% pHat = 1; pCI95 = 0.2924    1.0000; pCI99 = 0.1710 to 1.00
 
 % QUESTION (Q5): What happens to our confidence interval as we increase the
 % number of tosses?
@@ -79,23 +81,23 @@ nHypotheses = length(pi0);
 % If we have no clue as to what the true value of P(heads) is, we could
 % consider all the values to be equally likely. This is often referred to
 % as a 'flat prior' (because the histogram is flat) or an 'uninformative
-% prior' (because all of our hypotheses about pi0 are equally likely).
+% prior' (because all of our hypotheses about pi0 are equally likely.
 priorFlat = ones(size(pi0)) ./ nHypotheses;
 
 % QUESTION (L1): How intuitively plausible is this prior? Imagine that you have
 % visually inspected the coin before we did our experiment, and you saw
 % that, indeed, one side of the coin was a head and the other was a tail.
 
-% Now, similarly to  the frequentist, we want to know the probability of
-% our data (3 heads on 3 tosses) given a hypothesis. This is called the
-% 'likelihood'. But here, as Bayesians, we are going to calculate the
-% likelihood for each possible value of P(heads). That is, for all of the
-% elements in our vector 'pi0'
+% Now, similarly to what the frequentist did, we want to know the
+% probability of our data (3 heads on 3 tosses) given a hypothesis. This is
+% called the 'likelihood'. But here, as Bayesians, we are going to
+% calculate the likelihood for each possible value of P(heads). That is,
+% for all of the elements in our vector 'pi0'
 
 % TODO: Calculate the probability of 3 heads on 3 tosses for each element
 % in pi0 and store this in a variable called 'likelihood3H'. HINT: You can
 % use a 'for' loop, but you don't have to.
-likelihood3H = ;
+likelihood3H = binopdf(3,3,pi0);    % general formulation, could just use pi0.^3
 likelihood3H = likelihood3H ./ trapz(likelihood3H); % normalize by area
 
 % NOTE: We don't need to normalize the likelihood to do a proper
@@ -108,44 +110,60 @@ likelihood3H = likelihood3H ./ trapz(likelihood3H); % normalize by area
 % Now we use Bayes' rule to calculate the probability of each hypothesis
 % (i.e. the possible values of P(heads) in pi0), known as the 'posterior
 % probability': P(hypothesis|data). This is just the product of our prior
-% and our likelihood, followed by normalization.
-% TODO: Calculate the posterior distribution.
-posterior3H = ;
-posterior3H = posterior3H ./ trapz(posterior3H);    % normalize
+% and our likelihood, followed by normalization:
+posterior3H = likelihood3H .* priorFlat;
+posterior3H = posterior3H ./ trapz(posterior3H);
 
 % Plot our results
-figure, 
+figure
 subplot(2,2,1)
 plot(pi0,priorFlat,'k-',pi0,likelihood3H,'r-',pi0,posterior3H,'b--');
 legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Bayes: flat prior');
 
+% QUESTION (L2):
+% What is the difference between a likelihood and the posterior?
+% How is it that Bayes rule is changing what we think about pi0?
+
 %% Calculate some values of interest
+
+% Note: This is an opportunity to point out the richness afforded by having
+% the entire posterior distribution as opposed to just a point estimate or
+% an interval estimate.
 
 % TODO (Q7): Calculate the mean value for the posterior distribution.
 % HINT: Recall that the mean value is the expected value. You can't just
 % take the mean of the posterior, since it is a probability distribution,
-% not a sample from that distribution. This is a subtle but important
-% concept. If it is not clear to you, ask one of the instructors.
-pi0mean = ;
+% not a sample from that distribution.
+pi0mean = sum(posterior3H .* pi0);
 
 % TODO (Q8): Calculate the median value for the posterior distribution.
 % HINT: The median divides the probability mass in half.
-pi0median = ;
+% This is a brute force approximation.
+idx = 1;
+while trapz(posterior3H(pi0 <= pi0(idx))) <= 0.5
+    idx = idx+1;
+end
+pi0median = pi0(idx-1);
 
 % TODO (Q9): Calculate the most likely value of pi0 (i.e. the mode):
 % HINT: Despite the similar names, this is not about the likelihood!
 % Think about what the posterior distribution is really saying: this is the
 % probability of each value of pi0, given what we already think we know
 % about pi0s in general.
-pi0max = ;
+pi0max = pi0(posterior3H == max(posterior3H));
+
+% NOTE: Can point out to the students that 'pi0max' is called the "Maximum
+% a-posteriori (MAP) estimate, which is the Bayesian equivalent of the
+% frequentist Maximum Likelihood (ML).
 
 % But, in addition, the Bayesian can answer interesting questions that 
 % don't even exist for the frequentist.
 
-% TODO (Q10): Calculate the probability that the coin has any amount of bias towards heads?
-pBiased = ;
+% TODO (Q10): Calculate the probability that the coin has any amount of
+% bias towards heads:
+pBiased = trapz(posterior3H(pi0 > 0.5));
 
 % QUESTION (Q11) What are the odds the coin is biased towards heads?
 oddsBiased2Heads = pBiased / (1-pBiased);
@@ -156,20 +174,23 @@ oddsBiased2Heads = pBiased / (1-pBiased);
 % HINT: see http://andrewgelman.com/2010/07/10/creating_a_good/
 
 %% Non-flat priors
-% Now, what if we base our prior on having previously observed 3H and 1T:
+
+% Now, what if we base our prior on having observed 3H and 1T:
 
 % TODO: Calculate a prior based on the observation of 3 heads and 1 tails
 % HINT: If we originally thought the distribution was uniform (pi0), then
 % another way to think about this prior is as the posterior distribution
 % after we've already observed those 4 trials.
-% (For plotting purposes, re-normalize each of your variables.)
-prior3H1T = ;
+prior3H1T = binopdf(3,4,pi0);
+prior3H1T = prior3H1T ./ trapz(prior3H1T);
 
 % Then we observe an outcome of 4H:
 likelihood4H = binopdf(4,4,pi0);
+likelihood4H = likelihood4H ./ trapz(likelihood4H);
 
 % TODO: Compute the posterior, using our likelihood and prior
-posterior3H1T = ;
+posterior3H1T = likelihood4H .* prior3H1T;
+posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
 
 % Now plot the new posterior distribution
 subplot(2,2,2);
@@ -177,10 +198,6 @@ plot(pi0,prior3H1T,'k-',pi0,likelihood4H,'r-',pi0,posterior3H1T,'b-');
 legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Prior based on 3H1T');
-
-% QUESTION (L2):
-% What is the difference between a likelihood and the posterior?
-% How is it that Bayes rule is changing what we think about pi0?
 
 % QUESTION (L3):
 % Is this result any different from using the uniform prior and then
@@ -201,12 +218,15 @@ priorGaussFair = priorGaussFair ./ trapz(priorGaussFair);
 
 % Then we observe an outcome of 3H1T:
 % TODO: Compute the likelihood and posterior distributions
-likelihood3H1T = ;
+likelihood3H1T = binopdf(3,4,pi0);
+likelihood3H1T = likelihood3H1T ./ trapz(likelihood3H1T);
 
-posterior3H1T = ;
+posterior3H1T = likelihood3H1T .* priorGaussFair;
+posterior3H1T = posterior3H1T ./ trapz(posterior3H1T);
 
 % QUESTION (Q13): Given this posterior, calculate the probability that the
 % coin has any amount of bias towards heads?
+pBiasedNow = trapz(posterior3H1T(pi0 > 0.5));
 
 subplot(2,2,3);
 plot(pi0,priorGaussFair,'k-',pi0,likelihood3H1T,'r-',pi0,posterior3H1T,'b-');
@@ -216,8 +236,9 @@ title('Gaussian prior around 0.5');
 
 % QUESTION (L4):
 % How is this prior different from the one we imposed above using "previous
-% observations?" Not just numerically, but philosophically. What is the ideological
-% distinction between the two types of priors?
+% observations?" Not just numerically, but philosophically. What is the
+% ideological distinction between the two types of priors?
+
 %% Gaussian prior tightly centered around 0.5, observe 3H1T
 
 % Now we might imagine that we have some data from the US Government
@@ -225,12 +246,15 @@ title('Gaussian prior around 0.5');
 % not very willing to entertain hypotheses like p(H) = 1.
 
 % TODO: Create a Gaussian prior with a standard deviation of 0.1
-priorGaussFairNew = ;
+priorGaussFairNew = normpdf(pi0,0.5,0.1);
+priorGaussFairNew = priorGaussFairNew ./ trapz(priorGaussFairNew);
 
-% Now we flip the coin 4 times and observe, 3H,1T:
-likelihood3H1TNew = ;
+% Then we observe an outcome of 3H1T:
+likelihood3H1TNew = binopdf(3,4,pi0);
+likelihood3H1TNew = likelihood3H1TNew ./ trapz(likelihood3H1TNew);
 
-posterior3H1TNew = ;
+posterior3H1TNew = likelihood3H1TNew .* priorGaussFairNew;
+posterior3H1TNew = posterior3H1TNew ./ trapz(posterior3H1TNew);
 
 subplot(2,2,4);
 plot(pi0,priorGaussFairNew,'k-',pi0,likelihood3H1TNew,'r-',pi0,posterior3H1TNew,'b-');
@@ -239,12 +263,11 @@ xlabel('\pi'); ylabel('P(\pi)');
 title('Prior tight near 0.5');
 
 % Note that in both of our bottom subplots, the likelihood (red curve) is
-% identical but our posterios appear to have shifted by different amounts.
-% To what do you attribute this? Does it make sense?
-
-% TODO: As a measure of the shifts, compare your assessment of the
-% probability that the coin has any amount of bias towards heads:
-pBiasedNowNew = ;
+% identical but our posteriors appear to have shifted by different amounts.
+% To what do you attribute this? Does it make sense? As a measure of the
+% shifts, compare your assessment of the probability that the coin has any
+% amount of bias towards heads under the two different priors.
+pBiasedNowNew = trapz(posterior3H1TNew(pi0 > 0.5));
 
 % TODO (L5): Save your final figure as a jpeg, then upload it to the
 % learning catalytics module.

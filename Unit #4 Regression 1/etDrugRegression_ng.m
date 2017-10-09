@@ -179,6 +179,51 @@ plot(xVals, yRegC, 'g-');
 % random effects for the intercept are significantly different from 0. To
 % see this, look at the STATS variable. What do we conclude?
 
+%% Compare with multiple regression using indicator variables for lot
+
+% Tip o' the Pin to Shihyi Tseng for suggesting this approach.
+
+% TODO: Create indicator variables for the different lots. Think hard about
+% how many indicator variables you need to code 3 different lots.
+!!! Your code here
+
+% TODO: fit the model:
+mdl1a = fitglm();
+
+% When we look at the mdl1a coefficients, we see that, indeed, 'lotA' is
+% significant, while 'lotB' is not.
+
+% In the workspace, double click on 'mdl1a' and then on the 'Coefficients'.
+% Are any of the lot indicator variables statistically significant from 0?
+
+% Extract the model coefficients into a single vector:
+b1a = mdl1a.Coefficients{:,'Estimate'};
+
+% WRITE DOWN YOUR REGRESSION EQUATION!
+
+% Re-plot the original scatter plot with the simple regression line:
+figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
+hold on
+xlabel('Time implanted (hrs)'); ylabel('Drug remaining (mg)');
+title('Tests of osmotic mini-pump for drug delivery');
+ax = axis;
+xVals = ax(1):ax(2);
+yRegression = b0 + b1.*xVals;
+plot(xVals, yRegression, 'k-');
+
+% TODO: Plot the regression line for lotA:
+yVals = ;
+plot(xVals,yVals,'b-');
+
+% TODO: Plot the regression line for lotB:
+yVals = ;
+plot(xVals,yVals,'r-');
+
+% TODO: Plot the regression line for lotC:
+yVals = ;
+plot(xVals,yVals,'g-');
+
+
 %% Application of the bootstrap (p. 111): bootstrap the residuals
 
 % Classic quote: "Thus reassured that the bootstrap is giving reasonable

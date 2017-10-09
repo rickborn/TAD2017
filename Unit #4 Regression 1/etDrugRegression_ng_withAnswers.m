@@ -182,6 +182,8 @@ plot(xVals, yRegC, 'g-');
 
 %% Compare with multiple regression using indicator variables for lot
 
+% Tip o' the Pin to Shihyi Tseng for suggesting this approach.
+
 % create indicator variables for the different lots:
 lotA = strcmp(ds.lot,'A');
 lotB = strcmp(ds.lot,'B');
@@ -191,11 +193,13 @@ mdl1a = fitglm([ds.hrs,lotA,lotB],ds.amount,...
     'linear','Distribution','normal','Link','identity');
 
 % When we look at the mdl1a coefficients, we see that, indeed, 'lotA' is
-% significant, while 'lotB' is not.
-ba0 = mdl1a.Coefficients{1,'Estimate'};
-ba1 = mdl1a.Coefficients{2,'Estimate'};
-ba2 = mdl1a.Coefficients{3,'Estimate'};
-ba3 = mdl1a.Coefficients{4,'Estimate'};
+% significantly different from 0, while 'lotB' is not.
+
+% Extract the model coefficients into a single vector:
+b1a = mdl1a.Coefficients{:,'Estimate'};
+
+% WRITE DOWN YOUR REGRESSION EQUATION!
+% ds.amount = 35.60 - 0.06*ds.hrs - 3.46*lotA + 0.51*lotB
 
 % Re-plot the original scatter plot with the simple regression line:
 figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
@@ -208,15 +212,15 @@ yRegression = b0 + b1.*xVals;
 plot(xVals, yRegression, 'k-');
 
 % Plot the regression line for lotA:
-yVals = ba0 + (ba1 .* xVals) + (ba2 .* ones(size(xVals)));
+yVals = b1a(1) + (b1a(2) .* xVals) + (b1a(3) .* ones(size(xVals)));
 plot(xVals,yVals,'b-');
 
 % Plot the regression line for lotB:
-yVals = ba0 + (ba1 .* xVals) + (ba3 .* ones(size(xVals)));
+yVals = b1a(1) + (b1a(2) .* xVals) + (b1a(4) .* ones(size(xVals)));
 plot(xVals,yVals,'r-');
 
 % Plot the regression line for lotC:
-yVals = ba0 + (ba1 .* xVals);
+yVals = b1a(1) + (b1a(2) .* xVals);
 plot(xVals,yVals,'g-');
 
 % We get the same answers as we did with the LME model!

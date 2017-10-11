@@ -176,10 +176,10 @@ figure, qqplot(H);
 
 % The true beauty and power is that, now, knowing just these two numbers, I
 % can tell you the probability that a given boy is in soome height range.
-% E.g. What is the probability that a boy is between 100 and 120 cm?
+% E.g. What is the probability that a boy is between 100 and 110 cm?
 muHgt = mean(H);
 sigmaHgt = std(H);
-pHgt = normcdf(120,muHgt,sigmaHgt) - normcdf(100,muHgt,sigmaHgt);
+pHgt = normcdf(110,muHgt,sigmaHgt) - normcdf(100,muHgt,sigmaHgt);
 
 % superimpose nl distribution on histogram
 figure(hf);
@@ -187,6 +187,27 @@ ax = axis;
 xVals = ax(1):0.01:ax(2);
 yVals = normpdf(xVals,muHgt,sigmaHgt);
 plot(xVals,yVals,'r-');
+
+% calculate the SEM in two ways: formula and bootstrap
+n = length(H);
+semHgt = std(H) / sqrt(n);
+% Ans = 0.5232
+
+nBoot = 10000;
+allMuHgt = zeros(nBoot,1);
+rng default
+for k = 1:nBoot
+    allMuHgt(k) = mean(H(unidrnd(n,n,1)));
+end
+semHgtBS = std(allMuHgt);
+% Ans = 0.5216
+
+% or use MATLAB's 'bootstrp' function
+rng default
+[bootStat] = bootstrp(nBoot,@mean,H);
+std(bootStat)
+% Ans = 0.5216
+
 %% Distribution of the t-statistic
 Ns = [5:5:30];
 B = 10000;

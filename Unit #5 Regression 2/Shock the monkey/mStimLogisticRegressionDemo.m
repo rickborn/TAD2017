@@ -23,8 +23,8 @@
 % 7. Confidence intervals on model predictions
 
 %% Read in the data from a Newsome lab microstimulation experiment
-%fileName = 'es5bRaw.xlsx';
-fileName = 'js25aRaw.xlsx';
+fileName = 'es5bRaw.xlsx'; % big effect
+%fileName = 'js25aRaw.xlsx'; % small effect; used in class
 ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
@@ -54,11 +54,17 @@ ds = dataset('xlsfile',fileName);
 % We first need to find all stimulus conditions:
 allDataProp = sortrows(unique([ds.Mstim,ds.Coh],'rows'),[1,2]);
 nConds = length(allDataProp);
-% Add a column of zeros to allDataProp to hold the calcualted proportion
-allDataProp = [allDataProp,zeros(nConds,1)];
+% Add a column of zeros to allDataProp to hold the calcualted proportion;
+% (plus two more for confidence intervals)
+allDataProp = [allDataProp,zeros(nConds,3)];
+% myErr = 0.32;   % for error bars of the 68% CI (= SEM)
+myErr = 0.05;   % for error bars of the 95% CI
 for k = 1:nConds
     thisCond = find(ds.Mstim ==allDataProp(k,1) & ds.Coh == allDataProp(k,2));
-    allDataProp(k,3) = sum(ds.PDchoice(thisCond)) / length(thisCond);
+    % allDataProp(k,3) = sum(ds.PDchoice(thisCond)) / length(thisCond);
+    [pHat,pCI] = binofit(sum(ds.PDchoice(thisCond)),length(thisCond),myErr);
+    allDataProp(k,3) = pHat;
+    allDataProp(k,[4,5]) = pCI;
 end
 
 % Now plot: stim trials in red; no-stim trials in black
@@ -67,11 +73,72 @@ figure
 plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
 plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko');
-xlabel('Motion Strength (%coh)'); ylabel('Proportion Preferred Decisions');
+xlabel('Motion strength (%coh)'); ylabel('Proportion preferred decisions');
 ax = axis;
 axis([ax(1),ax(2),0,1]);
 legend('Stim','No Stim','Location','Northwest');
 title(fileName);
+
+%% Add error bars
+
+% Many students seem to think that you can't put error bars on a
+% proportion: you divide one number by another, so how can you calculate a
+% standard error? Well, you don't need to since we know our underlying
+% probability model is binomial. We can use this to calculate confidence
+% intervals directly. The intuition is that we are much more confident of a
+% proportion of 0.8 for 80 of 100 than for 8 of 10.
+
+% To do this, we use 'binofit', but it is much easier to incorporate this
+% into the 'for' loop in the previous section were we calculate the sum.
+
+% NOTE: The 'errorbar' function plots error bars that are L(i) + U(i) long.
+% That is, it doesn't treat our CI as an interval, but rather as a distance
+% from the mean to the end of each error bar. So we need to subtract each
+% from the mean:
+
+allDataProp(:,4) = allDataProp(:,3) - allDataProp(:,4); % lower error bar
+allDataProp(:,5) = allDataProp(:,5) - allDataProp(:,3); % upper error bar
+
+errorbar(allDataProp(stimIdx,2),allDataProp(stimIdx,3),...
+    allDataProp(stimIdx,4),allDataProp(stimIdx,5),'r.');
+
+errorbar(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),...
+    allDataProp(~stimIdx,4),allDataProp(~stimIdx,5),'ko');
+
+%% Bootstrap error bars: one example
+
+% answer using binofit:
+[pHat,pCI] = binofit(16,40);
+% pHat = 0.4000
+% pCI = 0.2486    0.5667
+
+% bootstrap method
+% create a vector of 16 ones and 24 zeros:
+x = [ones(16,1);zeros(40-16,1)];
+% create an anonymous function that calculates the proportion:
+prop = @(n) sum(n)/length(n);
+% use bootci
+ci = bootci(10000,{prop,x},'type','percentile');
+% ci = 0.25, 0.55
+
+% pretty good, but at what cost?
+tic;[pHat,pCI] = binofit(16,40);t1=toc;
+tic;ci = bootci(10000,{prop,x},'type','percentile');t2=toc;
+t2/t1
+
+%% Plot the raw data, too?
+
+nTrials = length(ds);
+mstimIndex = logical(ds.Mstim);
+
+% Will need to jitter data to see all of the points
+jitterX = (rand(nTrials,1) * 3) - 1.5;
+jitterY = (rand(nTrials,1) * 0.2) - 0.1;
+
+plot(ds.Coh(mstimIndex)+jitterX(mstimIndex),ds.PDchoice(mstimIndex)+jitterY(mstimIndex),'r.');
+plot(ds.Coh(~mstimIndex)+jitterX(~mstimIndex),ds.PDchoice(~mstimIndex)+jitterY(~mstimIndex),'k.');
+
+axis([ax(1),ax(2),-0.1,1.1]);
 
 %% Fit full model using glmfit
 % ln(P/1-P) = b0 + b1*stim + b2*corr + b3*stim*corr
@@ -134,11 +201,14 @@ PSEnoStim = mean(coh(pNoStim < 0.505 & pNoStim > 0.495));
 PSEstim = mean(coh(pStim < 0.505 & pStim > 0.495));
 
 % Draw lines for the respective PSEs
-ax = axis;
-line([ax(1),PSEstim],[0.5,0.5],'Color','r','LineStyle','-');
-line([PSEstim,PSEstim],[ax(3),0.5],'Color','r','LineStyle','--');
-line([ax(1),PSEnoStim],[0.5,0.5],'Color','k','LineStyle','--');
-line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
+pFlag = 0;
+if pFlag
+    ax = axis;
+    line([ax(1),PSEstim],[0.5,0.5],'Color','r','LineStyle','-');
+    line([PSEstim,PSEstim],[ax(3),0.5],'Color','r','LineStyle','--');
+    line([ax(1),PSEnoStim],[0.5,0.5],'Color','k','LineStyle','--');
+    line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
+end
 
  %% Using the 'predict' function, we can get CIs on our estimates
  

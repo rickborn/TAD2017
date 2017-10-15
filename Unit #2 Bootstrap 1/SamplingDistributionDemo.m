@@ -195,6 +195,7 @@ semHgt = std(H) / sqrt(n);
 
 nBoot = 10000;
 allMuHgt = zeros(nBoot,1);
+n = length(H);
 rng default
 for k = 1:nBoot
     allMuHgt(k) = mean(H(unidrnd(n,n,1)));

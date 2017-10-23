@@ -112,6 +112,11 @@ set(gca, 'YTickLabel', testNames);
 set(gca,'XTickLabelRotation',45)
 
 % QUESTION (Q8): Which two tests are most highly correlated with one another?
+% Approach #1: get a better colorbar:
+subplot(2,2,4);
+colormap('hot')
+
+% Approach #2: find it numerically:
 maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
 % Ans. Algebra and analysis
 

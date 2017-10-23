@@ -6,16 +6,17 @@ function [pow] = powSimTtest2(H0,HA,nSims)
 %
 % Inputs:
 % - H0: 3-vector containing mean,SD & n for null distribution
-% - HA: 2-vector containing mean,SD & n for alternate distribution
+% - HA: 3-vector containing mean,SD & n for alternate distribution
 % - nSims: number of simulations to run
 % 
 % RTB wrote it, Biostats cert course, then updated on 24 Sept. 2016
 %
-% See also: code in 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\Biostatistics 2015-16\MATLAB code\Power and Sample Size'
+% See also: code in 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses...
+% \Stats\Biostatistics 2015-16\MATLAB code\Power and Sample Size'
 % See also: sampsizepwr
 
 if nargin < 3, nSims = 100000; end
-if nargin < 2, HA = [98,20,64]; end
+if nargin < 2, HA = [95,20,64]; end
 if nargin < 1, H0 = [85,20,64]; end
 
 allH = zeros(nSims,1);
@@ -34,7 +35,7 @@ allH = zeros(nSims,1);
 % Elapsed time is 0.747981 seconds.
 
 allH = ttest2(normrnd(H0(1),H0(2),H0(3),nSims), ...
-    normrnd(HA(1),HA(2),HA(3),nSims));
+              normrnd(HA(1),HA(2),HA(3),nSims));
 
 pow = sum(allH) / nSims;
 

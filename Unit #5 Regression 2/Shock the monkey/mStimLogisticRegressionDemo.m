@@ -72,7 +72,7 @@ stimIdx = logical(allDataProp(:,1));
 figure
 plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
-plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko');
+plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko','MarkerFaceColor','k');
 xlabel('Motion strength (%coh)'); ylabel('Proportion preferred decisions');
 ax = axis;
 axis([ax(1),ax(2),0,1]);

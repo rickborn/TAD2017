@@ -6,7 +6,7 @@ function [statPower,perCentPerBin,xVals] = pCurve(dPrime,n,nSim,colStr)
 %
 % Inputs:
 % - dPrime, a measure of effect size: d' = (M2 - M1) / SD (default = 0.64)
-% - n, sample size (default = 20)
+% - n, sample size per group (default = 20)
 % - nSim, number of simulations to run (default = 10,000)
 % - colStr, color to use for plot (default = red)
 %

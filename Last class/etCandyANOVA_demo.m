@@ -17,7 +17,7 @@ for k=1:length(ds.observation_date)
     currentEntry=ds.observation_date{k};
     ds.year(k)=str2double(currentEntry(1:4));
     ds.month(k)=str2double(currentEntry(6:7));
-    if ds.month(k)== 12|ds.month(k)== 1|ds.month(k)== 2
+    if ds.month(k)== 12 || ds.month(k)== 1 || ds.month(k)== 2
         ds.season(k)={'Winter'};
     elseif ds.month(k)>=3 && ds.month(k)<=5
         ds.season(k)={'Spring'};
@@ -29,6 +29,7 @@ for k=1:length(ds.observation_date)
 end
     
 %% Plot candy production for each month
+
 monthmeans=zeros(1,12);
 monthCI=zeros(1,12);
 for k=1:12
@@ -37,13 +38,18 @@ for k=1:12
 end
 
 figure
-errorbar(monthmeans,monthCI,'.','MarkerSize',30,'Color','k','CapSize',20,'LineWidth',2)
+% RTB: I had to delete the 'CapSize' property. Not part of R2016A.
+errorbar(monthmeans,monthCI,'.','MarkerSize',30,'Color','k','LineWidth',2)
 xlabel('Month')
 ylabel('Candy Production')
 
 % Which months have the highest candy production? Do you have any idea why
 % that might be?
 %% Plot candy production by year
+
+% RTB: 'years' was not defined until the cell below
+years=unique(ds.year);
+
 % Let's get a list of candy production broken up by year 
 yearlist=unique(ds.year);
 yearsums=zeros(1,length(yearlist));
@@ -65,6 +71,7 @@ ylabel('Candy production')
 % Describe the data. How has US candy production varied over the past 30+
 % years? Do you see any trends?
 %% Plot candy production by season approach #1: by calendar year
+
 % This approach puts December of a given year with the previous January and
 % February
 yearlist=unique(ds.year);
@@ -112,7 +119,8 @@ fall(isnan(fall(:,1)),:) = [];
 fall=[fall;NaN];
 
 %combine these columns into the new season matrix
-seasonsums=[winter,spring,summer,fall]
+seasonsums=[winter,spring,summer,fall];
+
 %% Plot season means and CI
 % Upload a plot of candy production by season, including both the raw data
 % and the CI
@@ -129,7 +137,8 @@ plot([x1',x2',x3',x4'],seasonsums,'o')
 xlabel('Season')
 ylabel('Candy production')
 hold on
-errorbar(seasonMeans,seasonCI,'.k','LineWidth', 2,'CapSize', 20,'MarkerSize', 20)
+% RTB: removing 'CapSize' again.
+errorbar(seasonMeans,seasonCI,'.k','LineWidth', 2,'MarkerSize', 20)
 legend('Winter', 'Spring','Summer','Fall','Location','south','Orientation','horizontal')
 
 %Is there a visible pattern of candy production by season? Are there any
@@ -170,7 +179,7 @@ hold on
 line([obsF,obsF],[bsAxis(3),bsAxis(4)],'Color','g');
 
 %Calculate a 95% CI and plot that
-myAlpha=0.05
+myAlpha=0.05;
 bootFsSorted = sort(bootFs);
 
 idxLo = ceil((myAlpha/2) * nBoot);   % index corresponding to lower bound
@@ -197,17 +206,18 @@ line([F95CIpercentileHi,F95CIpercentileHi],[bsAxis(3),bsAxis(4)],'Color','r');
 % We can look at each group individually and assess each for normality.
 figure
 subplot(2,2,1)
-h=qqplot(seasonsums(:,1))
-title("Winter")
+h=qqplot(seasonsums(:,1));
+% RTB: title names were in double-quotes; I changed to single
+title('Winter')
 subplot(2,2,2)
-h=qqplot(seasonsums(:,2))
-title("Spring")
+h=qqplot(seasonsums(:,2));
+title('Spring')
 subplot(2,2,3)
-h=qqplot(seasonsums(:,3))
-title("Summer")
+h=qqplot(seasonsums(:,3));
+title('Summer')
 subplot(2,2,4)
-h=qqplot(seasonsums(:,4))
-title("Fall")
+h=qqplot(seasonsums(:,4));
+title('Fall')
 
 % Is Y|X normally distributed for all seasons? If not, what can we do about
 % it?
@@ -232,29 +242,30 @@ allResid(isnan(allResid(:))) = [];
 [allResidOpt,lambda] = boxcox(allResid);
 subplot(4,4,2)
 qqplot(allResidOpt)
-title("Optimum Box Cox lambda="+num2str(lambda));
+title(['Optimum Box Cox lambda=' num2str(lambda)]);
 lambdas=[-3:0.5:3];
 for y=1:13
     [allResidy] = boxcox(lambdas(y),allResid);
     subplot(4,4,y+2)
     qqplot(allResidy)
-    title("lambda="+num2str(lambdas(y)))
+    title(['lambda=' num2str(lambdas(y))])
 end
     
 %% Transform our data (by season):
-seasonsumsT=1./(seasonsums)
-seasonsumsT=exp(seasonsums)
+
+seasonsumsT=1./(seasonsums);
+seasonsumsT=exp(seasonsums);
 
 figure
 subplot(2,2,1)
-h=qqplot(seasonsumsT(:,1))
-title("Winter")
+h=qqplot(seasonsumsT(:,1));
+title('Winter')
 subplot(2,2,2)
-h=qqplot(seasonsumsT(:,2))
-title("Spring")
+h=qqplot(seasonsumsT(:,2));
+title('Spring')
 subplot(2,2,3)
-h=qqplot(seasonsumsT(:,3))
-title("Summer")
+h=qqplot(seasonsumsT(:,3));
+title('Summer')
 subplot(2,2,4)
-h=qqplot(seasonsumsT(:,4))
-title("Fall")
+h=qqplot(seasonsumsT(:,4));
+title('Fall')

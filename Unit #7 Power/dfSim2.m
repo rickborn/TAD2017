@@ -45,7 +45,7 @@ if nargin < 1, nInit = 10; end
 FPrate = ones(length(nInit),length(nAddObs)) .* NaN;
 
 % The logic for this simulation is that we generate all nMax pairs of
-% observations at once. Then, in our innter 'for' loop where we run the
+% observations at once. Then, in our inner 'for' loop where we run the
 % t-tests, we just extend the the length of our index into 'allSims'.
 for jVal = 1:length(nInit)
     for iVal = 1:length(nAddObs)

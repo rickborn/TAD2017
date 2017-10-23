@@ -45,9 +45,10 @@ ylabel('Candy Production')
 % that might be?
 %% Plot candy production by year
 % Let's get a list of candy production broken up by year 
-yearsums=zeros(1,length(years));
-for k=1:length(years)
-    yearsums(k)=sum(ds.IPG3113N(double(ds.year)==years(k)));
+yearlist=unique(ds.year);
+yearsums=zeros(1,length(yearlist));
+for k=1:length(yearlist)
+    yearsums(k)=sum(ds.IPG3113N(double(ds.year)==yearlist(k)));
 end
 
 %Because we don't have all of 2017, let's not plot it
@@ -57,7 +58,7 @@ yearMeans=mean(yearsums);
 yearCI=1.96.*std(yearsums)/sqrt(length(yearsums(:,1)));
 
 figure
-plot(years(1:end-1)',yearsums,'ok')
+plot(yearlist(1:end-1)',yearsums,'ok')
 xlabel('Year')
 ylabel('Candy production')
 
@@ -66,15 +67,15 @@ ylabel('Candy production')
 %% Plot candy production by season approach #1: by calendar year
 % This approach puts December of a given year with the previous January and
 % February
-years=unique(ds.year);
+yearlist=unique(ds.year);
 seasons={'Winter', 'Spring','Summer','Fall'};
-seasonsums=zeros(length(years),length(seasons));
+seasonsums=zeros(length(yearlist),length(seasons));
 %This code will code seasons by year. This has the disadvantage of grouping
 %January and February with the following December. Maybe it would make more
 %sense to group last year's December with January and February
-for k=1:length(years)
+for k=1:length(yearlist)
     for j=1:length(seasons)
-        seasonsums(k,j)=sum(ds.IPG3113N(double(ds.year==years(k)) + double(ismember(ds.season,seasons{j}))==2));
+        seasonsums(k,j)=sum(ds.IPG3113N(double(ds.year==yearlist(k)) + double(ismember(ds.season,seasons{j}))==2));
     end
 end
 %You may notice we have two 0s in our dataset at this point. This is
@@ -154,7 +155,7 @@ bootPop=ones(length(allseasonsums));
 seasonTable=ones(45,4);
 bootFs=zeros(1,length(nBoot));
 for k=1:nBoot
-    bootPop=datasample(allseasonsums,length(allseasonsums),'Replace', true);
+    bootPop=datasample(allseasonsums,length(allseasonsums), 'Replace', false);
     seasonTable=reshape(bootPop,[45,4]);
     [bootp,bootTbl]=anova1(seasonTable,[],'off');
     bootFs(k)=bootTbl{2,5};

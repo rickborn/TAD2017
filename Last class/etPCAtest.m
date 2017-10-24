@@ -4,7 +4,7 @@
 % RTB adapted for final exam, 11 October 2017
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "Last Class". You will answer a series of questions based
+% module entitled "Final Exam". You will answer a series of questions based
 % on the guided programming below. Each section begins with a '%%'. Read
 % through the comments and follow the instructions provided. In some cases
 % you will be asked to answer a question, clearly indicated by 'QUESTION'.
@@ -41,12 +41,6 @@
 % An introduction to the bootstrap. Chapman & Hall, London u.a. pp. 61-70 
 % Adapted by RTB 5/31/2002, originally named bs_ex2.m
 % Developed for homework by RAS and RTB, August 2017
-
-%% Concepts covered:
-%1. z-scoring to see relationships among different measures
-%2. PCA to capture maximal variance ('scientific IQ')
-%3. bootstrap to estimate std. error of our PCA-based statistic
-%4. bootstrap for confidence intervals by the percentile method
 
 %% Load data and make some plots
 
@@ -103,6 +97,7 @@ title('Test score correlations');
 rhoCols = corr(X);
 subplot(2,2,4);
 imagesc(rhoCols,[0,1]); colorbar;
+colormap('hot');
 xlabel('Test'); ylabel('Test');
 title('Correlation matrix for test scores');
 set(gca, 'XTick', 1:nTests); % center x-axis ticks on bins
@@ -111,7 +106,7 @@ set(gca, 'XTickLabel', testNames);
 set(gca, 'YTickLabel', testNames);
 set(gca,'XTickLabelRotation',45)
 
-% QUESTION (Q8): Which two tests are most highly correlated with one another?
+% QUESTION (Q6): Which two tests are most highly correlated with one another?
 maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
 % Ans. Algebra and analysis
 
@@ -122,7 +117,7 @@ maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
 % student (x) could be captured by a single number, Q, that would
 % completely describe her performance: x_i = Q_i * v
 %
-% We could think of Q as each student's scientific IQ. In the language of
+% We could think of Q as each student's "scientific IQ". In the language of
 % linear algebra (PCA), v is the eigenvector of the covariance matrix (the
 % first principle component) and Q_i is the distance along the line defined
 % by the eigenvector for each student. The eigenvalues reflect the amount
@@ -143,7 +138,7 @@ maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
 % store it in 'thHat'
 thHat = ;
 
-% QUESTION (Q9): What is the proportion of variance explained by the first
+% QUESTION (Q7): What is the proportion of variance explained by the first
 % principle component?
 
 %% Bootstrap to calculate standard error of our measure.
@@ -163,7 +158,7 @@ rng default
 
 thSE = ;
 
-% QUESTION (Q10): What is your value for the standard error?
+% QUESTION (Q8): What is your value for the standard error?
 
 % Make a histogram of the bootstrap replicates and draw a vertical line for
 % the actual value ('thHat')
@@ -181,7 +176,4 @@ line([thHat,thHat],[ax(3),ax(4)],'Color','y');
 % based on the percentile method.
 !!! Your code here
 
-% QUESTION (Q11): What is your value for the lower bound of the 95% CI?
-
-% TODO: Draw vertical red lines on your histogram showing the 95% CI
-!!! Your code here
+% QUESTION (Q9): What is your value for the lower bound of the 95% CI?

@@ -30,7 +30,6 @@ p8sided = post1Nl(nSides == 8);
 
 % The chosen die is rolled a 2nd time, and a value of 10 is obtained:
 like2 = [0,0,0,1/12,1/20];
-% We use our old posterior (post1Nl) as our new prior for roll #2
 post2 = post1Nl .* like2;
 post2Nl = post2 ./ sum(post2);
 
@@ -50,7 +49,7 @@ odds12sided = post2Nl(nSides==12) / (1 - post2Nl(nSides==12));
 % die being the chosen one?
 
 % One approach is to calculate a new 'prior1' and just re-do the entire
-% calculation above:
+% calculation:
 prior1 = nSides ./ sum(nSides);
 % Ans = 1.6667
 

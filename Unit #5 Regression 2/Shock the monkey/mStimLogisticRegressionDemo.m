@@ -78,6 +78,7 @@ ax = axis;
 axis([ax(1),ax(2),0,1]);
 legend('Stim','No Stim','Location','Northwest');
 title(fileName);
+set(gca,'FontSize',14); % make text larger
 
 %% Add error bars
 

@@ -34,7 +34,7 @@
 % 5. Parametric bootstrap by sampling from a bivariate normal distribution
 % 
 % The data here is LSAT and GPA scores from a census of 82 law schools.
-% We also have a random sample of 15 schools from this census as well.
+% We also have a random sample of 15 schools from this census.
 
 %% Define a few constants and load the data
 nBoot = 10000;
@@ -60,7 +60,7 @@ semLSAT = ;
 
 % QUESTION (Q1): What is the value of semLSAT to 2 decimal places?
 
-%% "True" standad error by sampling from the population
+%% "True" standad error by repeataedly sampling from the population
 
 % TODO: Draw nBoot samples of size 15 from the CENSUS of 82, each time calculating
 % the sample mean. Save each mean in 'allMeans'

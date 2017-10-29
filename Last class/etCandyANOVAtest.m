@@ -43,7 +43,7 @@ legend('Winter', 'Spring','Summer','Fall','Location','south','Orientation','hori
 % One way to answer this question is by using One-way ANOVA
 % What is our null hypothesis? - all seasons are the same 
 
-[~,tbl]=anova1(seasonsums);
+[pVal,tbl]=anova1(seasonsums);
 % What does the anova table suggest about our data? Are all seasons drawn
 % from the same distribution?
 obsF=tbl{2,5};

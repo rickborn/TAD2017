@@ -23,7 +23,7 @@ function [FPrate,nSimsActual] = dfSim3(nInit,nAddObs,nMax,myAlpha,pCrit,nSims,pF
 % - FPrate, percentage of simulations yielding a false positive
 %
 % RTB wrote it, winter rain storm, 21 Dec 2012; Gill, MA
-% RTB modified to 'dfSim3.m', 30 Sept 2017; rainy Saturday at homoe in JP
+% RTB modified to 'dfSim3.m', 30 Sept 2017; rainy Saturday at home in JP
 
 % Reference:
 % Simmons JP, Nelson LD, Simonsohn U. False-positive psychology:

@@ -37,8 +37,14 @@ nTransitions = sum(allTransitions);
 % This works for a vector, but 'find' will not work along colums.
 % maxRuns = max(diff(find(allTransitions)));
 maxRuns = zeros(1,nSims);
+maxRunLength = 10;
+binCtrs = 1:maxRunLength;
+cumRunCounts = zeros(1,maxRunLength);
 for k = 1:nSims
-    maxRuns(k) = max(diff(find(allTransitions(:,k))));
+    allRuns = diff(find(allTransitions(:,k)));
+    runCounts = hist(allRuns,binCtrs);
+    cumRunCounts = cumRunCounts + runCounts;
+    maxRuns(k) = max(allRuns);
 end
 
 if pFlag
@@ -56,6 +62,19 @@ if pFlag
     tStr = sprintf('%d simulations of %d coin tosses',nSims,nTosses);
     title(tStr);
     legend('Individual sims','Median');
+    
+    figure
+    bar(binCtrs,cumRunCounts ./ sum(cumRunCounts));
+    hold on
+    xlabel('Run length'); ylabel('Probability');
+    title('Distribution of runs of heads');
+    % Note that we are looking at the probability of getting z heads before
+    % we get one tail, which is the negative binomial distribution with a
+    % parameter of one. In our case, a run of 'one' corresponds to a 'z' of
+    % zero. This is the geometric distribution.
+    yVals = nbinpdf(binCtrs-1,1,0.5);
+    plot(binCtrs,yVals,'ro-','MarkerFaceColor','r');
+    
 end
 
 end

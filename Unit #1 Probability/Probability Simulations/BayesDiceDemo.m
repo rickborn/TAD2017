@@ -7,18 +7,36 @@
 % sides of each die are numbered 1:n, where n is the number of sides, and
 % each face is equally likely to come up when the die is rolled. A Bayesian
 % statistician randomly selects one of the dice from the bag and rolls it
-% behind a screen. She informs you that the roll was a '5'. 
+% behind a screen. She informs you that the roll was a '5'. Which of the 5
+% dice did she most likely choose?
 
-% Q1: Which of the 5 dice did she most likely choose?
+% We want to calculate the probability that each of the 5 dice was chosen
+% given that a 5 was rolled, then pick the hypothesis with the largest
+% probability. We can think of each die being chosen as a hypothesis, and
+% we want to know P(Hypothesis | Data). This is fundamentally a job for
+% Bayes' Rule:
 nSides = [4,6,8,12,20];
 nDice = 5;
+
+% Start with a flat prior: each of the dice equally likely to have been
+% chosen:
 prior1 = ones(1,nDice) ./ nDice;
+
+% Calculate our likelihoods: P(Data | Hypothesis)
+%   P(5 was rolled | Die = 4-sided) = 0
+%   P(5 was rolled | Die = 6-sided) = 1/6
+%   P(5 was rolled | Die = 8-sided) = 1/8
+%   etc.
 like1 = [0,1/6,1/8,1/12,1/20];
+
+% Calculate our posterior: prior x likelihood
 post1 = prior1 .* like1;
+% Normalize our posterior (all possbilities must add up to one):
 post1Nl = post1 ./ sum(post1);
 
+% Q1: Which of the 5 dice did she most likely choose?
+maxLike = nSides(post1Nl == max(post1Nl));
 % A1: 6-sided
-maxLike = nSides(post1 == max(post1));
 
 % Q2: What is the probability that the 4-sided die was chosen?
 p4sided = post1Nl(nSides == 4);

@@ -25,7 +25,7 @@
 % 
 % Adapted by RTB, date unknown
 % Developed for homework by RAS and RTB, July-August 2017
-%% Concepts covered:
+% % Concepts covered:
 % 1. Standard error of the mean calculated 3 ways:
 %       a) formula, b) population sampling, c) bootstrap sampling
 % 2. Calculating correlation coefficients with 'corr'

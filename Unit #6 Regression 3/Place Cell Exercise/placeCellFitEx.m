@@ -314,7 +314,7 @@ alt_dAIC = (dev1 + 4) - (dev2 + 6);     % compare with dAIC above
 % (i.e. diff. in # of parameters) degrees of freedom:
 pValChiSq = 1-chi2cdf(dev1 - dev2,1);	%Compare Models 1 and 2, nested GLMs.
 
-%% Method 2b: Sequential F-test for nexted models:
+%% Method 2b: Sequential F-test for nested models:
 % In general, the F statistic is a ratio of variances. In this case, the
 % numerator is the additional variance accounted for by the full model (per
 % additional free parameter), and the denominator is the variance not

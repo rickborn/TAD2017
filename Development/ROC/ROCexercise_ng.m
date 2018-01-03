@@ -1,4 +1,4 @@
-% ROCexercise.m
+% ROCexercise_ng.m
 %
 % Signal Detection Theory with spikes from a retinal ganglion cell
 %
@@ -37,11 +37,13 @@
 % in retinal ganglion cells of the cat. Vision Res., Suppl 3:87-101.
 %
 % Barlow et al. (1971) measured the responses of cat retinal ganglion cells
-% to brief flashes of light. They obtained complete probability
-% distributions for the occurrence of 0, 1, 2 . . . N spikes in a 200-ms
-% counting window for stimulus intervals that had weak flashes of light (~5
-% photons, 'signal') and for equivalent blank intervals (0 photons,
-% 'noise').
+% to brief flashes of light. On a given trial, they either presented a dim
+% light flash or a blank screen, then counted action potentials in the
+% ensuing 200-ms window. In this way, they obtained complete probability
+% distributions for the occurrence of 0, 1, 2 . . . N spikes in the 200-ms
+% counting window for stimulus intervals that had either weak flashes of
+% light (~5 photons, 'signal') and for equivalent blank intervals (0
+% photons, 'noise').
 %
 % We want a metric of how well our neuron can distinguish signal from
 % noise.
@@ -49,8 +51,10 @@
 %% Load data and plot a histogram of responses to signal vs. noise
 
 % The data file consists of spike counts measured during the 200-ms
-% counting window. Column #1 is for the trials containing signal (~5
-% photons); column #2 is for trials containing only noise (0 photons).
+% counting window. Column #1 contains spike counts for signal trials (~5
+% photons); column #2 is for blank trials (0 photons). Each condition was
+% repeated 96 times.
+
 load BLYdata
 
 % We want to have 1 bin for each possbile spike count
@@ -80,13 +84,15 @@ set(gcf,'Position',[456 29 837 779],'Name','Barlow, Levick & Yoon 1971');
 % extremely strict criterion of 17 spikes we would correctly declare a
 % "hit" (i.e. signal present) only 1 time out of the total of 96 signal
 % trials, for a "hit rate" of 1/96, or 0.0104. We would never declare a
-% signal to be present when it wasn't (a "false alarm"), because there are
-% no yellow bars (noise distribution) at or to the right of 17. This gives
-% us two values, 0.0104 and 0, which constitute one point on a plot of
-% "hits" vs. "false alarms." We then repeat this procedure for all possible
-% criteria from 17 to 0, each time sliding one to the left and calculating
-% our "hits" from the signal distribution and our "false alarms" from the
-% noise distribution.
+% signal to be present when it wasn't (a "false alarm" or a "false
+% positive"), because there are no yellow bars (noise distribution) at or
+% to the right of 17. This gives us two values, 0.0104 and 0, which
+% constitute one point on a plot of "hits" vs. "false alarms." We then
+% repeat this procedure for all possible criteria from 17 to 0, each time
+% sliding one to the left and calculating our "hits" from the signal
+% distribution and our "false alarms" from the noise distribution. The plot
+% of all of these points is call a "Receiver Operating Characteristic
+% curve" (or just "ROC curve" for short).
 
 % TODO: For each possible spike-count criterion, starting with the most
 % strict (i.e. 17) and proceeding to the most lax (i.e. 0), calculate the
@@ -109,6 +115,17 @@ plot([0 1],[0 1],'k--');
 title('ROC curve');
 
 %% Calculate the area under the curve
+
+% The area under the ROC curve is our measure of "performance"—but what
+% does it mean? At one level, we can just think of it as a non-parametric
+% measure of how well separated the two histograms are. For example, if the
+% two histograms were completely overlapping, we would always measure the
+% same values for hits and false alarms regardless of the criterion, thus
+% putting all points on the diagonal and getting an ROC area of 0.5. If, on
+% the other hand, the two histograms were completely non-overlapping, our
+% points, as we moved away from the strictest criterion, would crawl up the
+% left-hand y-axis, then across the top of the box to give an ROC area of
+% 1.
 
 % TODO: Calculate the area under the ROC curve
 % HINT: Use 'trapz'
@@ -237,3 +254,29 @@ tStr1 = sprintf('sum JP = %.4f',pCorrectJP);
 tStr2 = sprintf('auROC = %.4f',pCorrectROC);
 text(0.6,0.3,tStr1);
 text(0.6,0.2,tStr2);
+
+% Green and Swets (1966) showed that the result of this method is
+% equivalent to the result obtained by using the Receiver Operating
+% Characteristic (ROC). That is, the area under the ROC curve is equivalent
+% to the performance (% correct) of an ideal observer on a 2AFC task.
+%
+% ROC analysis was developed by engineers during WWII ("signal detection
+% theory"), but was quickly adopted by psychologists (Green & Swets 1966)
+% and has since come to be a tool widely used in statistics and machine
+% learning. For more on SDT and ROC, see the following resources.
+%
+% 1) Wikipedia pages:
+% https://en.wikipedia.org/wiki/Detection_theory
+% https://en.wikipedia.org/wiki/Receiver_operating_characteristic
+%
+% 2) Prof. David Heeger's tutorials (NYU)
+% http://www.cns.nyu.edu/~david/handouts/sdt/sdt.html
+% http://www.cns.nyu.edu/~david/handouts/sdt-advanced.pdf
+%
+% 3) Don McNicol's excellent primer on SDT:
+% http://www.hms.harvard.edu/bss/neuro/bornlab/nb204/statistics/sdt.pdf
+% https://www.amazon.com/Primer-Signal-Detection-Theory/dp/0805853235
+%
+% 4) The "Bible" on SDT for psychology:
+% Green DM and Swets JA (1966) Signal Detection Theory and Psychophysics.
+% New York: Wiley. (ISBN 0-471-32420-5)

@@ -1,6 +1,7 @@
-% incomeByHeightDemo.m
+% incomeByHeightDataGen.m
 %
-% RTB trying to emulate Gelman & Nolan demo
+% RTB trying to emulate Gelman & Nolan demo (pp. 49-51)
+% generating some fake data for the lurking covariate demonstration
 
 clearall
 nSamp = 100;

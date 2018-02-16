@@ -59,7 +59,7 @@ load BLYdata
 
 % We want to have 1 bin for each possbile spike count
 xBins = min(spikeCounts(:)):1:max(spikeCounts(:));
-figure
+
 subplot(3,1,1);
 hist(spikeCounts,xBins);
 xlabel('Response (spikes/trial)');
@@ -285,3 +285,10 @@ text(0.6,0.2,tStr2);
 % 4) The "Bible" on SDT for psychology:
 % Green DM and Swets JA (1966) Signal Detection Theory and Psychophysics.
 % New York: Wiley. (ISBN 0-471-32420-5)
+
+%% Bonus: ROC without a 'for' loop
+
+% Calculations for ROC method
+probFalseAlarm = cumsum(flipud(pNoise));
+probHit = cumsum(flipud(pSignal));
+aucROC = trapz(probFalseAlarm,probHit);

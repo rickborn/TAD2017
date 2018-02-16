@@ -11,7 +11,7 @@
 % Collaboration and consultation of outside sources. The goal of this
 % exercise is to give you practice in plotting and understanding ROC curves
 % in MATLAB. The instructions and supplied code below will lead you through
-% this in a straightforward and gentle manner. Therefore, we ask that you
+% this in a straightforward and gentle manner. Therefore, I ask that you
 % do not collaborate with any classmates on this exercise prior to class
 % discussion. Neither should you seek out answers from published materials
 % or online code repositories. This is a self-contained exercise, so you
@@ -25,7 +25,13 @@
 % have supplied the required code, you can execute that section by
 % mouse-clicking in that section (The block will turn yellow.) and then
 % simultaneously hitting the 'ctrl' and 'enter' keys (PC) or 'command'
-% and 'enter' keys (Mac).
+% and 'enter' keys (Mac). Have fun!
+%
+% TODO: Save this m-file by pre-pending your own last name.
+% e.g. Mine would be 'Born_ROCexercise.m'
+% In the MATLAB editor, click 'save', then select 'save as'
+% You will turn in this file plus a jpeg of your final figure (instructions
+% below).
 %
 % The first section of code doesn't require you to do anything, but you
 % still need to execute it in order to load the data and put up an
@@ -79,7 +85,7 @@ set(gcf,'Position',[456 29 837 779],'Name','Barlow, Levick & Yoon 1971');
 % We want to know how well an "ideal observer" ("ideal" because she has
 % access to all of the statistics contained in the two histograms) could
 % distinguish signal from noise. Conceptually this amounts to adopting
-% different "criteria"—that is a number of spikes at or above which we
+% different "criteria"—that is, a number of spikes at or above which we
 % would declare that a signal was present. For example, if we adopted an
 % extremely strict criterion of 17 spikes we would correctly declare a
 % "hit" (i.e. signal present) only 1 time out of the total of 96 signal
@@ -224,7 +230,7 @@ c.Label.String = 'Probability';
 % to get MORE spikes with signal than with noise.
 
 % QUESTION: Which part of our table corresponds to correct trials?
-% ANSWER: the lower triangular part of the joint-probability table
+% ANSWER: 
 % 
 % Summing over all of these will give us the total probability of getting a
 % higher spike rate from the signal than the noise distribution.
@@ -254,6 +260,12 @@ tStr1 = sprintf('sum JP = %.4f',pCorrectJP);
 tStr2 = sprintf('auROC = %.4f',pCorrectROC);
 text(0.6,0.3,tStr1);
 text(0.6,0.2,tStr2);
+
+% TODO: Save your figure as a jpeg with your last name
+% (e.g. Mine would be 'Born.jpg')
+% On the figure, click 'file', then 'save as', then next to 'save as type'
+% change 'MATLAB figure' to 'JPEG image'.
+% Turn in the figure along with your completed m-file.
 
 % Green and Swets (1966) showed that the result of this method is
 % equivalent to the result obtained by using the Receiver Operating

@@ -40,13 +40,13 @@ function [pVal] = pNflips2getzHeads(zHeads,N,pHead,nSims,pFlag)
 % data-generating process and will give us a different p-value. We can
 % calculate it by simulation (as below), or we can use the negative
 % binomial distribution, y = nbincdf(x,R,p), which gives the probability of
-% x-or-fewer failures before we get R successes given a single-trial
+% x-or-fewer failures *before* we get R successes given a single-trial
 % probability of success of p. In our case, we want to know the probability
 % of 17 or more failures before 7 successes. In MATLAB, this would be:
 % p = 1 - nbincdf(16,7,0.5);    % p = 0.0173
 %
 % or, more accurately (see 'doc nbincdf'):
-% p = nbincdf(16,7,0.5,'upper'); % p = 0.173
+% p = nbincdf(16,7,0.5,'upper'); % p = 0.0173
 %
 % y = nbincdf(x,R,p,'upper') returns the complement of the negative
 % binomial cdf at each value in x, using an algorithm that more accurately

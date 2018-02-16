@@ -125,7 +125,7 @@ ci = bootci(10000,{prop,x},'type','percentile');
 % pretty good, but at what cost?
 tic;[pHat,pCI] = binofit(16,40);t1=toc;
 tic;ci = bootci(10000,{prop,x},'type','percentile');t2=toc;
-t2/t1
+t2/t1;
 
 %% Plot the raw data, too?
 
@@ -238,3 +238,8 @@ plot(coh',yStimCI(:,2),'r--');
 plot(coh',yNoStim,'k-','LineWidth',2);
 plot(coh',yNoStimCI(:,1),'k--');
 plot(coh',yNoStimCI(:,2),'k--');
+
+ax = axis;
+axis([ax(1),ax(2),0,1]);
+legend('Stim','No Stim','Location','Northwest');
+set(gca,'FontSize',14); % make text larger

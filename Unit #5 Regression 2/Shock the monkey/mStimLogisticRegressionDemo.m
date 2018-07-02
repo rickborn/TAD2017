@@ -23,8 +23,8 @@
 % 7. Confidence intervals on model predictions
 
 %% Read in the data from a Newsome lab microstimulation experiment
-fileName = 'es5bRaw.xlsx'; % big effect
-%fileName = 'js25aRaw.xlsx'; % small effect; used in class
+%fileName = 'es5bRaw.xlsx'; % big effect
+fileName = 'js25aRaw.xlsx'; % small effect; used in class
 ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
@@ -70,13 +70,14 @@ end
 % Now plot: stim trials in red; no-stim trials in black
 stimIdx = logical(allDataProp(:,1));
 figure
-plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
+% subplot(2,1,1);
+p1 = plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
-plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko','MarkerFaceColor','k');
+p2 = plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko','MarkerFaceColor','k');
 xlabel('Motion strength (%coh)'); ylabel('Proportion preferred decisions');
 ax = axis;
 axis([ax(1),ax(2),0,1]);
-legend('Stim','No Stim','Location','Northwest');
+% legend([p1,p2],'Stim','No Stim','Location','Northwest');
 title(fileName);
 set(gca,'FontSize',14); % make text larger
 
@@ -129,17 +130,21 @@ t2/t1;
 
 %% Plot the raw data, too?
 
-nTrials = length(ds);
-mstimIndex = logical(ds.Mstim);
+rawFlag = 0;
 
-% Will need to jitter data to see all of the points
-jitterX = (rand(nTrials,1) * 3) - 1.5;
-jitterY = (rand(nTrials,1) * 0.2) - 0.1;
-
-plot(ds.Coh(mstimIndex)+jitterX(mstimIndex),ds.PDchoice(mstimIndex)+jitterY(mstimIndex),'r.');
-plot(ds.Coh(~mstimIndex)+jitterX(~mstimIndex),ds.PDchoice(~mstimIndex)+jitterY(~mstimIndex),'k.');
-
-axis([ax(1),ax(2),-0.1,1.1]);
+if rawFlag
+    nTrials = length(ds);
+    mstimIndex = logical(ds.Mstim);
+    
+    % Will need to jitter data to see all of the points
+    jitterX = (rand(nTrials,1) * 3) - 1.5;
+    jitterY = (rand(nTrials,1) * 0.2) - 0.1;
+    
+    plot(ds.Coh(mstimIndex)+jitterX(mstimIndex),ds.PDchoice(mstimIndex)+jitterY(mstimIndex),'r.');
+    plot(ds.Coh(~mstimIndex)+jitterX(~mstimIndex),ds.PDchoice(~mstimIndex)+jitterY(~mstimIndex),'k.');
+    
+    axis([ax(1),ax(2),-0.1,1.1]);
+end
 
 %% Fit full model using glmfit
 % ln(P/1-P) = b0 + b1*stim + b2*corr + b3*stim*corr
@@ -211,10 +216,14 @@ if pFlag
     line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
 end
 
+% add a legend
+legend([p1,p2],'Stim','No Stim','Location','Northwest');
+
  %% Using the 'predict' function, we can get CIs on our estimates
  
  % Re-plot raw data
 figure
+%subplot(2,1,2);
 plot(allDataProp(stimIdx,2),allDataProp(stimIdx,3),'ro','MarkerFaceColor','r');
 hold on;
 plot(allDataProp(~stimIdx,2),allDataProp(~stimIdx,3),'ko');

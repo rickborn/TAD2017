@@ -50,5 +50,6 @@ if pFlag
     ylabel('p Value');
     hl = line([min(nSamples), max(nSamples)], [0.05, 0.05]);
     set(hl,'Color','r','LineStyle','--');
+    ylim([0,1]);
 end
 

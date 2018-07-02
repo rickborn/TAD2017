@@ -155,7 +155,7 @@ OPTIONS = optimset('Display','off','TolX',0.001);
 x = ds.dose;
 y = ds.logSurvProp;
 
-% use of least-squares regression as a guess
+% use of least-squares regression, b14, as a guess
 median_square_error_function = @(q) median((y - (q(1).*x + q(2).*x.^2)).^2);
 beta14lms = fminsearch(median_square_error_function,b14,OPTIONS);
 

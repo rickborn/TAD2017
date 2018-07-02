@@ -21,8 +21,9 @@
 
 %% Read in the data from a Newsome lab microstimulation experiment
 
-% TODO: Load the file 'js25aRaw.xlsx' in a dataset structure called 'ds'
-ds = ;
+% Load the file 'es5bRaw.xlsx' in a dataset structure called 'ds'
+fileName = 'es5bRaw.xlsx'; % big effect
+ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the monkey viewed a stochastic
 % motion display whose signal strength is varied systematically (Coh) and

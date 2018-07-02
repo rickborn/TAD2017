@@ -344,11 +344,11 @@ i1 = find(iDir==1);		%Right movement trial.
 R = cumsum(stats1.resid);%Cumulative sum of Model 1 residuals.
 
 figure('Name','Point process residuals for model 1');
-plot(i0,R(i0),'b.')      %Plot residuals for L trials,
+plot(i0./T0,R(i0),'b.')      %Plot residuals for L trials,
 hold on
-plot(i1,R(i1),'g.')		%...and plot residuals for R trials,
+plot(i1./T0,R(i1),'g.')		%...and plot residuals for R trials,
 hL = legend('Left','Right','Location','southeast');
-xlabel('Trial')			%...label axes.
+xlabel('Trial #')			%...label axes.
 ylabel('Integrate Point Process Residual')
 
 % If our model is good, then the cumulative residuals should bounce around
@@ -410,18 +410,24 @@ iMove=reshape((iMove)',nTrials*T1,1);						%...reshaped.
 % shifted, truncated copies of our spike train. So our y variable starts at
 % time point 71 and goes to the end; our first history colum starts at time
 % point 70 and goes to end-1; our 2nd column starts at time point 69 and
-% goes to end-2, etc.
+% goes to end-2, etc. Note that we truncate each trial before concatenating
+% everything into one long column vector.
 xHist = zeros(size(y,1),modelOrd);
 for i = 1:modelOrd				%...for each step in past.
-    xHist(:,i) = reshape(spikeTrain(:,modelOrd+1-i:end-i)',nTrials*T1,1);
+    %xHist(:,i) = reshape(spikeTrain(:,modelOrd+1-i:end-i)',nTrials*T1,1);
+    
+    % Doing this in one step makes it harder to parse. This would be
+    % clearer:
+    thisHistory = spikeTrain(:,modelOrd+1-i:end-i)';
+    xHist(:,i) = thisHistory(:);
 end
 
 %Fit Model 3, with history dependence.
 [b3,dev3,stats3] = glmfit([iMove iDir xHist],y,'poisson');
 
-% However, this model assumes that the history effect is independent of the
+% However, model #3 assumes that the history effect is independent of the
 % movement period. Yet, in our spectral analysis, we observed the strong
-% rhythmic activity mainlin in the planning phase. Therefore we can improve
+% rhythmic activity mainly in the planning phase. Therefore we can improve
 % our model by allowing for different effects of history during the
 % planning and the movement periods:
 
@@ -528,7 +534,7 @@ pVal = 1-chi2cdf(dev3-dev4,modelOrd);
 %% Chapter 10, Choice of model order.
 
 % For the data in the planning period alone, we will find the model order
-% that minimizes the Akaike Information Criterion
+% that minimizes the Akaike Information Criterion (AIC)
 %
 % NOTE: This block of code takes several minutes to run!
 skipFlag = 1;
@@ -556,6 +562,9 @@ if ~skipFlag
     plot(1:maxOrd,aic,'b-','LineWidth',2);     %Plot the AIC,
     xlabel('Model Order')   %...with axes labelled,
     ylabel('AIC')
+    
+    allOrd = 1:maxOrd;
+    bestOrder = allOrd(aic == min(aic));    % 'best' = model with 62 ms history
     
 end
 
@@ -592,19 +601,19 @@ nParams = size(C,2);
 % Now let's replot the fit parameters that correspond to our history terms:
 figure('Name','History fit parameters using Gaussian kernel method');
 subplot(2,1,1);
-plot(1:modelOrd,exp(C*b5(4:nParams+3)),'b-','LineWidth',2);    %Planning,
+plot(1:modelOrd,exp(C*b5(4:nParams+3)),'b-','LineWidth',2);    %Planning
 hold on
 ax = axis;
 line([ax(1),ax(2)],[1,1],'Color','r','LineStyle','--');
-ylabel('Modulation')							%..axes labelled.
+ylabel('Modulation')
 title('Planning');
 
 subplot(2,1,2);
-plot(1:modelOrd,exp(C*b5(nParams+4:end)),'b-','LineWidth',2);    %Movement,
+plot(1:modelOrd,exp(C*b5(nParams+4:end)),'b-','LineWidth',2);    %Movement
 hold on
 ax = axis;
 line([ax(1),ax(2)],[1,1],'Color','r','LineStyle','--');
-ylabel('Modulation'); xlabel('Lag (ms)')		%..axes labelled.
+ylabel('Modulation'); xlabel('Lag (ms)')
 title('Movement');
 
 %% KS Plot for model 5

@@ -21,7 +21,7 @@
 % 6. Permutation vs. bootstrap
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "etALS2sample". You will answer a series of questions
+% module entitled "ALS 2-sample". You will answer a series of questions
 % based on the guided programming below. Each section begins with a '%%'.
 % Read through the comments and follow the instructions provided. In some
 % cases you will be asked to answer a question, clearly indicated by

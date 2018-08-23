@@ -25,7 +25,7 @@
 % Does aspirin help to prevent heart attacks?
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "etASAdemo, combined". You will answer a series of
+% module entitled "ASA Bootstrap". You will answer a series of
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated

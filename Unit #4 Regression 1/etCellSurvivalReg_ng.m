@@ -1,4 +1,4 @@
-% etCellSurvivalReg.m
+% etCellSurvivalReg_ng.m
 %
 % E & T example of cell survival data, pp. 115-121
 %
@@ -14,7 +14,7 @@
 % 6. bootstrapping pairs to calculate SEs with LMS regression
 
 % What to do: Login to Learning Catalytics (LC) and join the session for
-% the module entitled "etCellSurvivalRegression, combined". You will answer
+% the module entitled "Cell Survival Regression". You will answer
 % a series of questions based on the guided programming below. Each section
 % begins with a '%%'. Read through the comments and follow the instructions
 % provided. In some cases you will be asked to answer a question, clearly

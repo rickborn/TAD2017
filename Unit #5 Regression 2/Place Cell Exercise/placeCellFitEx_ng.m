@@ -4,11 +4,11 @@
 % Chapter 9, of "Case studies in neural data analysis" by Kramer & Eden 2016
 % 
 % What to do: Login to Learning Catalytics (LC) and join the session for
-% the module entitled "placeCellFit". You will answer a series of questions
-% based on the guided programming below. Each section begins with a '%%'.
-% Read through the comments and follow the instructions provided. In some
-% cases you will be asked to answer a question, clearly indicated by
-% 'QUESTION' and a corresponding 'Q#' that directs you to answer the
+% the module entitled "Place Cell Regression". You will answer a series of
+% questions based on the guided programming below. Each section begins with
+% a '%%'. Read through the comments and follow the instructions provided.
+% In some cases you will be asked to answer a question, clearly indicated
+% by 'QUESTION' and a corresponding 'Q#' that directs you to answer the
 % relevant question in LC. In other cases, you be asked to supply missing
 % code, indicated by 'TODO'. Once you have supplied the required code, you
 % can execute that section by mouse-clicking in that section (The block

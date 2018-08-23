@@ -22,6 +22,9 @@
 
 %% Load and plot data
 
+% NOTE: I reverse-engineered the raw data based on the graphic in the piece
+% by The Economist, so the numbers might not be exactly correct
+%
 % womanFirst = [60,44,36,36,28,28,28,28,28,24,20,16,16,12,8,8,8,8,8,8,8,8,...
 %     4,4,4,4,4,4,0,0,0,0,0,0,0,-4,-4,-4,-4,-4,-4,-8,-8,-8,-8,-8,...
 %     -12,-12,-12,-12,-12,-12,-12,-12,-12,-16,-16,-16,-16,-16,-16,-16,-16,-16,...
@@ -56,6 +59,7 @@ xlabel({'Percentage of questions asked by women minus';...
 ylabel('Number of seminars');
 legend('Man 1st','Woman 1st');
 set(gca,'YGrid','on')
+title('University seminars, relative share of questions asked by women')
 
 %% Calculate an effect size, d-prime
 
@@ -84,6 +88,8 @@ text(-70,2/3*ax(4),tStr);
 %
 % (https://www.economist.com/news/science-and-technology/ ...
 % 21732082-there-easy-fix-women-ask-fewer-questions-men-seminars)
+% Print edition | Science and technology
+% December 7, 2017
 %
 % "ONE theory to explain the low share of women in senior academic jobs is
 % that they have less self-confidence than men. This hypothesis is
@@ -173,6 +179,7 @@ end
 
 nQperSeminar = 5;
 nSeminars = length(manFirst) + length(womanFirst); % i.e. 249 in original study
+% nSeminars = 127;
 nSims = 10000;
 allEffectSizes = zeros(nSims,1);
 allDPrimes = zeros(nSims,1);
@@ -229,8 +236,8 @@ line([realEffectSize,realEffectSize],[ax(3),ax(4)],'Color','k','LineWidth',2);
 
 % CI for the simulation:
 myAlpha = 0.05;     % MATLAB convention for determining 95% CI
-idxHi = round(nSims * (1 - myAlpha/2));
-idxLo = round(nSims - idxHi);
+idxHi = ceil(nSims * (1 - myAlpha/2));
+idxLo = floor(nSims * (myAlpha/2));
 sortedEffectSizes = sort(allEffectSizes);
 simCI = [sortedEffectSizes(idxLo),sortedEffectSizes(idxHi)];
 line([simCI(1),simCI(1)],[ax(3),ax(4)],'Color','b','LineStyle','--');
@@ -238,7 +245,7 @@ line([simCI(2),simCI(2)],[ax(3),ax(4)],'Color','b','LineStyle','--');
 
 xlabel('Effect size');
 ylabel('# of simulations');
-tStr = sprintf('Questions per seminar = %d', nQperSeminar);
+tStr = sprintf('# of seminars:%d; Questions per seminar:%d',nSeminars,nQperSeminar);
 title(tStr);
 
 pValue1 = sum(allEffectSizes >= realEffectSize) / nSims;
@@ -249,7 +256,7 @@ end
 % print p-value on plot
 xTxt = (floor(ax(1)/5) + 1) * 5;
 yTxt = 0.75 * ax(4);
-txtStr = sprintf('p = %0.2f',pValue1);
+txtStr = sprintf('p = %0.3f',pValue1);
 text(xTxt,yTxt,txtStr);
 
 % QUESTION: What is the mean effect size, rounded to the nearest whole
@@ -266,16 +273,25 @@ text(xTxt,yTxt,txtStr);
 % think about what is going on.
 % ANSWER: We can reason it out that, if nQperSeminar is 1, then all values
 % must be 100. For nQperSeminar = 2, on average we should get a value of
-% 50, and so on.
+% 50, and so on: meanBiasEffect = 100 / nQuestionsPerSeminar
 
 % QUESTION: So then why do the simulation?
 % ANSWER: By simulating the conditions we used in our actual experiment
 % (i.e. nSeminars = 249), we get an idea of the random variability in the
-% expected effect size under H0. We might also vary nSeminars to see how
-% this would affect the spread. What is your intution here?
+% expected effect size under H0.
+
+% What would happen to our distribution of simulated effect sizes if there
+% were 127 seminars instead of 249?
+% ANSWER: The variance would increase.
+
+% QUESTION: What is the smallest number of questions per seminar for which
+% you would be 95% confident that the actual effect size obtained (25) was
+% not purely do to a sorting bias?
+% ANSWER: 5
 
 % QUESTION: How could you eliminate this bias?
-% ANSWER: Sort by the 1st question, but exclude it from the calculation.
+% ANSWER1: Sort by the 1st question, but exclude it from the calculation.
+% ANSWER2: Another approach might be to subtract the mean bias effect.
 %% Histogram of simulated d-primes
 
 figure

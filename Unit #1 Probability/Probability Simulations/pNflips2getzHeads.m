@@ -1,9 +1,9 @@
-function [pVal] = pNflips2getzHeads(zHeads,N,pHead,nSims,pFlag)
+function [pValCDF,pValPDF] = pNflips2getzHeads(zHeads,N,pHead,nSims,pFlag)
 
-% pNflips2getzHeads.m: probability of taking N flips to get z heads
+% pNflips2getzHeads.m: probability of taking N or fewer flips to get z heads
 %
-% What is the probability of taking N flips to get z heads?
-% e.g. pVal = pNflips2getzHeads(7,24,0.5,100000,1);
+% What is the probability of taking N or fewer flips to get z heads?
+% e.g. [pVal,pValPDF] = pNflips2getzHeads(8,25,0.5,100000,1);
 %
 % Inputs:
 % - zHeads: number of heads to achieve (terminate flipping)
@@ -13,9 +13,12 @@ function [pVal] = pNflips2getzHeads(zHeads,N,pHead,nSims,pFlag)
 % - pFlag: 1 = plot histograms (default = 0)
 %
 % Outputs:
-% - pVal: p-value
+% - pValCDF: probability of taking N or fewer flips to get z heads
+% - pValPDF: probability of taking exactly N flips to get z heads
 %
 % RTB wrote it, 30 Oct. 2017, after the big wind/rain storm
+%
+% see also: 'nbincdf' and 'nbinpdf'
 
 % NOTE: This exercise was inspired by Ch. 11 of John Kruschke's "Doing
 % Bayesian Data Analysis" (2nd Ed.) in which he points out that how we
@@ -70,7 +73,8 @@ for k = 1:nSims
     allProps(k) = nHeads / nFlips;
     allN(k) = nFlips;
 end
-pVal = sum(allProps <= (zHeads ./ N)) ./ nSims;
+pValCDF = sum(allProps >= (zHeads ./ N)) ./ nSims;
+pValPDF = sum(allProps == (zHeads ./ N)) ./ nSims;
 
 if pFlag
     figure, histogram(allProps);
@@ -81,7 +85,7 @@ if pFlag
     title(tStr);
     ax = axis;
     line([zHeads/N,zHeads/N],[ax(3),ax(4)],'Color','r');
-    pStr = sprintf('p = %.3f',pVal);
+    pStr = sprintf('p = %.3f',pValCDF);
     text(ax(2)*0.8,ax(4)*0.9,pStr);
     
     figure, histogram(allN);

@@ -283,7 +283,7 @@ axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
 % is, for example, the SEM can be thought of as defining a 68% CI for our
 % estimate of the mean. But we can go further.
 
-%% Confidence Interval by asymptotic normal distribution theory
+%% CI by asymptotic normal distribution theory
 
 % Since the std. error is the 68% CI, we can get any other CI by just
 % calculating the appropriate number of standard deviates from the normal
@@ -297,8 +297,7 @@ bsAxis = axis;
 % This is our mean correlation:
 meanRhoBoot = mean(bsRhos);
 
-% This is our 68% CI. That is, 'seRhoBoot' is equal to one standard deviate
-% of the sampling distribution.
+% This is our 68% CI. That is, '
 seRhoBoot = std(bsRhos);
 
 % For a 95% CI:
@@ -311,16 +310,10 @@ myAlpha = 0.05;
 
 % TODO: Write a line of MATLAB code that will convert a desired CI,
 % expressed as myAlpha, to the appropriate number of standard deviates.
-% Hint: MATLAB gives us access to many different probability distributions,
-% including, of course, the normal distribution. So, for example, the
-% function 'normcdf' is the normal cumulative distribution function, which
-% takes as arguments the number of standard deviates (i.e. 'x', if we set
-% mu=0 and sigma=1) and returns a probability. In this case, we want to
-% pass a probability ('myAlpha') to a function that will return the number
-% of standard deviates. Find that function!
+% Hint: MATLAB gives us access to 
 numStdDeviates = ;
 
-% QUESTION (Q17): What is numStdDeviates corresponding to myAlpha = 0.001?
+% QUESTION (Q17): What is numStdDeviates for myAlpha = 0.001?
 
 % TODO: Calculate the upper and lower bounds for the 95% CI
 rho95CIlow = ;
@@ -333,7 +326,7 @@ rho95CIhi = ;
 line( );
 line( );
 
-%% Confidence Interval by percentile method:
+%% CI by percentile method:
 
 % In this case, we generated 10,000 samples, so a more intuitive,
 % brute-force way to calculate the 95% CI is just to sort our bootstrap
@@ -351,7 +344,6 @@ idxHi = ;    % index corresponding to upper bound
 % Use these indices to read out the corresponding values:
 rho95CIpercentileLow = bsRhosSorted(idxLow);
 rho95CIpercentileHi = bsRhosSorted(idxHi);
-% QUESTION (Q20): What is the lower bound of the 95% CI?
 
 % TODO: Draw lines for the 95%CI on our histogram in green ink:
 line( );
@@ -370,15 +362,15 @@ ci = ;
 line([ci(1),ci(1)],[bsAxis(3),bsAxis(4)],'Color','y');
 line([ci(2),ci(2)],[bsAxis(3),bsAxis(4)],'Color','y');
 
-% QUESTION (Q21): What is the lower bound of the 95% CI returned by
+% QUESTION (Q20): What is the lower bound of the 95% CI returned by
 % 'bootci'?
 
-% QUESTION (Q22): Think about this confidence interval and your earlier
+% QUESTION (Q21): Think about this confidence interval and your earlier
 % guess about whether LSAT score and GPA are correlated. How can you use
 % this to generate a hypothesis test? (i.e. Can we say that LSAT and GPA
 % are significantly correlated at p < 0.05?)
 
-% QUESTION (Q23): Today we've explored bootstrapping as a way to estimate
+% QUESTION (Q22): Today we've explored bootstrapping as a way to estimate
 % standard errors and confidence intervals for means and correlation
 % coefficients. Which of these measures are the most robust across our
 % different ways of bootstrapping and estimating? Which are more sensitive

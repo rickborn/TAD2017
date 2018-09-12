@@ -299,13 +299,10 @@ legend([h1,h2,h3],{'Bootstrap','Census','Parametric'},'Location','Northwest');
 %% Side-by-side view of our histograms
 
 figure
-hist([bsRhos,allRhoTS,pbsRhos],30);
+hist([bsRhos,allRhoTS,
 xlabel('Correlation coefficient');
-ylabel('# of bootstrap replicates');
 title('Distribution of rhos')
-legend('Bootstrap','Census','Parametric','Location','Northwest');
-pbsAxis = axis;
-axis([bsAxis(1), bsAxis(2), pbsAxis(3), pbsAxis(4)]);
+legend([h1,h2,h3],{'Bootstrap','Census','Parametric'},'Location','Northwest');
 
 %% Confidence intervals:
 

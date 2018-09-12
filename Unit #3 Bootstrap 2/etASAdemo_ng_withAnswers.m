@@ -12,6 +12,8 @@
 % 4. Relationship between CI and hypothesis test
 % 5. Permutation test for strong test of H0.
 % 6. One-tailed vs. two-tailed tests.
+% 7. CI with 'bootci' and an anonymous function
+% 8. Making data tables with 'table'
 
 % A study was done to see if low-dose aspirin would prevent heart attacks
 % in healthy middle-aged men. The study design was optimal: controlled,
@@ -22,10 +24,10 @@
 % aspirin group (n=11037): 104 heart attacks (MI)
 % placebo group (n=11034): 189 heart attacks
 %
-% Does aspirin help to prevent heart attacks?
+% Scientific question: Does aspirin help to prevent heart attacks?
 
 % What to do: Login to learning catalytics and join the session for the
-% module entitled "etASAdemo, combined". You will answer a series of
+% module entitled "ASA Bootstrap". You will answer a series of
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated
@@ -85,14 +87,16 @@ for k = 1:nBoot
 end
 
 %% Make a histogram of our bootstrapped ORs
-figure, hist(orStar,20);
+figure
+subplot(2,1,1);
+hist(orStar,20);
 hold on;
 xlabel('OR^*'); ylabel('#');
 title('Distribution of bootstrapped odds ratios');
 % Draw a vertical line to see where our actual value lies within the
 % distribution of bootstrap replications. Does it make sense?
 ax = axis;
-line([orHat,orHat],[ax(3),ax(4)],'Color','y');
+line([orHat,orHat],[ax(3),ax(4)],'Color','y','LineWidth',2);
 
 %% Calculate the standard error and the confidence intervals
 
@@ -101,8 +105,8 @@ semBoot = std(orStar);
 
 % TODO: Use the percentile method to determine the 95% confidence interval.
 orStarSorted = sort(orStar);
-idxLo = floor((myAlpha/2) * nBoot);   % index corresponding to lower bound
-idxHi = nBoot - idxLo;                  % index corresponding to upper bound
+idxLo = floor((myAlpha/2) * nBoot);    % index corresponding to lower bound
+idxHi = ceil((1-(myAlpha/2)) * nBoot); % index corresponding to upper bound
 confInterval = [orStarSorted(idxLo),orStarSorted(idxHi)];
 
 % QUESTION (Q3): What is the 95% CI based on your bootstrap distribution?
@@ -118,6 +122,39 @@ confInterval = [orStarSorted(idxLo),orStarSorted(idxHi)];
 %% Plot CIs on histogram
 line([confInterval(1),confInterval(1)],[ax(3),ax(4)],'Color','r');
 line([confInterval(2),confInterval(2)],[ax(3),ax(4)],'Color','r');
+
+%% Confidence intervals with 'bootci' and an anonymous function
+
+% As we saw in week #2, we can also use a built-in function to calculate
+% CIs with much less hassle (No 'for' loops!). In that case, we had to pass
+% 'bootci' a handle to a function ('@corr'), but here we have no such
+% built-in function to calculate an odds ratio. So what do we do? We make
+% one up! We do this using what is known as an 'anonymous function'--a kind
+% of on-the-fly function that we create in one line of code:
+oddsratio = @(g1,g2) (sum(g1,'omitnan')/sum(1-g1,'omitnan'))...
+    /(sum(g2,'omitnan')/sum(1-g2,'omitnan'));
+
+% We have to make g1 and g2 be the same size:
+ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
+
+% now use 'bootci':
+ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+
+% The above is a good example of how a defect in MATLAB requires one to use
+% some ingenuity in coding. I intially did this in the logical way, which
+% is to use a sensible definition of the odds ratio that works perfectly
+% well: oddsratio = @(g1,g2) (sum(g1)/sum(~g1))/(sum(g2)/sum(~g2));
+% That is, if I now enter: oddsratio(rxGrp,ctrlGrp), I get the correct
+% answer of 0.5458. However, when I try to use this anonymous function, I
+% get an error: 'Nonscalar arguments to BOOTFUN must have the same number
+% of rows.' That is, I can't have g1 and g2 be different lengths. So then I
+% figure I'll just pad the shorter vector with NaN's:
+% ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
+% So now they're both the same length, but then I get a different error: I
+% can't use the tilde ('~') negation trick with NaN's in the vector. So now
+% I have to change the function to use '1-g1' instead of '~g1' in the
+% denominator of each odds calculation. So then it works, but it is rather
+% unsatisfying to have to kluge things in this way!
 
 %% Perform an explicit hypothesis test by modeling our OR under H0
 % In this case, we will use a permutation test, where we resample
@@ -145,7 +182,8 @@ for k = 1:nBoot
 end
 
 % plot the distrubtion of permuted ORs
-figure, hist(orPerm,20);
+subplot(2,1,2);
+hist(orPerm,20);
 hold on
 xlabel('Permuted ORs'); ylabel('#');
 title('Distribution of ORs under H0');
@@ -156,28 +194,28 @@ line([orHat,orHat],[ax(3),ax(4)],'Color','r');
 %% Calcualte a p-value
 % This is a one-tailed test:
 if orHat < 1
-    pVal1s = sum(orPerm <= orHat) / nBoot;
+    pVal1t = sum(orPerm <= orHat) / nBoot;
 else
-    pVal1s = sum(orPerm >= orHat) / nBoot;
+    pVal1t = sum(orPerm >= orHat) / nBoot;
 end
 
 % The p-value can never be 0. The logic is that we could have found a
 % significant value on our next iteration. Good teaching point.
-if pVal1s == 0
-    pVal1s = 1 / (nBoot+1);
+if pVal1t == 0
+    pVal1t = 1 / (nBoot+1);
 end
 
 % QUESTION (Q7): What is our one-tailed p-value for the odds ratio?
 
 %% Calculate a 2-tailed p-value
 if orHat < 1
-    pVal2s = (sum(orPerm <= orHat) + sum(orPerm >= 1/orHat)) / nBoot;
+    pVal2t = (sum(orPerm <= orHat) + sum(orPerm >= 1/orHat)) / nBoot;
 else
-    pVal2s = (sum(orPerm >= orHat) + sum(orPerm <= 1/orHat)) / nBoot;
+    pVal2t = (sum(orPerm >= orHat) + sum(orPerm <= 1/orHat)) / nBoot;
 end
 
-if pVal2s == 0
-    pVal2s = 1 / (nBoot+1);
+if pVal2t == 0
+    pVal2t = 1 / (nBoot+1);
 end
 
 % Note: This is a good teaching point. The students will initially

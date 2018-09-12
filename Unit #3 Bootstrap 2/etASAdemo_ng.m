@@ -40,7 +40,7 @@
 
 %% Constants: these would normally be passed as arguments to a function
 nBoot = 10000;
-myAlpha = 0.05;
+myAlpha = 0.05;     % for a 95% confidence interval
 
 % useful numbers
 nRx = 11037;    % number of patients in the treatment group (ASA)
@@ -51,10 +51,14 @@ nTotal = nRx + nCtrl;
 
 %% Calculate the actual ratio of rates of disease: an odds ratio
 
-% This is defined as the ratio of 2 ratios: the numerator is the ratio of
-% the number of subjects in the treatment group who had an MI divided by
-% the number who did not have an MI. The denominator is the same, but for
-% the control group.
+% This is defined as the ratio of 2 ratios. The 'odds' of an event with a
+% binary outcome (i.e. it either happens or it doesn't) is defined as the
+% probability that the event happens divided by the probability that it
+% does not happen. So we calculate the odds for each condition (treatment
+% vs. control) and define the odds ratio as the odds of having a heart
+% attack given that you were in the treatment group divided by the odds of
+% having a heart attack given that you were in the control group.
+
 % TODO: calculate the odds ratio for this study
 orHat = ;
 
@@ -154,7 +158,7 @@ line([orHat,orHat],[ax(3),ax(4)],'Color','r');
 %% Calcualte a one-tailed p-value
 
 % TODO: Calculate a one-tailed p-value based on your permuted samples (i.e.
-% orPerm) and store it in a variable called 'pVal1s'
+% orPerm) and store it in a variable called 'pVal1t'
 
 
 % QUESTION (Q7): What is our one-tailed p-value for the odds ratio?
@@ -162,7 +166,7 @@ line([orHat,orHat],[ax(3),ax(4)],'Color','r');
 %% Calculate a 2-tailed p-value
 
 % TODO: Calculate a two-tailed p-value based on your permuted samples (i.e.
-% orPerm) and store it in a variable called 'pVal2s'
+% orPerm) and store it in a variable called 'pVal2t'
 
 % QUESTION (Q8): What is our two-tailed p-value for the odds ratio?
 
@@ -203,9 +207,13 @@ MIdata = table([nMIrx;nMIctrl],[nRx-nMIrx;nCtrl-nMIctrl],...
 %% Extra: Repeat calculations for a different data set:
 
 % In the same study, the researchers also recorded the number of strokes in
-% each group. Sample data for strokes: 1=had stroke; 0=no stroke
-rxGrp = [ones(119,1);zeros(10918,1)];    % aspirin group for strokes
-ctrlGrp = [ones(98,1);zeros(10936,1)];   % non-aspirin group for strokes
+% each group. Here are the data:
+%
+% Treatment group:
+% 119 had a stroke; 10918 did not have a stroke
+%
+% Control group:
+% 98 had a stroke; 10936 did not have a stroke
 
 % TODO: Repeat the above analysis for the stroke data.
 % Be sure to compare the p-values and confidence intervals that you obtain

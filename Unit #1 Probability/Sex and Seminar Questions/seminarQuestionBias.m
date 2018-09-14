@@ -12,6 +12,14 @@
 % RTB wrote it, 14 December 2017
 % RTB revised for TAD answers, original name was sexQuestionDemo.m
 
+% Concepts covered:
+% 1. histograms for summarizing data
+% 2. difference between 'sig' and 'not sig' is not itself nec. stat. sig.
+% 3. d-prime as a measure of effect size
+% 4. simulating data under H0
+% 5. detecting and removing sorting biases
+% 6. extracting p-values from simulations
+
 %% Load and plot data
 
 % Each datum represents a value derived from one academic seminar. Values

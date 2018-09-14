@@ -322,7 +322,7 @@ numStdDeviates = ;
 
 % QUESTION (Q17): What is numStdDeviates corresponding to myAlpha = 0.001?
 
-% TODO: Calculate the upper and lower bounds for the 95% CI
+% TODO: Calculate the lower and upper bounds for the 95% CI
 rho95CIlow = ;
 rho95CIhi = ;
 

@@ -167,6 +167,7 @@ rhoHat15 = corr(ds15.LSAT,ds15.GPA);
 
 %% Get a bootstrap sample of correlation coefficients the old fashioned way,
 % with a 'for' loop
+
 rng default  % For reproducibility
 bsRhosFL = zeros(nBoot,1); 
 nSamp = length(ds15.LSAT);
@@ -181,6 +182,7 @@ for k = 1:nBoot
     %Compute the correlation of LSAT score ans GPA for this sample
     bsRhosFL(k) = corr(ds15.LSAT(thisSample),ds15.GPA(thisSample));
 end
+
 % Compute standard error of our correlation coefficient
 seRhoBootFL = std(bsRhosFL);
 
@@ -360,7 +362,7 @@ numStdDeviates = norminv(1-myAlpha/2);
 
 % QUESTION (Q17): What is numStdDeviates for myAlpha = 0.001?
 
-% TODO: Calculate the upper and lower bounds for the 95% CI
+% TODO: Calculate the lower and upper bounds for the 95% CI
 rho95CIlow = meanRhoBoot - (seRhoBoot * numStdDeviates);
 rho95CIhi = meanRhoBoot + (seRhoBoot * numStdDeviates);
 

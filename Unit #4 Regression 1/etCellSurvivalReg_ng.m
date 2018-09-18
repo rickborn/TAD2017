@@ -40,11 +40,8 @@
 % Column 3 is the proportion of cells surviving after radiation treatment
 
 %% Load data and plot it
-% change the below line to redirect you to whatever this exercise is stored
-% e.g. 'C://folder_name/another_folder_name/folder_where_file_is
-% directory_name = ;
-% cd directory_name;
-ds = dataset('xlsfile','CellSurvivalData.xlsx');
+
+ds = readtable('CellSurvivalData.xlsx');
 ds.logSurvProp = log(ds.survProp);  % add a column
 nPts = length(ds.dose);
 

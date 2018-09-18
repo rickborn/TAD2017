@@ -46,7 +46,7 @@
 
 %% Load data and plot it
 
-ds = dataset('xlsfile','CellSurvivalData.xlsx');
+ds = readtable('CellSurvivalData.xlsx');
 ds.logSurvProp = log(ds.survProp);  % add a column
 nPts = length(ds.dose);
 
@@ -109,11 +109,11 @@ SE14ls = mdl14.Coefficients.SE;
 % need the 1, since the default is to include a constant term. That is:
 % modelspec = 'logSurvProp ~ dose + dose^2';
 
-% Note that the 'fitglm' function also gives us much diagnostic
+% Note that the 'fitglm' function also gives us much more diagnostic
 % information. In particular, a measure called "Cook's distance" (in
 % mdl14.Diagnostics.CooksDistance) measures the effect of deleting each
 % observation. A large value for a given data point, D_i, suggests that
-% data point might be spurious due to either a very large residual and/or leverage.
+% data point might be spurious due to a very large residual and/or leverage.
 
 % D_i can be interpreted as the distance one's estimates move within the
 % confidence ellipsoid that represents a region of plausible values for the

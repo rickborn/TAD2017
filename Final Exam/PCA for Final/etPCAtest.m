@@ -106,9 +106,7 @@ set(gca, 'XTickLabel', testNames);
 set(gca, 'YTickLabel', testNames);
 set(gca,'XTickLabelRotation',45)
 
-% QUESTION (Q6): Which two tests are most highly correlated with one another?
-maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
-% Ans. Algebra and analysis
+% QUESTION (Q1): Which two tests are most highly correlated with one another?
 
 %% PCA to capture sources of maximal variance
 
@@ -158,7 +156,9 @@ rng default
 
 thSE = ;
 
-% QUESTION (Q8): What is your value for the standard error?
+% QUESTION (Q3): What is your value for the standard error?
+
+%% Histogram of bootstrap replicates
 
 % Make a histogram of the bootstrap replicates and draw a vertical line for
 % the actual value ('thHat')
@@ -176,4 +176,4 @@ line([thHat,thHat],[ax(3),ax(4)],'Color','y');
 % based on the percentile method.
 !!! Your code here
 
-% QUESTION (Q9): What is your value for the lower bound of the 95% CI?
+% QUESTION (Q4): What is your value for the lower bound of the 95% CI?

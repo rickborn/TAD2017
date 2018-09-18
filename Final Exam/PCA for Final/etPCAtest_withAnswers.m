@@ -111,7 +111,7 @@ set(gca, 'XTickLabel', testNames);
 set(gca, 'YTickLabel', testNames);
 set(gca,'XTickLabelRotation',45)
 
-% QUESTION (Q8): Which two tests are most highly correlated with one another?
+% QUESTION (Q1): Which two tests are most highly correlated with one another?
 % Approach #1: get a better colorbar:
 subplot(2,2,4);
 colormap('hot')
@@ -144,7 +144,7 @@ maxLoc = rhoCols == max(max(tril(rhoCols,-1)));
 % latent: the eigenvalues of the covariance matrix: variance explained by each PC
 [coef,score,latent] = pca(X);
 
-% QUESTION (Q9): What is the proportion of variance explained by the first
+% QUESTION (Q2): What is the proportion of variance explained by the first
 % principle component?
 thHat = latent(1) / sum(latent);    % 0.6191
 

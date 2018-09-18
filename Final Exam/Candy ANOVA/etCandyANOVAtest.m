@@ -15,19 +15,21 @@
 % excel spreadsheet so the students would not spend time having to figure
 % this out.
 fileName='candy-production-by-season.xlsx';
-ds = dataset('xlsfile',fileName);
+ds = readtable(fileName);
 
-seasonsums = [ds.Winter, ds.Spring, ds.Summer, ds.Fall];
-seasonMeans=nanmean(seasonsums);
-seasonCI=1.96.*(nanstd(seasonsums)/sqrt(length(seasonsums(:,1))));
+seasonSums = [ds.Winter, ds.Spring, ds.Summer, ds.Fall];
+seasonMeans = mean(seasonSums);
+seasonCI=1.96.*(std(seasonSums)/sqrt(length(seasonSums(:,1))));
 
 figure
-x=ones(1,length(seasonsums(:,1)));
+% Jitter the data so that we can see it all
+x=ones(1,length(seasonSums(:,1)));
 x1=x+rand(size(x))-0.5;
 x2=x+rand(size(x))+.5;
 x3=x+rand(size(x))+1.5;
 x4=x+rand(size(x))+2.5;
-plot([x1',x2',x3',x4'],seasonsums,'o')
+% Plot it
+plot([x1',x2',x3',x4'],seasonSums,'o')
 xlabel('Season')
 ylabel('Candy production')
 hold on
@@ -43,7 +45,7 @@ legend('Winter', 'Spring','Summer','Fall','Location','south','Orientation','hori
 % One way to answer this question is by using One-way ANOVA
 % What is our null hypothesis? - all seasons are the same 
 
-[pVal,tbl]=anova1(seasonsums);
+[pVal,tbl]=anova1(seasonSums);
 % What does the anova table suggest about our data? Are all seasons drawn
 % from the same distribution?
 obsF=tbl{2,5};
@@ -51,18 +53,18 @@ obsF=tbl{2,5};
 %% Does candy production differ by season? Permutation test
 
 nPerm = 1000;
-% First, let's create our population of season values, ignoring 2017
-allseasonsums=[seasonsums(1:end-1,1);seasonsums(1:end-1,2);seasonsums(1:end-1,3);seasonsums(1:end-1,4)];
-
-% Then, sample without replacement from these values, separate into fake
+% Sample without replacement from these values, separate into fake
 % seasons and perform the ANOVA again to get a distribution of F under H0.
-seasonTable=ones(45,4);
-bootFs=zeros(1,length(nPerm));
+[nRows,nCols] = size(seasonSums);
+seasonTable = zeros(nRows,nCols);
+bootFs = zeros(nPerm,1);
+H0data = seasonSums(:);
 for k=1:nPerm
-    bootPop=datasample(allseasonsums,length(allseasonsums), 'Replace', false);
-    seasonTable=reshape(bootPop,[45,4]);
-    [~,bootTbl]=anova1(seasonTable,[],'off');
-    bootFs(k)=bootTbl{2,5};
+    % shuffle data
+    bootPop = datasample(H0data,length(H0data),'Replace',false);
+    seasonTable = reshape(bootPop,[nRows,nCols]);
+    [~,bootTbl] = anova1(seasonTable,[],'off');
+    bootFs(k) = bootTbl{2,5};
 end
 
 %% Plot a distribution of the Fs we got under H0 
@@ -93,7 +95,7 @@ line([F95CIpercentileHi,F95CIpercentileHi],[bsAxis(3),bsAxis(4)],'Color','r');
 
 %% Testing assumptions
 % 1. Equal variances
-[p,stats] = vartestn(seasonsums);
+[p,stats] = vartestn(seasonSums);
 % Our different groups have similar variances 
 
 % 2. Normality of the residuals. What this is really trying to get at is 
@@ -103,26 +105,26 @@ line([F95CIpercentileHi,F95CIpercentileHi],[bsAxis(3),bsAxis(4)],'Color','r');
 % We can look at each group individually and assess each for normality.
 figure
 subplot(2,2,1)
-h=qqplot(seasonsums(:,1));
+h=qqplot(seasonSums(:,1));
 % RTB: title names were in double-quotes; I changed to single
 title('Winter')
 subplot(2,2,2)
-h=qqplot(seasonsums(:,2));
+h=qqplot(seasonSums(:,2));
 title('Spring')
 subplot(2,2,3)
-h=qqplot(seasonsums(:,3));
+h=qqplot(seasonSums(:,3));
 title('Summer')
 subplot(2,2,4)
-h=qqplot(seasonsums(:,4));
+h=qqplot(seasonSums(:,4));
 title('Fall')
 
 % Is Y|X normally distributed for all seasons? If not, what can we do about
 % it?
 %% Alternatively, we can look at all residuals together
-winter=seasonsums(:,1);
-spring=seasonsums(:,2);
-summer=seasonsums(:,3);
-fall=seasonsums(:,4);
+winter=seasonSums(:,1);
+spring=seasonSums(:,2);
+summer=seasonSums(:,3);
+fall=seasonSums(:,4);
 winterResid=winter-nanmean(winter);
 springResid=spring-nanmean(spring);
 summerResid=summer-nanmean(summer);
@@ -150,8 +152,8 @@ end
     
 %% Transform our data (by season):
 
-seasonsumsT=1./(seasonsums);
-seasonsumsT=exp(seasonsums);
+seasonsumsT=1./(seasonSums);
+seasonsumsT=exp(seasonSums);
 
 figure
 subplot(2,2,1)

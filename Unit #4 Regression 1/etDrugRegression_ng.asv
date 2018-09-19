@@ -317,16 +317,13 @@ h1 = plot(ds.hrs,resid,'ko');
 hold on;
 h2 = plot(ds.hrs,CVresiduals,'k*');
 ax = axis;
-% This corresponds to the regression line:
 line([ax(1),ax(2)],[0,0]);
 xlabel('Time implanted (hrs)'); ylabel('residual');
-title('Full-model vs. CV Residuals');
-legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','southeast');
+title('Real vs. CV Residuals');
+legend([h1,h2],'Actual residuals','Cross-validated residuals','Location','southeast');
 
 % THOUGHT QUESTION: How similar are the actual and cross-validated
-% residuals? In the plot, each asterisk has a corresponding circle. Try to
-% put into words what the difference is between the asterisk and its
-% corresponding circle.
+% residuals?
 
 %% Other estimates of prediction error
 
@@ -397,15 +394,15 @@ set(hP,'MarkerSize',3,'MarkerFaceColor','k');
 % from the total pool of possible residuals (use mdl1.Residuals.Raw),
 % giving us errorStar (see below). For each of the nBoot iterations, we
 % will draw the nPts residuals, which is the number of data points in our
-% original dataset, with replacement. We will add these residuals to the
-% fitted linear predictors of the model to get yStar, which we can think of
-% like a 'recomputation' of our data. Another way to think about this is
-% yStar(i) = betaHat0x(i) + errorStar(i) Then, recompute the regression,
-% only with yStar instead of the original Y. Store the regression
-% coefficients from each run in a row of allBeta (allBeta should be a
-% nBoot-x-2 matrix if completed correctly). We want to use 'regress' within
-% our 'for' loop, because 'fitglm' is much slower (It is calculating a
-% bunch of stuff that we don't need in the bootstrap.)
+% original dataset, with repla. We will add these residuals to the fitted linear
+% predictor of the model to get yStar, which we can think of like a
+% 'recomputation' of our data. Another way to think about this is yStar(i)
+% = betaHat0x(i) + errorStar(i) Then, recompute the regression, only with
+% yStar instead of the original Y. Store the regression coefficients from
+% each run in a row of allBeta (allBeta should be a nBoot-x-2 matrix if
+% completed correctly). We want to use 'regress' within our 'for' loop,
+% because 'fitglm' is much slower (It is calculating a bunch of stuff that
+% we don't need in the bootstrap.)
 nBoot = 1000;
 nPts = length(ds.hrs);      % number of data points in original
 allBeta = zeros(nBoot,2);   % place to store our bootstrap replicates

@@ -133,7 +133,7 @@ hold on;
 % QUESTION (Q6): Is our y-intercept value statistically significant at
 % alpha = 0.05?
 
-% QUESTION (Q7): Do we care?
+% QUESTION (Q7): Do we care about the value of the y-intercept?
 
 %% Linear mixed effects: allowing for different y-intercepts
 
@@ -197,7 +197,7 @@ plot(xVals, yRegC, 'g-');
 % Tip o' the Pin to Shihyi Tseng for suggesting this approach. This was not
 % included in the regular exercise, but is included here for your
 % amusement. This is an alternative, though less principled, approach to
-% the issue dealt with above use the mixed effects model. Here we simply
+% the issue dealt with above using the mixed effects model. Here we simply
 % treat 'lot' as another regressor by including two 'indicator' (or
 % 'dummy') variables in our regression. Note that they do similar but not
 % identical things.
@@ -255,7 +255,10 @@ plot(xVals,yVals,'g-');
 % for when LotB==1 (0.5078). How do we get the y-intercept for LotC? Ah,
 % LotC is defined, as it were, by default, when both LotA==0 and LotB==0.
 % Statisticians would refer to LotC as the "reference group". So, actually
-% the y-intercept for LotC is our original beta0 of 35.5973.
+% the y-intercept for LotC is our original beta0 of 35.5973. Which group is
+% chosen as the reference group can greatly simplify (or complicate!) the
+% interpretation of the regression model. In general, one should choose the
+% control group as the reference.
 %
 % The bottom line is that we would make the same inferences using the two
 % approaches, but the LME model is conceptually cleaner and slightly more
@@ -263,10 +266,14 @@ plot(xVals,yVals,'g-');
 
 %% Regression diagnostics, Part 1
 
-% What you do AFTER fitting a regression model is every bit as critical was
+% What you do AFTER fitting a regression model is every bit as critical as
 % what you do before and during. These diagnostics are important for giving
 % us a visual impression of whether our data meet the assumptions of linear
 % regression:
+% 1) independence (each point in scatter plot is independent of others)
+% 2) linearity: relationship between x & y is linear
+% 3) homoscedasticity of residuals: residuals, ?i, have the same variance
+% 4) normality of the residuals
 
 % We'll look at two measures:
 % 1) Residuals vs. Fitted: The 'fitted' values are the regresion model's
@@ -389,13 +396,13 @@ for k = 1:nPts
 end
 
 % TODO: Calculate the mean squared error of our cross-validated residuals.
-CVfull = sum(CVresiduals.^2) / nPts;
+CVmse = sum(CVresiduals.^2) / nPts;
 % QUESTION (Q10): What is the cross-validated mean squared error?
 
 % QUESTION (Q11): By how many percent does meanRSE underestimate the
-% prediction error as computed by cross-validation? Use 'CVfull' as the
+% prediction error as computed by cross-validation? Use 'CVmse' as the
 % gold standard.
-underEstPerCent = round(((CVfull - meanRSE) / CVfull) * 100);  % 13%
+underEstPerCent = round(((CVmse - meanRSE) / CVmse) * 100);  % 13%
 
 %% Compare actual residuals with the residuals obtained by cross-validation
 
@@ -404,13 +411,21 @@ h1 = plot(ds.hrs,resid,'ko');
 hold on;
 h2 = plot(ds.hrs,CVresiduals,'k*');
 ax = axis;
+% This corresponds to the regression line:
 line([ax(1),ax(2)],[0,0]);
 xlabel('Time implanted (hrs)'); ylabel('residual');
-title('Real vs. CV Residuals');
-legend([h1,h2],'Actual residuals','Cross-validated residuals','Location','southeast');
+title('Full-model vs. CV Residuals');
+legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','southeast');
 
 % THOUGHT QUESTION: How similar are the actual and cross-validated
-% residuals?
+% residuals? In the plot, each asterisk has a corresponding circle. Try to
+% put into words what the difference is between the asterisk and its
+% corresponding circle.
+%
+% ANSWER: The circle is the residual when comparing that data point to the
+% regression line fit to the entire data set; the asterisk is the residual
+% when comparing that data point to the regression line fit without that
+% data point in the data set.
 
 %% Other estimates of prediction error
 
@@ -451,7 +466,7 @@ BIClme = lme.ModelCriterion.BIC;
 % approaches for regression models where we can compare our bootstrap
 % estimates of standard errors to those we get from the GLM.
 
-%% Bootstrapping residuals:
+%% Method 1: Bootstrapping residuals:
 
 % The basic idea is that we need an estimate of both the regression
 % coefficients (beta's) and the probability density function (PDF) of the
@@ -472,8 +487,7 @@ figure(1)
 hP = plot(ds.hrs,mdl1.Fitted.LinearPredictor,'ko');
 set(hP,'MarkerSize',3,'MarkerFaceColor','k');
 
-% . . . and the residuals:
-mdl1.Residuals.Raw
+% . . . and the residuals: mdl1.Residuals.Raw
 
 nBoot = 1000;
 allBeta = zeros(nBoot,2);

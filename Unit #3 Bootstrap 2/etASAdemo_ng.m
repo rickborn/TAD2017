@@ -7,20 +7,10 @@
 % one file that is modular for my stats class.
 % RTB modified it to emphasize stroke data (13 September 2018)
 
-% Concepts covered:
-% 1. Test for proportions: odds ratio
-% 2. Comparing resampling tests with Fisher's exact test
-% 3. Std. error and confidence intervals through bootstrapping
-% 4. Relationship between CI and hypothesis test
-% 5. Permutation test for strong test of H0.
-% 6. One-tailed vs. two-tailed tests.
-% 7. CI with 'bootci' and an anonymous function
-% 8. Making data tables with 'table'
-
-% A study was done to see if low-dose aspirin would prevent heart attacks
-% in healthy middle-aged men. The study design was optimal: controlled,
-% randomized, double-blind. Subjects were randomly assigned to receive
-% aspirin (ASA) or placebo. The summary statistics:
+% The scenario: A study was done to see if low-dose aspirin would prevent
+% heart attacks in healthy middle-aged men. The study design was optimal:
+% controlled, randomized, double-blind. Subjects were randomly assigned to
+% receive aspirin (ASA) or placebo. The summary statistics:
 %
 % aspirin group (n=11037): 104 heart attacks (MI); 10933 no MI
 % placebo group (n=11034): 189 heart attacks; 10845 no MI
@@ -37,7 +27,8 @@
 % stroke?
 %
 % We will start by addressing the 2nd question regarding strokes. The code
-% you generate here will then allow you to rapidly analyze the MI data.
+% you generate here will then allow you to rapidly analyze the heart attack
+% data.
 
 % What to do: Login to learning catalytics and join the session for the
 % module entitled "ASA Bootstrap". You will answer a series of
@@ -60,6 +51,16 @@
 % to highlight the code you want to run, then hit the F9 key (PC) or you
 % can also just copy the section and then paste it into the command line.
 
+%% Concepts covered:
+% 1. Test for proportions: odds ratio
+% 2. Comparing resampling tests with Fisher's exact test
+% 3. Std. error and confidence intervals through bootstrapping
+% 4. Relationship between CI and hypothesis test
+% 5. Permutation test for strong test of H0.
+% 6. One-tailed vs. two-tailed tests.
+% 7. CI with 'bootci' and an anonymous function
+% 8. Making data tables with 'table' command
+
 %% Constants: these would normally be passed as arguments to a function
 
 nBoot = 10000;
@@ -69,7 +70,7 @@ myAlpha = 0.05;
 nRx = 11037;        % number of patients in the treatment group (ASA)
 nStrokeRx = 119;    % number of Strokes in the treatment group
 nCtrl = 11034;      % number of patients in the control group (placebo)
-nStrokeCtrl = 98;  % number of MIs in the control group
+nStrokeCtrl = 98;   % number of MIs in the control group
 nTotal = nRx + nCtrl;
 
 %% Calculate the actual ratio of rates of disease: an odds ratio
@@ -88,7 +89,7 @@ orHat = ;
 
 % The general approach in bootstrapping is to resample from our original
 % sample. Thus far, we only have proportions, but we want to have the full
-% information in the original sample.
+% information in the original sample, as if we had the raw data.
 
 % TODO: Create a column vector that is the size of each treatment group and
 % that contains 1s for each person who had stroke and 0s for each person
@@ -186,7 +187,7 @@ axis(ax);
 h3=line([orHat,orHat],[ax(3),ax(4)],'Color','g','LineWidth',2);
 legend(h3,'orHat','Location','NorthEast');
 
-%% Calcualte a p-value from the orPerm values under H0
+%% Calcualte a 1-tailed p-value from the orPerm values under H0
 
 % TODO: Calculate a one-tailed p-value based on your permuted samples (i.e.
 % orPerm) and store it in a variable called 'pVal1t'
@@ -243,11 +244,11 @@ strokeData = table([nStrokeRx;nStrokeCtrl],[nRx-nStrokeRx;nCtrl-nStrokeCtrl],...
 
 % useful numbers for heart attack data
 nRx = 11037;    % number of patients in the treatment group (ASA)
-nMIrx = 104;    % number of MIs in the treatment group
+nMIrx = 104;    % number of heart attacks (= MIs) in the treatment group
 nCtrl = 11034;  % number of patients in the control group (placebo)
 nMIctrl = 189;  % number of MIs in the control group
 
-% Generate raw data
+% Generate the raw data
 rxGrp = ;       % aspirin group for MI
 ctrlGrp = ;     % non-aspirin group for MI
 

@@ -78,13 +78,13 @@ end
 
 % Cohen suggested that d=0.2 be considered a 'small' effect size, 0.5
 % represents a 'medium' effect size and 0.8 a 'large' effect size.
-dPrimeSim = 0.57;
+dPrimeSim = 0.5;
 
 % Make plots?
 pFlag = 1;
 
 if pFlag
-    allN = [10,20,50,100];
+    allN = [5,10,25,50];
     s = sprintf('Distribution of d'' with effect size of %0.2f',dPrimeSim);
     figure('Name',s);
 else
@@ -97,7 +97,7 @@ powerSim = zeros(size(allN));
 pubESright = zeros(size(allN));
 yCrit = -log10(0.05);
 
-rng shuffle
+rng default
 for k = 1:length(allN)
     
     allSamples = randn(allN(k),2,nSims);
@@ -108,6 +108,7 @@ for k = 1:length(allN)
     
     % Do a one-sided t-test:
     [h,p] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)),'Tail','Right');
+    %[h,p] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
     h = logical(h);
     
     % What is the power?
@@ -177,9 +178,6 @@ else
     line([ax(1),ax(2)],[1,1],'Color','r','LineStyle','--');
 end
 xlabel('Power');
-
-%
-
 
 % Hah! I independently discovered a cool thing. See:
 % https://www.nature.com/articles/nrn3475/figures/5

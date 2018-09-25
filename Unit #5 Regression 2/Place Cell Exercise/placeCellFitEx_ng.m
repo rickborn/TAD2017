@@ -36,13 +36,20 @@
 % 5. Model comparison through measures of goodness of fit: AIC,
 %       Chi-square, parameter CIs, Kolmogorov-Smirnov 
 %
-% Recording of a hippocampal neuron while the rat runs back and forth in a
-% linear maze.
+% Scenario: A rat runs back and forth in a linear maze, incentivized by a
+% morsel of chocolate each time she reaches the end of the maze. While she
+% is running we are recording the action potentials from a single neuron in
+% the rat's hippocampus.
 %
-% Data:
-% expTime: time axis for entire experiment (in seconds at 1 ms resolution)
-% ratPosition: rat's position (in cm) at each time point in expTime
-% spikeTimes: time at which each recorded action potential occurred (in seconds at 1 ms resolution)
+% Data: 
+% - expTime: time axis for entire experiment
+%   (in seconds at 1 ms resolution) 
+% - ratPosition: rat's position (in cm) at each time point in expTime 
+% - spikeTimes: time at which each recorded action potential (a.k.a.
+%   'spike') occurred (in seconds at 1 ms resolution)
+%
+% Scientific question: What aspects of the rat's behavior influence the
+% neuron's tendency to fire an action potential?
 
 %% load data
 % make sure placeCellData.mat is in your path
@@ -61,42 +68,67 @@ xlabel('Time [s]');
 ylabel('Position [cm]')
 title('Fig. 1: Rat position vs. time');
 
+% Look at the 3 experimental variables and make sure you understand what
+% each one means and how the data are formatted.
+
+% QUESTION (Q1): 
+% What was the duration of the entire experiment, in seconds (rounded to
+% nearest whole number)?
+
+% QUESTION (Q2):
+% How many action potentials did the hippocampal neuron fire during the
+% entire experiment?
+
+
 %% Plot spikes on top of position trace.
 
-% TODO: Make a binary variable that is size 177761 x 1 that indicates when a
-% spike occurred. Name that variable 'spikeTrain'. Use the space provided
-% below. Hint: use  the variables 'expTime' and 'spikeTimes'
+% We want to know where in the maze the rat was each time a spike was fired
+% by our neuron. Currently, all we know is the *time* that each spike was
+% fired. But we also know that rat's position at every moment in time, so
+% we can use these two pieces of information to derive what we want to
+% know. Because we are using these variables at subsequent stages of the
+% exercise, we will
+
+% TODO: Make a binary variable that is size 177761 x 1 that has a 1 at each
+% time point where the neuron fired a spike and a 0 elsewhere. Name that
+% variable 'spikeTrain'. Use the space provided below. Hint: use the
+% variables 'expTime' and 'spikeTimes'. Hint #2: sum(spikeTrain) should be
+% the total number of spikes. This will be the critical information for our
+% subsequent regression.
 spikeTrain = ;
 
-% TODO: Using spikeTrain, find the index of each spike and name that variable
-% 'spikeIndex' (220 x 1).
+% TODO: Using spikeTrain, find the time-based index of each spike and name
+% that variable 'spikeIndex' Hint: It should be 220 x 1, but instead of
+% having a time value, it will be the appropriate index into the 'expTime'
+% vector.
 spikeIndex = ;
 
-% We then use that index to plot a dot of the rat's position at the time
+% We then use 'spikeIndex' to plot a dot of the rat's position at the time
 % of that spike.
 hp=plot(expTime(logical(spikeTrain)),ratPosition(logical(spikeTrain)),'r.');
 set(hp,'MarkerSize',10);    % make dots bigger
 
-% QUESTION (Q1): When does the cell fire? Is it just a place cell?
+% QUESTION (Q3): When does the cell fire? Is it just a place cell?
 
 %% Occupancy normalized histogram
+
 % We want to visualize the probability of the cell firing as a function of
 % position along the maze (ignoring for now the directionality issue).
-% Because the rat is moving, it potentially spends more or less time in
-% each spatial bin, so we need to normalize by the amount of time he spends
-% in each bin.
-positionBins=0:10:100;
+% Because the rat may not be moving at a perfectly constant speed, it
+% potentially spends more or less time in each spatial bin, so we need to
+% normalize by the amount of time she spends in each bin.
+positionBins = round(min(ratPosition)):10:round(max(ratPosition));
 
-% TODO: Using the positionBins indicated above, make a histogram of positions 
-% where we got spikes. NOTE: You need to both plot a histogram and
-% create a variable containing the spike-counts per bin so that you can create
-% the normalized histogram below. The general way to do this is to use
-% 'hist' to bin the data in a variable, then use 'bar' to create the plot.
-% Name this variable 'spikeHist' (it will be used later).
-% spikeHist = hist(yData,positionBins);
-% bar(positionBins,spikeHist);
+% TODO: Using the positionBins indicated above, make a histogram of
+% positions where we got spikes. NOTE: You need to both plot a histogram
+% and create a variable containing the spike-counts per bin so that you can
+% create the normalized histogram below. The general way to do this is to
+% use 'hist' to bin the data in a variable, then use 'bar' to create the
+% plot. Name this variable 'spikeHist' (it will be used later).
 subplot(nr,nc,nc+1)
-% YOUR CODE HERE
+!!! YOUR CODE HERE
+spikeHist = ;
+bar(positionBins,spikeHist);
 
 xlabel('Position [cm]')			%Label the axes.
 ylabel('Spike count')
@@ -115,7 +147,7 @@ axis([-10,110,ax(3),ax(4)]);
 % up to the total length of the experiment. Name this variable
 % 'occupancyHist'
 subplot(nr,nc,nc+2)
-% YOUR CODE HERE
+!!! YOUR CODE HERE
 
 xlabel('Position [cm]')			%Label the axes.
 ylabel('Time/bin (s)')
@@ -135,16 +167,17 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q2): Compare the histogram in the lower left panel ('Spike
+% QUESTION (Q4): Compare the histogram in the lower left panel ('Spike
 % histogram') with the one on the lower right ('Occupancy normalized
 % histogram'). Are there any differences?
 
-%% Chapter 9, Model #1
+%% Model #1: Position as a covariate
 
 % We want to fit a model that will predict the cell's spike counts in each
 % bin as a function of its position along the track. The natural model 
 % is the Poisson, where we express the mean rate as a function of time in
 % terms of the covariates: lambda_t = beta0 + beta_1(position_t)
+%
 % However, as we discussed in lecture, the right side of our equation is
 % not bounded and can assume negative values, whereas spike rates cannot go
 % below 0. So the trick is to use a so-called 'link function' to transform
@@ -157,10 +190,13 @@ axis([-10,110,ax(3),ax(4)]);
 % ('log'). But we must remember that we are still really fitting
 % log(lambda_t) if we are to interpret our beta coefficients properly.
 
-% TODO: Fit a Poisson Model to the spike train data using the rat's position as a 
-% predictor. Fill in the inputs below. See help on function 'glmfit'. 
+% TODO: Fit a Poisson Model to the spike train data using the rat's
+% position as a predictor. Fill in the inputs below. See help on function
+% 'glmfit'. Hint: We always want to fit the 'rawest' form of the data,
+% which, in this case is the rat's position at every ms (independent
+% variable) and whether or not the neuron fired a spike at every ms
+% (dependent variable).
 [b1,dev1,stats1] = glmfit();
-
 
 % THOUGHT QUESTION: What are each of these output terms (b1,dev1,stats1)?
 
@@ -169,15 +205,18 @@ axis([-10,110,ax(3),ax(4)]);
 % in which we are interested. So in order to interpret the coefficients in
 % a straightforward way, we need to 'undo' the natural logarithm.
 
-% QUESTION (Q3): What is our predicted firing rate when the rat is at position
-% 0? (HINT: Write down the model!). Give your answer in spikes/sec to 4
-% decimal places.
+% QUESTION (Q5): What is our predicted firing rate when the rat is at
+% position 0? (HINT: Write down the model!!). Give your answer in spikes/sec
+% to 1 decimal place. HINT #2: Think about the time-scale of the variables
+% that went into the model (i.e. position or spiking at each millisecond)
+% and the units you are being asked to provide your answer in.
+rate0 = ;
 
 %re-plot occupancy normalized histogram
 subplot(nr,nc,2*nc+1)
 bar(positionBins,spikeHist./occupancyHist);
 hold on;
-%Plot the model.
+% Superimpose the model's prediction on the histogram.
 plot(positionBins,exp(b1(1)+b1(2)*positionBins)*1000,'r');
 xlabel('Position [cm]')				%Label the axes.
 ylabel('Occ. nl. rate (sp/s)')
@@ -186,10 +225,22 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-%% Model #2
+%% Model #2: Adding position-squared as a covariate
+
+% We see that our first model does a very poor job of describing the data.
+% This would have been obvious with a little thought once we wrote down our
+% model: the first model requires the log of the spike rate to be a linear
+% function of the rat's position, so it can only get larger as the position
+% increases. But we see that the spike rate goes up until the rat is
+% centered at about the 60 or 70 cm bin, and then goes down. When one sees
+% this kind of behavior (i.e. non-monotonic in 'x'), a standard trick is to
+% include an additional co-variate that is related to x-squared. Why we use
+% this trick should become more evident below. But for now, let's just do
+% it and see what happens.
 
 % TODO: Improve model fit by ADDING a squared term for position.
-% Hint: 'b2' should contain 3 elements
+% Hint: 'b2' should contain 3 elements: an intercept, a coefficient for
+% position and a coefficient for position-squared.
 [b2,dev2,stats2] = glmfit();
 
 % Look at the fit
@@ -204,11 +255,12 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q4): What kind of statistical distribution does our model resemble?
+% QUESTION (Q6): What kind of statistical distribution does our model
+% resemble?
 
 %% Re-cast the model for easier interpretation of beta coefficients
 
-% We notice that model #2 looks sort of like a Gaussian (ans. to Q above!)
+% We notice that model #2 looks sort of like a Gaussian (ans. to Q6 above!)
 % And if we compare the model to the formula for a Gaussian, we notice that
 % we can transform one into the other:
 %
@@ -229,12 +281,19 @@ mu = -b2(2)/2/b2(3);                  %...place field center,
 sigma = sqrt(-1/(2*b2(3)));           %...place field size,
 alpha = exp(b2(1)-b2(2)^2/4/b2(3));   %...max firing rate.
 
-%% OPTIONAL: Gaussian fit directly with unconstrained nonlinear optimization
+%% BONUS: Gaussian fit directly with unconstrained nonlinear optimization
+
+% NOTE: You don't have to do anything in this cell. Just read the comments
+% and then execute the code. You must have the objective function,
+% 'fitFunGauss2.m' in your current working directory (or your path).
+%
+% Make sure that you look inside of 'fitFunGauss2.m' to see what it is
+% doing!
 
 % At this point, you might be asking yourself, "Why go through all of that
 % algebraic gymnastics? Why not just fit a Gaussian model directly?" Well,
-% we can do this using our old friend, 'fminsearch'. What we need to do is
-% write an objective function, call it 'fitFunGauss', that will take in 3
+% we can do this using 'fminsearch'. What we need to do is
+% write an objective function, call it 'fitFunGauss2', that will take in 3
 % parameters and return some measure of error in the fit to the actual
 % data. The 3 input parameters should be:
 %
@@ -251,28 +310,34 @@ alpha = exp(b2(1)-b2(2)^2/4/b2(3));   %...max firing rate.
 %   -sum(log(poisspdf(y,lambda)))
 %
 % We then use 'fminsearch' to find the parameters, q, that minimize the
-% value returned by 'fitFunGauss'.
-%
+% value returned by 'fitFunGauss2'.
+
 % THOUGHT QUESTION: Why do we have our function return *minus* the sum of
 % the log likelihood? HINT: Think about what 'fminsearch' is doing and the
 % overall goal, which is to maximize the likelihood of our data given the
 % model.
+%
+% ANSWER: We are calculating a maximum likelihood estimate for our
+% paramters by minimizing -log(likelihood) of the model given the data.
 
 OPTIONS = optimset('Display','off','TolX',0.001);
 % Look at our occupancy normalized histogram to generate guesses:
 q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
+qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
-% TODO: Use 'fminsearch' and your objective function to find the MLE for
-% 'q' and store them in 'qFit':
-qFit = fminsearch(!!!Your code here);
+% Compare qFit with alpha, mu and sigma calculated above:
+[qFit; [alpha,mu,sigma]]
 
-% Compare qFit with alpha, mu and sigma calculated above.
 % But to see the down side of this approach, try making initial guesses
 % that are less well guided by the histogram (e.g. q0 = [0,0,0]). 
-% Do we always converge to the correct answer?
+% Do we always converge to the correct answer? Ans. No
 
 % THOUGHT QUESTION: Can you think of other benefits of using the GLM
 % approach?
+%
+% ANSWER: glmfit is faster, we are guaranteed to get the right answer, and
+% we automatically get all sorts of useful information, such as standard
+% errors and confidence intervals.
 
 %% Analysis of residuals
 
@@ -295,18 +360,20 @@ yyaxis right
 plot(expTime,ratPosition);
 ylabel('Position (cm)');
 
-% QUESTION (Q5): Is there any relationship between the residuals of our model
-% and the direction of motion of the rat?
+% QUESTION (Q7): Describe the relationship between the residuals of our
+% model and the position of the rat over time.
 
-% QUESTION (Q6): What do you think the source of this relationship is?
+% QUESTION (Q8): Describe the source of this relationship. Think about what
+% the current model "knows" (i.e. what predictor variables it contains) and
+% what the cell is actually doing.
 
-% QUESTION (Q7): If we had the correct model, what should the cumulative
+% QUESTION (Q9): If we had the "correct" model, what should the cumulative
 % residuals look like in a similar plot?
 
-%% Include direction of motion in the model: Model #3
+%% Model #3: Add direction of motion to the model
 
 % TODO: To provide a covariate for direction, create an indicator variable,
-% ratDirection, in which each bin contains a 1 if rat is moving in the
+% ratDirection, in which each bin contains a 1 if the rat is moving in the
 % positive direction, and 0 otherwise. (HINT: Your direction variable needs
 % to be the same size as ratPosition and spikeTrain.)
 ratDirection = ;
@@ -314,9 +381,9 @@ ratDirection = ;
 % TODO: Add this to the model as another covariate:
 [b3,dev3,stats3] = glmfit();
 
-% QUESTION: Is the directional coefficient statistically significant? Check
-% the p-value in our stats output variable for each predictor. What is the
-% relevant p-value for ratDirection?
+% QUESTION (Q10): Is the directional coefficient statistically significant?
+% Check the p-value in our stats output variable for each predictor. What
+% is the relevant p-value for ratDirection?
 
 % and now re-do our cumulative residuals plot: much better
 cumResid = cumsum(stats3.resid);
@@ -332,9 +399,9 @@ ax = axis;
 hl = line([ax(1),ax(2)],[0,0]);
 set(hl,'Color','g','LineStyle','--');
 
-%% Plot occupancy normalized histogram for each direction of motion separately
+%% Occupancy normalized histogram for each direction of motion separately
 
-% QUESTION (EXTRA CREDIT)
+% THOUGHT QUESTION (No LC component)
 % Why might it be useful to fit separate models for each direction of
 % motion. Think about other predictors that we don't have access to. Are
 % there any more predictors we could obtain from the data in our workspace?
@@ -346,7 +413,6 @@ spikeTrainUp = spikeTrain & ratDirection;
 spikeTrainDown = spikeTrain & ~ratDirection;
 spikeIndexUp=find(spikeTrainUp);%Determine index of each spike.
 spikeIndexDown=find(spikeTrainDown);%Determine index of each spike.
-positionBins=0:10:100;
 
 % Histogram of positions where we got spikes.
 spikeHistUp=hist(ratPosition(spikeIndexUp),positionBins);
@@ -389,45 +455,48 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q19): Save this figure (fig. #1) as a jpeg and upload it to
+% QUESTION (Q11): Save this figure (fig. #1) as a jpeg and upload it to
 % Learning Catalytics.
 
 %%  Measures of goodness of fit
 
 % "There is not a single procedure for measuring goodness-of-fit; instead
 % there are many tools that, taken together, can provide a broad
-% perspective on the strenghts and weaknesses of a set of models." 
+% perspective on the strengths and weaknesses of a set of models." 
 % - Kramer & Eden 2016, p. 280
 
 %% Method 1: Comparing Akaike's Information Criterion (AIC) values
 
 % AIC is a form of "penalized likelihood" measure: we first compute
-% -2*log(likelihood) of the data given the model (will be small for good
-% models) and then add a penalty term "2*p," where p is the number of
-% parameters in the model. 
+% -2*log(likelihood) of the data given the model (will be smaller for
+% better models) and then add a penalty term "2*p," where p is the number
+% of parameters in the model.
 
-% QUESTION (Q9): Why do we include a penalty for the number of parameters
+% QUESTION (Q12): Why do we include a penalty for the number of parameters
 % in the model?
 
 % Recall that what we are actually predicting is the Poisson rate
-% parameter, lambda. For model #1 (only position as covariate)
-% This is model #1's predictino of the Poisson rate function:
+% parameter, lambda. For model #1 (only position as covariate) this is the
+% prediction of the Poisson rate function:
 lambda1 = exp(b1(1)+ b1(2)*ratPosition);
+
 % Use 'poisspdf' to calculate the likelihood of our spiketrain given the
 % model, then take the log and add up the probabilities:
-loglikelihood1 = sum(log(poisspdf(spikeTrain,lambda1)));
+logLikelihood1 = sum(log(poisspdf(spikeTrain,lambda1)));
 
-% Calculate AIC for Model 1 (2 free parameters)
-AIC1 = -2 * loglikelihood1 + (2*2); 
+% Calculate AIC for Model 1 (2 parameters)
+AIC1 = -2 * logLikelihood1 + (2*2); 
 
-% TODO: Calculate AIC for Model 2
+% TODO: Calculate AIC for Model 2 (3 parameters)
 AIC2 = ; 
 
 % TODO: Calculate the difference in AIC values for Models 1 and 2:
-dAIC =AIC1 - AIC2;
-% QUESTION (Q10): What is the difference?
+dAIC = AIC1 - AIC2;
 
-% QUESTION (Q11): What does this difference in AIC values mean? 
+% QUESTION (Q13): What is the difference in AIC values between Model 1 and
+% Model 2?
+
+% QUESTION (Q14): What does this difference in AIC values mean? 
 
 % NOTE: We can also more easily calculate AIC from the deviance 
 % (The deviance is a generalization of the residual sum of squares for all 
@@ -442,23 +511,23 @@ alt_dAIC = (dev1 + 2*2) - (dev2 + 2*3);     % compare with dAIC above
 % intervals, because maximum likelihood estimators are approximately normal
 % for sufficiently large n.
 
-% QUESTION (Q12): What is the standard error for beta0 (i.e. the
+% QUESTION (Q15): What is the standard error for beta0 (i.e. the
 % y-intercept) in Model #1?
 
 % TODO: Calculate the 95% CI for the parameters of Model 1.
 % HINT: Recall that the linear model is a prediction of log(lambda). What
 % do we do to interpret our beta's in terms of spike rate?
 %
-% Your code here!
+!!! Your code here!
 CI1 = ;
 
-% QUESTION (Q13): What is the 95% confidence interval for the neuron's
-% spiking rate at position x=0, in spikes per second?
+% QUESTION (Q16): For Model #1, what is the 95% confidence interval for the
+% neuron's spiking rate at position x=0, in spikes per second?
 
-% TODO: Compute the 95% CI for parameters of Model 2.
+% TODO: Compute the 95% CI for the parameters of Model 2.
 CI2 = ;
 
-% QUESTION (Q14): Based on your 95% CI, can we say that the
+% QUESTION (Q17): Based on your 95% CI, can we say that the
 % position-squared term significantly (at alpha < 0.05) improves the model
 % fit?
 
@@ -466,25 +535,28 @@ CI2 = ;
 % maximum likelihood estimate and its standard error. This is called the
 % 'Wald test', and we also get it for free with glmfit
 %
-% QUESTION (Q15): What is the p-value for the position-squared term in
+% QUESTION (Q18): What is the p-value for the position-squared term in
 % model #2?
-pBeta2 = stats2.p(3);
 
 
 %% Comparing model #3 (with direction term) vs. model #2
 
-% QUESTION (Q16): What is the difference in AIC values between Model 2 and
+% QUESTION (Q19): What is the difference in AIC values between Model 2 and
 % Model 3?
 dAIC = ;
 
-%TODO: For model 3, compute 95% CI for last parameter and find the
-%significance level using the Wald test.
+% TODO: For model 3, compute 95% CI for last parameter and find the
+% significance level using the Wald test.
 CI3 = ;
 pBeta3 = ;	%... and significance level.
 
-% QUESTION (Q17): What do these results tell us about our three models?
+% QUESTION (Q20): What do these results tell us about our three models?
 
 %% Bonus: Kolmogorov-Smirnov plots to evalute models
+
+% NOTE: There is nothing you have to code in this section, but you should
+% read through it and take a look at the final plots. There is a question
+% for you to answer at the end.
 
 % Our previous approaches are good for model selection (i.e. adjudicating
 % between two models) or for telling us whether a particular covariate
@@ -552,9 +624,29 @@ ylabel('Empirical CDF')
 axis([0,1,0,1]);
 title('KS plot of rescaled data for model #2');
 
-% TODO: Evaluate model 3 and create the corresponding K-S plot
-lambda3 = ;
+% Evaluate model 3 in the same way:
+lambda3 = exp(b3(1) + b3(2)*ratPosition + ...
+    b3(3)*ratPosition.^2 + b3(4)*ratDirection);
+
+% Re-scale the waiting times
+Z = zeros(nSpikes,1);
+Z(1) = sum(lambda3(1:spikeIndex(1)));	%1st rescaled waiting time.
+for i=2:nSpikes							%... and the rest.
+  Z(i)=sum(lambda3(spikeIndex(i-1):spikeIndex(i)));
+end
+
+[eCDF, zVals] = ecdf(Z);                    %Define empirical CDF,
+mCDF = 1-exp(-zVals);                       %...and model CDF
 
 subplot(2,1,2);
+h1=plot(mCDF,eCDF,'LineWidth',2);               %...to create KS-plot.
+hold on
+h2=plot([0 1], [0 1]+1.96/sqrt(nSpikes),'k--'); %Upper 95% confidence bound.
+plot([0 1], [0 1]-1.96/sqrt(nSpikes),'k--')     %Lower 95% confidence bound.
+xlabel('Model CDF'); ylabel('Empirical CDF');
+axis([0,1,0,1]);
+title('KS plot of rescaled data for model #3');
+legend([h1,h2],{'KS Plot','95% CI'},'Location','Northwest');
 
-% QUESTION (Q18): What do you conclude from the two K-S plots?
+% QUESTION (Q21): What do you conclude from a comparison of the two
+% Kolmogorov-Smirnov plots?

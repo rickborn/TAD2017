@@ -27,9 +27,10 @@ function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
 % et al., then built this simulation, which can replicate fig. 1, off of that.
 
 % Execultion speed:
-% tic;FPrate = dfSim2(10,[1,2,5,10,20],50,0.05,1000,1);toc
+% tic;FPrate = dfSim2(10,[1,5,10,20],50,0.05,1000,1);toc
 % Elapsed time is 37.2 seconds on my Lenovo T61
 % Elapsed time is 28.0 seconds on my Dell Latitude E7440
+% Elapsed time is 21.9 seconds on my Dell Ultrabook
 
 % re-init random number generator
 rng shuffle;
@@ -39,7 +40,7 @@ if nargin < 6, pFlag= 0; end
 if nargin < 5, nSims = 1000; end
 if nargin < 4, myAlpha = 0.05; end
 if nargin < 3, nMax = 50; end
-if nargin < 2, nAddObs = [2,5,10,20]; end
+if nargin < 2, nAddObs = [1,5,10,20]; end
 if nargin < 1, nInit = 10; end
 
 FPrate = ones(length(nInit),length(nAddObs)) .* NaN;
@@ -60,8 +61,8 @@ for jVal = 1:length(nInit)
                     break
                 end
             end
-            FPrate(jVal,iVal) = (sum(FP) / nSims) * 100;
         end
+        FPrate(jVal,iVal) = (sum(FP) / nSims) * 100;
     end
 end
 

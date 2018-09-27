@@ -94,7 +94,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 % variable:
 nPts = length(ds.hrs);  % number of data points, useful for many things
 const = ones(nPts,1);
-[betaFit,betaCI,resid,residInt,stats] = regress(ds.amount,[const,ds.hrs]);
+[betaFit,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
 
 % QUESTION (Q2): Do the confidence intervals for our beta coefficients
 % indicate a significant linear relationship between amount of time
@@ -194,13 +194,13 @@ plot(xVals, yRegC, 'g-');
 
 %% Compare with multiple regression using indicator variables for lot
 
-% Tip o' the Pin to Shihyi Tseng for suggesting this approach. This was not
-% included in the regular exercise, but is included here for your
-% amusement. This is an alternative, though less principled, approach to
-% the issue dealt with above using the mixed effects model. Here we simply
-% treat 'lot' as another regressor by including two 'indicator' (or
-% 'dummy') variables in our regression. Note that they do similar but not
-% identical things.
+% Tip o' the Pin to Shihyi Tseng (TAD 2017) for suggesting this approach.
+% This was not included in the regular exercise, but is included here for
+% your enlightenment. This is an alternative, though less principled,
+% approach to the issue dealt with above using the mixed effects model.
+% Here we simply treat 'lot' as another regressor by including two
+% 'indicator' (or 'dummy') variables in our regression. Note that they do
+% similar but not identical things.
 
 % create indicator variables for the different lots:
 lotA = strcmp(ds.lot,'A');
@@ -242,7 +242,7 @@ plot(xVals,yVals,'r-');
 yVals = b1a(1) + (b1a(2) .* xVals);
 plot(xVals,yVals,'g-');
 
-% We get the NEARLY same answers as we did with the LME model, but not
+% We get NEARLY the same answers as we did with the LME model, but not
 % exactly. For example, look at the regression estimates for the slope. The
 % 'lme' gives a value of -0.0598, while the regression with indicator
 % variables gives -0.0601. Also note the different way that the intercepts
@@ -371,7 +371,7 @@ qqplot(A,pd);
 %% Cross-validation to measure prediction error
 
 % Calculate the mean residual squared error of our original, simple model:
-meanRSE = sum(resid.^2) / nPts;
+meanRSE = sum(rawResiduals.^2) / nPts;
 
 % The meanRSE is a measure of how well our model describes the data. But it
 % is overly optimistic, because it is measuring performance using the SAME
@@ -407,7 +407,7 @@ underEstPerCent = round(((CVmse - meanRSE) / CVmse) * 100);  % 13%
 %% Compare actual residuals with the residuals obtained by cross-validation
 
 figure
-h1 = plot(ds.hrs,resid,'ko');
+h1 = plot(ds.hrs,rawResiduals,'ko');
 hold on;
 h2 = plot(ds.hrs,CVresiduals,'k*');
 ax = axis;

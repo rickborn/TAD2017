@@ -182,6 +182,23 @@ ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
 % denominator of each odds calculation. So then it works, but it is rather
 % unsatisfying to have to kluge things in this way!
 
+%% Bonus: 2-sided p-value from the bootstrap distribution
+
+% We can get a more exact 2-sided p-value by gradually shrinking our % CI
+% until the null value falls just outside. We have already done the hard
+% work of generating the bootstrap distribution and sorting it, so now we
+% just loop through and find the value of alpha that puts the null value of
+% 1 outside of the lower bound.
+ciLow = confInterval(1);
+pAlpha = myAlpha;
+
+while ciLow < 1
+    pAlpha = pAlpha + 0.001;
+    idxLo = floor((pAlpha/2) * nBoot);
+    ciLow = orStarSorted(idxLo);
+end
+% pAlpha: 0.1620; compare with Fisher Exact value of 0.1723
+
 %% Perform an explicit hypothesis test by modeling our OR under H0
 
 % In this case, we will use a permutation test, where we resample

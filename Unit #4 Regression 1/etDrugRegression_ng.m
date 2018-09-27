@@ -77,6 +77,7 @@ hold on
 xlabel('Time implanted (hrs)'); ylabel('Drug remaining (mg)');
 %title('Drug delivery device: E & T fig. 9.1, p. 109');
 title('Tests of osmotic mini-pump for drug delivery');
+set(gca,'FontSize',14);
 
 % QUESTION (Q1): By eye, does the relationship between time implanted and
 % drug remaining look to be linear?
@@ -94,7 +95,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 % variable:
 nPts = length(ds.hrs);  % number of data points, useful for many things
 const = ones(nPts,1);
-[] = regress();
+[betaFit,betaCI,rawResiduals,~,stats] = regress();
 
 % QUESTION (Q2): Do the confidence intervals for our beta coefficients
 % indicate a significant linear relationship between amount of
@@ -195,6 +196,7 @@ plot(xVals, yRegC, 'g-');
 % address the issue of lot differences, we can ask whether any of the
 % random effects for the intercept are significantly different from 0. To
 % see this, look at the STATS variable. What do we conclude?
+% HINT: Type 'STATS' at the command line.
 
 %% Regression diagnostics, Part 1
 
@@ -278,7 +280,7 @@ subplot(3,1,3);
 % (i.e. the one without independent y-intercepts for the different lots).
 % This is just the summed squared error divided by the number of data
 % points:
-meanRSE = sum(resid.^2) / nPts;
+meanRSE = sum(rawResiduals.^2) / nPts;
 
 % The meanRSE is a measure of how well our model describes the data. But it
 % is overly optimistic, because it is measuring performance using the same
@@ -313,7 +315,7 @@ underEstPerCent = ;
 %% Compare actual residuals with the residuals obtained by cross-validation
 
 figure
-h1 = plot(ds.hrs,resid,'ko');
+h1 = plot(ds.hrs,rawResiduals,'ko');
 hold on;
 h2 = plot(ds.hrs,CVresiduals,'k*');
 ax = axis;

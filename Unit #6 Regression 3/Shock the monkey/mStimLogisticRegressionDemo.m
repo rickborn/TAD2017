@@ -23,8 +23,9 @@
 % 7. Confidence intervals on model predictions
 
 %% Read in the data from a Newsome lab microstimulation experiment
-%fileName = 'es5bRaw.xlsx'; % big effect
-fileName = 'js25aRaw.xlsx'; % small effect; used in class
+
+fileName = 'es5bRaw.xlsx'; % big effect
+%fileName = 'js25aRaw.xlsx'; % small effect; used in class
 ds = dataset('xlsfile',fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
@@ -46,7 +47,9 @@ ds = dataset('xlsfile',fileName);
 %
 % Our scientific question is "Did the microstimulation influence the
 % monkey's perceptual decisions? If so, by how much?"
+
 %% Plot the data
+
 % We want a plot like those in fig. 4 of Salzman et al. 1992:
 % x-axis is the signed correlation value; y-axis is proportion of preferred
 % decisions.
@@ -187,8 +190,8 @@ plot(coh,pStim,'r-');
 % regression equation, log(p/1-p), is equal to 0. So we calculate the
 % signal strength at PSE for the stim curve and subtract this from the
 % signal strength at PSE for the ctrl curve. This ends up to be b(2)/b(3)
-equivVisualStimulus = b(2) / b(3);
-eqv = round(equivVisualStimulus * 10) / 10;
+EVS1 = b(2) / b(3);
+eqv = round(EVS1 * 10) / 10;
 tStr = [fileName ': Equiv. Visual Stimulus = ',num2str(eqv), '%coh'];
 title(tStr);
 
@@ -196,7 +199,7 @@ title(tStr);
 % a very finely spaced set of coh values and find the one that gives us a
 % value of 0.5. Since we're unlikely to get exactly 0.5, we would choose some
 % narrow range straddling 0.5 and then take the average. 
-EVS = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
+EVS2 = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
       mean(coh(pStim < 0.505 & pStim > 0.495));
 
 % We can encourage the students to break this down into steps. First create
@@ -207,12 +210,13 @@ PSEnoStim = mean(coh(pNoStim < 0.505 & pNoStim > 0.495));
 PSEstim = mean(coh(pStim < 0.505 & pStim > 0.495));
 
 % Draw lines for the respective PSEs
-pFlag = 0;
+pFlag = 1;
 if pFlag
     ax = axis;
-    line([ax(1),PSEstim],[0.5,0.5],'Color','r','LineStyle','-');
+    line([ax(1),ax(2)],[0.5,0.5],'Color','k','LineStyle','--');
+    %line([ax(1),PSEstim],[0.5,0.5],'Color','r','LineStyle','-');
     line([PSEstim,PSEstim],[ax(3),0.5],'Color','r','LineStyle','--');
-    line([ax(1),PSEnoStim],[0.5,0.5],'Color','k','LineStyle','--');
+    %line([ax(1),PSEnoStim],[0.5,0.5],'Color','k','LineStyle','--');
     line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
 end
 

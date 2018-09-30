@@ -24,6 +24,7 @@ nPts = length(x);
 %% Plot the data:
 
 figure
+subplot(3,1,1);
 plot(x,y,'bo');
 hold on
 xlabel('x'); ylabel('y');
@@ -61,10 +62,11 @@ warning('on')
 MSEtrain = sum(trainResid.^2) ./ nPts;
 MSEtest = sum(testResid.^2) ./ nPts;
 
-figure
-plot(1:maxOrder,MSEtrain,'b-');
+% figure
+subplot(3,1,2);
+plot(1:maxOrder,MSEtrain,'b-','LineWidth',2);
 hold on
-plot(1:maxOrder,MSEtest,'r-');
+plot(1:maxOrder,MSEtest,'r-','LineWidth',2);
 
 xlabel('Degree of Polynomial');
 ylabel('Mean Squared Error');
@@ -113,10 +115,11 @@ for n = 1:nReps
 end
 warning('on');
 
-figure
-h1=errorbar(1:maxOrder,mean(MSEtrain),std(MSEtrain),'b-');
+% figure
+subplot(3,1,3);
+h1=errorbar(1:maxOrder,mean(MSEtrain),std(MSEtrain),'b-','LineWidth',2);
 hold on
-h2=errorbar(1:maxOrder,mean(MSEtest),std(MSEtest),'r-');
+h2=errorbar(1:maxOrder,mean(MSEtest),std(MSEtest),'r-','LineWidth',2);
 
 xlabel('Degree of Polynomial');
 ylabel('Mean Squared Error');

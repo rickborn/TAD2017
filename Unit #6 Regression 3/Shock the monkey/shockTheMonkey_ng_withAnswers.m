@@ -21,17 +21,18 @@
 
 %% Read in the data from a Newsome lab microstimulation experiment
 
-% Load a data file into a table structure called 'ds'
-fileName ='es5bRaw.xlsx';
+% Load the file into a table structure called 'ds'
+fileName ='es5bRaw.xlsx';   % big effect
+% fileName = 'js25aRaw.xlsx'; % small effect
 ds = readtable(fileName);
 
-% Each row is data from a single trial during which the monkey viewed a
-% stochastic motion display whose signal strength was varied systematically
-% (Coh) and whose direction was chosen according to the preferred direction
-% of neurons at the stimulation site. At the end of each trial, the monkey
-% chose one of two possible directions: preferred direction (PDchoice = 1)
-% or the null direction (PDchoice = 0). Positive values of Coh indicate a
-% stimulus moving in the preferred direction; negative values indicate null
+% Each row is a single trial during which the monkey viewed a stochastic
+% motion display whose signal strength is varied systematically (Coh) and
+% whose direction is chosen according to the preferred direction of neurons
+% at the stimulation site. At the end of each trial, the monkey chose one
+% of two possible directions: preferred direction (PDchoice = 1) or the
+% null direction (PDchoice = 0). Positive values of Coh indicate a stimulus
+% moving in the preferred direction; negative values indicate null
 % direction motion. On any given trial, microstimulation was applied to the
 % electrode with a probability of 0.5 (Mstim = 1 on microstim trials; 0 on
 % control trials).
@@ -39,38 +40,29 @@ ds = readtable(fileName);
 % Columns:
 % 1) Mstim: 0/1 for absence/presence of microstimulation
 % 2) Coh: Signed strength of the visual stimulus (% coherent motion)
-%    positive values indicate motion in the neuron's 'preferred' direction;
-%    negative values correspond to the opposite, or 'null', direction
-% 3) PDchoice: 0/1 for monkey choice in the null/preferred direction
+% 3) PDchoice: 0/1 for monkey choice in the null/pref direction
 %
 % Our scientific questions are "Did the microstimulation influence the
 % monkey's perceptual decisions? If so, by how much?"
 
 %% Plot the data
 
-% TODO: We want a plot in which the x-axis is the signed correlation value;
-% y-axis is proportion of preferred decisions. Stim trials in red; no-stim
-% trials in black. NOTE: Because this step is rather time-consuming, I've
-% provided the code here, so you don't need to do anything except execute
-% it to get the figure. But please read through the code and make sure you
-% understand how it works. And there are LC questions to be answered at the
-% bottom of the cell.
+% TODO: We want a plot like that shown in the accompanying figure (see Q1
+% of the Learning Catalytics module "Shock the Monkey"
+% x-axis is the signed correlation value; y-axis is proportion of preferred
+% decisions. Stim trials in red; no-stim trials in black
 
 % define some constants for our column names
 MSTIM=1; COH=2; PROP=3; CILO=4; CIHI=5;
 
-% We first need to find all of the different stimulus conditions:
+% We first need to find all stimulus conditions:
 allDataProp = sortrows(unique([ds.Mstim,ds.Coh],'rows'),[1,2]);
 nConds = length(allDataProp);
-
 % Add a column of zeros to allDataProp to hold the calcualted proportion;
 % (plus two more for confidence intervals)
 allDataProp = [allDataProp,zeros(nConds,3)];
 myAlpha = 0.05;   % for error bars of the 95% CI
 
-% For each unique condition, we need to find all of the corresponding rows
-% in our original raw data file and tally the proportion of those trials on
-% which the monkey chose the preferred direction choice target:
 for k = 1:nConds
     thisCond = find(ds.Mstim ==allDataProp(k,MSTIM) & ds.Coh == allDataProp(k,COH));
     [pHat,pCI] = binofit(sum(ds.PDchoice(thisCond)),length(thisCond),myAlpha);
@@ -103,57 +95,114 @@ title(fileName);
 set(gca,'FontSize',12); % make text larger
 
 % QUESTION (Q1): How many trials did the monkey perform in this experiment?
+%
+% ANSWER: length(ds.Mstim) = 560
 
 % QUESTION (Q2): How many unique types of trial were there?
+%
+% ANSWER: nConds = 14
 
 % QUESTION (Q3): How many repetitions of each trial type did the monkey
 % perform?
+%
+% ANSWER: 560 / 14 = 40
 
 % QUESTION (Q4): The error bars in the figure correspond to the 95% CI from
 % the binomial distribution. Name two different ways in which we could make
 % the error bars smaller?
+%
+% ANSWER:
+% 1. Have the monkey perform more repetitions for each trial type.
+% 2. Use a lower level of confidence for the CI.
+
+%% Bonus: bootstrapping confidence intervals
+
+% Suppose you didn't know that MATLAB had a handy-dandy function to
+% generate confidence intervals. How might you get them? You should know
+% this from the ASA/stroke exercise!
+
+% Let's use an example a single trial type in which the monkey performed 40
+% repetitions and chose the PD target on 16 of them:
+
+% Answer using 'binofit':
+[pHat,pCI] = binofit(16,40,myAlpha);
+% pHat = 0.4000
+% pCI = 0.2486    0.5667
+
+% Answer using the bootstrap (percentile method)
+% create a vector of 16 ones and 24 zeros:
+x = [ones(16,1);zeros(40-16,1)];
+% create an anonymous function that calculates the proportion:
+prop = @(n) sum(n)/length(n);
+% use 'bootci'
+ci = bootci(10000,{prop,x},'alpha',myAlpha,'type','percentile');
+% ci = 0.25, 0.55
 
 %% Fit full model using glmfit
 
 % TODO: Write down the full regression model, including an interaction term
-% for microstimulation and signal strength. Remember that you want to
-% pass the RAW data as your arguments to 'glmfit'
+% for microstimulation and signal strength.
 
-% TODO: Use 'glmfit' to perform the regression
-[b,dev,stats] = glmfit();
+% ln(P/1-P) = b0 + b1*stim + b2*corr + b3*stim*corr
+[b,dev,stats] = glmfit([ds.Mstim,ds.Coh,ds.Mstim .* ds.Coh],ds.PDchoice,...
+    'binomial','link','logit');
 
 % QUESTION (Q5): Is the interaction term statitically significant at p < 0.05?
+%
+% ANSWER: stats.p(4) = 0.89
+% Not significant.
 
 % TODO: If your answer to the question is 'no', re-do the fit without the
 % interaction term.
-%
 % The significance test for the interaction term is in stats.p(4)
 if stats.p(4) > 0.05
-    [b,dev,stats] = glmfit();
+    [b,dev,stats] = glmfit([ds.Mstim,ds.Coh],ds.PDchoice,...
+        'binomial','link','logit');
 end
 
 % QUESTION (Q6): What is the scientific meaning of beta0 (i.e. the
 % y-intercept) in our model?
+%
+% ANSWER: It is the log-odds of the monkey making a preferred-direction
+% choice on trials where there is no microstimulation and the motion
+% strength (coh) is 0.
 
 % QUESTION (Q7): Look at your graph. What would a value of 0 for the beta0
 % coefficient correspond to in terms of the probability of the monkey
 % making a preferred decision choice on trials where there was no
 % microstimulation and the motion strength was zero?
+%
+% ANSWER: Look at the regression equation! For trials without
+% microstimulation with a motion strength of 0, the regression reduces to:
+% log(P/1-P) = 0, or (P/1-P) = 1 and P = 0.5
 
 % QUESTION (Q8): Did microstimulation affect the monkey's choices at a
 % significance level of p < 0.05?
+%
+% ANSWER: Yes! From looking at the plots of the data and from the
+% regression we can see that the effect is both large (i.e. perceptually
+% significant) and highly statistically significant.
 
 % QUESTION (Q9): What is the p-value for the model parameter capturing the
 % effect of microstimulation on the monkey's choices?
+%
+% ANSWER: stats.p(2) = 5.0321e-20
 
 %% Plot the model fits
 
 % TODO: Plot the regression lines on top of the raw data. Make a separate
 % line for the stim (red line) and no-stim (black line) predictions.
 % Remember that our y-axis is in units of 'proportion preferred decisions'
-% and NOT in log(P/1-P). HINT: You need to solve for 'P':
-% P = 1 / 1 + exp[-(b0 + b1*stim + b2*corr)]
-!!! Your code here
+% and NOT in log(P/1-P). HINT: You need to solve for 'P'
+
+% Range for coherence:
+coh = min(ds.Coh):0.01:max(ds.Coh);
+const = ones(size(coh));
+mStim = ones(size(coh));
+pStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*mStim + b(3).*coh)));
+plot(coh,pStim,'r-');
+pNoStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*~mStim + b(3).*coh)));
+plot(coh,pNoStim,'k-');
 
 %% TODO: Determine the equivalent visual stimulus for microstimulation
 
@@ -173,22 +222,45 @@ end
 % Two possible approaches:
 
 % 1) Algebra. Using the regression equation, solve for the signal strength
-% at which the animal is equally likely to report preferred or null. This
-% is referred to in the psychophysical literature as the "Point of
-% Subjective Equality" or "PSE". We calculate the signal strength at PSE
-% for the stim curve and subtract this from the signal strength at PSE for
-% the ctrl curve. This will give us an equation in terms of the beta
-% parameters in our model. Very elegant!
+% at which the animal is equally likely to report pref. or null. This is
+% referred to in the psychophysical literature as the "Point of Subjective
+% Equality." The key mathematical point is that this is where the lefthand
+% side of our regression equation, log(p/1-p), is equal to 0. So we
+% calculate the signal strength at PSE for the stim curve and subtract this
+% from the signal strength at PSE for the ctrl curve. This will give us an
+% equation in terms of the beta parameters in our model. Very elegant!
+EVS1 = b(2) / b(3);
+eqv = round(EVS1 * 10) / 10;
+tStr = [fileName ': Equiv. Visual Stimulus = ',num2str(eqv), '% Coh'];
+title(tStr);
 
 % 2) Brute force. We have the regression equation, so we can input a very
 % finely spaced set of coh values and find the one that gives us a value of
 % 0.5. Since we're unlikely to get exactly 0.5, we would choose some narrow
 % range straddling 0.5 and then take the average.
-
-!!! Your code here
+EVS2 = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
+      mean(coh(pStim < 0.505 & pStim > 0.495));
+  
+% We can encourage the students to break this down into steps. First create
+% a logical selection vector that has ones where the y-value (pNoStim or
+% pStim) are within some narrow range around 0.5. Use these to find the
+% corresponding x-values (in coh), then take the average of these values.
+PSEnoStim = mean(coh(pNoStim < 0.505 & pNoStim > 0.495));
+PSEstim = mean(coh(pStim < 0.505 & pStim > 0.495));
 
 % QUESTION (Q10): How much signal would need to be added to the random dot
 % display in order to match the effect of microstimulation on the monkey's
 % choices? Give your answer as a positive percentage to 1 decimal place.
 
 % QUESTION (Q11): Upload your final figure to Learning Catalytics.
+
+% Plot the PSE lines:
+ax = axis;
+line([ax(1),ax(2)],[0.5,0.5],'Color','k','LineStyle','--');
+line([PSEstim,PSEstim],[ax(3),0.5],'Color','r','LineStyle','--');
+line([PSEnoStim,PSEnoStim],[ax(3),0.5],'Color','k','LineStyle','--');
+p1 = plot(PSEstim,0,'r.','MarkerSize',15);
+p2 = plot(PSEnoStim,0,'k.','MarkerSize',15);
+
+% add a legend'
+legend([h1,h2,p1,p2],{'Stim','No Stim','PSE_s','PSE_n_s'},'Location','Northwest');

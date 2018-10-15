@@ -1,4 +1,4 @@
-% shockTheMonkey_ng.m
+% shockTheMonkey_ng_withAnswers.m
 %
 % Data a from Salzman et al. (1992) "Microstimulation in visual area MT:
 % Effects on direction discrimination performance," J. Neurosci.
@@ -22,8 +22,9 @@
 %% Read in the data from a Newsome lab microstimulation experiment
 
 % Load the file into a table structure called 'ds'
-fileName ='es5bRaw.xlsx';   % big effect
-% fileName = 'js25aRaw.xlsx'; % small effect
+%fileName ='es5bRaw.xlsx';   % big effect
+%fileName = 'js25aRaw.xlsx'; % small effect
+fileName ='js92dRaw.xlsx';  % sig. interaction term
 ds = readtable(fileName);
 
 % Each row is a single trial during which the monkey viewed a stochastic
@@ -81,11 +82,11 @@ allDataProp(:,CIHI) = allDataProp(:,CIHI) - allDataProp(:,PROP); % upper error b
 
 % Now plot: stim trials in red; no-stim trials in black
 figure
-h1=errorbar(allDataProp(stimIdx,COH),allDataProp(stimIdx,PROP),...
-    allDataProp(stimIdx,CILO),allDataProp(stimIdx,CIHI),'ro');
-hold on
 h2=errorbar(allDataProp(~stimIdx,COH),allDataProp(~stimIdx,PROP),...
     allDataProp(~stimIdx,CILO),allDataProp(~stimIdx,CIHI),'ko');
+hold on
+h1=errorbar(allDataProp(stimIdx,COH),allDataProp(stimIdx,PROP),...
+    allDataProp(stimIdx,CILO),allDataProp(stimIdx,CIHI),'ro');
 
 xlabel('Motion strength (%coh)'); ylabel('Proportion preferred decisions');
 ax = axis;
@@ -138,6 +139,15 @@ prop = @(n) sum(n)/length(n);
 ci = bootci(10000,{prop,x},'alpha',myAlpha,'type','percentile');
 % ci = 0.25, 0.55
 
+% Note that the bootstrap will fail if you have 0 successes in your n
+% trials: no matter how much you re-sample from 40 zeros, you can never get
+% anything but 0. Here is where 'binofit' is nice. So let's look at the
+% binomial confidence intervals for 0 successes out of 10 vs. out of 20
+% trials and see what we get:
+[pHat,pCI] = binofit(0,10,0.05);    % 95% CI = [0,0.31]
+[pHat,pCI] = binofit(0,20,0.05);    % 95% CI = [0,0.17]
+
+
 %% Fit full model using glmfit
 
 % TODO: Write down the full regression model, including an interaction term
@@ -156,8 +166,13 @@ ci = bootci(10000,{prop,x},'alpha',myAlpha,'type','percentile');
 % interaction term.
 % The significance test for the interaction term is in stats.p(4)
 if stats.p(4) > 0.05
+    iSig = 0;
+    disp('Fitting reduced model');
     [b,dev,stats] = glmfit([ds.Mstim,ds.Coh],ds.PDchoice,...
         'binomial','link','logit');
+else
+    iSig = 1;
+    disp('Interaction term significant.');
 end
 
 % QUESTION (Q6): What is the scientific meaning of beta0 (i.e. the
@@ -199,7 +214,12 @@ end
 coh = min(ds.Coh):0.01:max(ds.Coh);
 const = ones(size(coh));
 mStim = ones(size(coh));
-pStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*mStim + b(3).*coh)));
+
+if iSig
+    pStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*mStim + b(3).*coh + b(4).*coh.*mStim)));
+else
+    pStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*mStim + b(3).*coh)));
+end
 plot(coh,pStim,'r-');
 pNoStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*~mStim + b(3).*coh)));
 plot(coh,pNoStim,'k-');
@@ -230,9 +250,6 @@ plot(coh,pNoStim,'k-');
 % from the signal strength at PSE for the ctrl curve. This will give us an
 % equation in terms of the beta parameters in our model. Very elegant!
 EVS1 = b(2) / b(3);
-eqv = round(EVS1 * 10) / 10;
-tStr = [fileName ': Equiv. Visual Stimulus = ',num2str(eqv), '% Coh'];
-title(tStr);
 
 % 2) Brute force. We have the regression equation, so we can input a very
 % finely spaced set of coh values and find the one that gives us a value of
@@ -240,6 +257,18 @@ title(tStr);
 % range straddling 0.5 and then take the average.
 EVS2 = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
       mean(coh(pStim < 0.505 & pStim > 0.495));
+
+eqv = round(EVS2 * 10) / 10;
+tStr = [fileName ': Equiv. Visual Stimulus = ',num2str(eqv), '% Coh'];
+title(tStr);
+
+% NOTE: The above formula only applies to the case where the interaction
+% term is not significant. The brute force gets it right regardless,
+% because it uses the probabilities calculated from the appropriate fit. In
+% terms of parameters, the formula with a significant interaction term is
+% not so pretty:
+% (-b(1)/b(3)) - ((-b(1) - b(2))/(b(3) + b(4)))
+% but it does still give the correct answer!
   
 % We can encourage the students to break this down into steps. First create
 % a logical selection vector that has ones where the y-value (pNoStim or

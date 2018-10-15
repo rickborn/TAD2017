@@ -586,7 +586,7 @@ end
 % To visualize the kernels: plot(C)
 
 % The result in C is a [70 x 8] matrix that converts the previous 70-column
-% xHist matrix into a new seet of 8 columns to include in the design
+% xHist matrix into a new set of 8 columns to include in the design
 % matrix: xHist*C. Cute! So now, instead of 70 free parameters to capture
 % spike history, we reduce it to only 8.
 
@@ -629,7 +629,7 @@ N=length(spikeindex);				%...and total # spikes.
 Z(1)=sum(lambda5(1:spikeindex(1)));	%1st rescaled waiting time,
 for i=2:N							%... and the rest.
   Z(i)=sum(lambda5(spikeindex(i-1)+1:spikeindex(i)));
-end;
+end
 [eCDF, zvals]=ecdf(Z);				%Empirical CDF.
 mCDF = 1-exp(-zvals);				%Model CDF.
 

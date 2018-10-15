@@ -10,7 +10,7 @@
 
 %% Generate data using a polynomial of order 3 and add Gaussian noise:
 
-% nPts = 50;
+% nPts = 15;
 % pTrue = [0, 0.0105, -0.5849, 1.2220];
 % x = 1:nPts;
 % y = polyval(pTrue,x) + 2*randn(1,nPts);
@@ -64,13 +64,20 @@ MSEtest = sum(testResid.^2) ./ nPts;
 
 % figure
 subplot(3,1,2);
-plot(1:maxOrder,MSEtrain,'b-','LineWidth',2);
-hold on
-plot(1:maxOrder,MSEtest,'r-','LineWidth',2);
+if (max(MSEtest) - min(MSEtest)) > 10
+    semilogy(1:maxOrder,MSEtrain,'b-','LineWidth',2);
+    hold on
+    semilogy(1:maxOrder,MSEtest,'r-','LineWidth',2);
+    legend('Training Sample','Test Sample','Location','Northwest');
+else
+    plot(1:maxOrder,MSEtrain,'b-','LineWidth',2);
+    hold on
+    plot(1:maxOrder,MSEtest,'r-','LineWidth',2);
+    legend('Training Sample','Test Sample','Location','Northeast');
+end
 
 xlabel('Degree of Polynomial');
 ylabel('Mean Squared Error');
-legend('Training Sample','Test Sample');
 title('LOOCV')
 
 %% Let's do it with k-fold, where k = 5 or 10
@@ -108,6 +115,10 @@ for n = 1:nReps
             yHatTest = polyval(pFit,x(test));
             SSEtest = SSEtest + sum((yHatTest - y(test)).^2)/sum(test);
         end
+        % Note: This only works if 'kFold' divides evenly into nPts
+        % A more general algorithm uses the weighted sum. That is, you
+        % calculate the MSE for each fold, then the MSE for each fold
+        % contributes to the total in proportion to n_k/n
         MSEtrain(n,p) = SSEtrain / kFold;
         MSEtest(n,p) = SSEtest / kFold;
         
@@ -117,9 +128,17 @@ warning('on');
 
 % figure
 subplot(3,1,3);
-h1=errorbar(1:maxOrder,mean(MSEtrain),std(MSEtrain),'b-','LineWidth',2);
-hold on
-h2=errorbar(1:maxOrder,mean(MSEtest),std(MSEtest),'r-','LineWidth',2);
+if (max(mean(MSEtest)) - min(mean(MSEtest))) > 10
+    h1=semilogy(1:maxOrder,mean(MSEtrain),'b-','LineWidth',2);
+    hold on
+    h2=semilogy(1:maxOrder,mean(MSEtest),'r-','LineWidth',2);
+    legFlag = 1;
+else
+    h1=errorbar(1:maxOrder,mean(MSEtrain),std(MSEtrain),'b-','LineWidth',2);
+    hold on
+    h2=errorbar(1:maxOrder,mean(MSEtest),std(MSEtest),'r-','LineWidth',2);
+    legFlag = 0;
+end
 
 xlabel('Degree of Polynomial');
 ylabel('Mean Squared Error');
@@ -143,4 +162,8 @@ ax = axis;
 hl = line([ax(1),ax(2)],[minTestError, minTestError]);
 set(hl,'Color','k','LineStyle','--');
 
-legend([h1,h2],{'Training Sample','Test Sample'});
+if legFlag
+    legend([h1,h2],{'Training Sample','Test Sample'},'Location','Northwest');
+else
+    legend([h1,h2],{'Training Sample','Test Sample'},'Location','Northeast');
+end

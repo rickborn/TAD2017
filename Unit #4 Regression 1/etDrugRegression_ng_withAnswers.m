@@ -396,13 +396,13 @@ for k = 1:nPts
 end
 
 % TODO: Calculate the mean squared error of our cross-validated residuals.
-CVmse = sum(CVresiduals.^2) / nPts;
+MSEloocv = sum(CVresiduals.^2) / nPts;
 % QUESTION (Q10): What is the cross-validated mean squared error?
 
 % QUESTION (Q11): By how many percent does meanRSE underestimate the
 % prediction error as computed by cross-validation? Use 'CVmse' as the
 % gold standard.
-underEstPerCent = round(((CVmse - meanRSE) / CVmse) * 100);  % 13%
+underEstPerCent = round(((MSEloocv - meanRSE) / MSEloocv) * 100);  % 13%
 
 %% Compare actual residuals with the residuals obtained by cross-validation
 
@@ -410,11 +410,13 @@ figure
 h1 = plot(ds.hrs,rawResiduals,'ko');
 hold on;
 h2 = plot(ds.hrs,CVresiduals,'k*');
+xlabel('Time implanted (hrs)'); ylabel('residual');
+title('Full-model vs. CV Residuals');
+set(gca,'FontSize',14);
+
 ax = axis;
 % This corresponds to the regression line:
 line([ax(1),ax(2)],[0,0]);
-xlabel('Time implanted (hrs)'); ylabel('residual');
-title('Full-model vs. CV Residuals');
 legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','southeast');
 
 % THOUGHT QUESTION: How similar are the actual and cross-validated
@@ -426,6 +428,36 @@ legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','so
 % regression line fit to the entire data set; the asterisk is the residual
 % when comparing that data point to the regression line fit without that
 % data point in the data set.
+
+%% Bonus: Smaller 'k' for k-fold cross-validation
+
+% Trevor Hastie and Rob Tibshirani argue the LOOCV is not idea because it
+% doens't "shake up the data enough." That is, each time through our 'for'
+% loop, we're using nearly all of the data so the estimates from each fold
+% are highly correlated. A more general way of thinking about CV is
+% 'k-fold', where we partion the data into k groups, then successively use
+% different k-1 groups to train and the kth group to test. The consensus in
+% the field is that good values for k are 5 or 10. Note that LOOCV is
+% equivalent to k-fold where k = N.
+
+kFold = 5;
+rng default
+cvIdx = crossvalind('Kfold',nPts,kFold);
+MSEcv = 0;
+for k = 1:kFold
+    test = (cvIdx == k);
+    train = ~test;
+    nK = sum(test);
+    
+    % fit model to training data:
+    [betaFit] = regress(ds.amount(train),[const(train),ds.hrs(train)]);
+    % MSE for this test set:
+    MSEk = sum((ds.amount(test) - (betaFit(1) + betaFit(2).*ds.hrs(test))).^2) / nK;
+    % Each partition contributes to the total MSE in proportion to its size
+    MSEcv = MSEcv + (MSEk * (nK/nPts));
+end
+
+% MSEcv = 6.42
 
 %% Other estimates of prediction error
 

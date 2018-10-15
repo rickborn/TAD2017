@@ -71,7 +71,7 @@ title('Fig. 1: Rat position vs. time');
 
 % QUESTION (Q1): 
 % What was the duration of the entire experiment, in seconds (rounded to
-% nearest whole number)?
+% nearest second)?
 
 % QUESTION (Q2):
 % How many action potentials did the hippocampal neuron fire during the
@@ -292,7 +292,7 @@ q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
 qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
 % Compare qFit with alpha, mu and sigma calculated above:
-[qFit; [alpha,mu,sigma]]
+[qFit', [alpha;mu;sigma]]
 
 % But to see the down side of this approach, try making initial guesses
 % that are less well guided by the histogram (e.g. q0 = [0,0,0]). 
@@ -356,6 +356,9 @@ ratDirection = [0; diff(ratPosition) > 0];
 % Now we just throw this into the model as another covariate:
 [b3,dev3,stats3] = glmfit([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'poisson','link','log');
 
+% or with 'fitglm' to get more diagnostics:
+mdl3 = fitglm([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'linear','Distribution','Poisson');
+
 % QUESTION (Q10): Is the directional coefficient statistically significant?
 % Check the p value in our stats output variable for each predictor.
 %ANSWER
@@ -374,6 +377,50 @@ ylabel('Cum. residuals');
 ax = axis;
 hl = line([ax(1),ax(2)],[0,0]);
 set(hl,'Color','g','LineStyle','--');
+
+%% Model parameter interpretation:
+
+% Note that the log-link function changes how we interpret our beta
+% coefficients. We already saw how to interpret beta0 above for Model #1.
+% In the improved model (#3):
+%
+% Beta0:
+% exp(b3(1))*1000 tells us that our predicted spike rate at position 0 is
+% about 3e-10, or essentially 0. That's good.
+%
+% For the other parameters, we have to remember that:
+%   exp(a+b) = exp(a) * exp(b)
+%
+% which means that a unit increase in the covariate has a multiplicative
+% effect on the rate function:
+%
+% lambda_t = exp{b3(1) + b3(2)*position + b3(3)*position^2 + b3(4)*dir}
+%
+% so, for example, if we just consider the effect of position:
+% exp(b3(2)) = 1.9915
+% meaning that a 1 cm increase in the rat's position nearly doubles the
+% cell's firing rate, whereas the effect of the position-squared term:
+% exp(b3(3)) = 0.9946
+% means we get about a 1% decrease for a unit change here. However, as the
+% position increases, obviously position^2 increases much faster, so that
+% gradually the 1% decrease overtakes the 200% increase and drives our
+% predicted firing rate back down. Where in position this transition
+% happens will determine the center of our place field, so it makes perfect
+% sense that when we transformed our beta's into Gaussian parmeters (i.e.
+% alpha, mu and sigma), the 'mu' parameter was determined only by the beta
+% coefficients corresponding to the position and position^2 terms.
+% (i.e. for Model #2, mu=-b2(2)/2/b2(3);)
+%
+% And finally, direction has a massive multiplier effect of 26.45, as it
+% must in order to account for the fact that, at the exact same position,
+% the cell fires a lot in one direction and not at all in the opposite.
+
+% But NOTE: We can compute the same Gaussian description of the place field
+% using our new parameters. The new parameter, direction, just acts as a
+% multiplier of the same 3 transformed parameters:
+mu = -b3(2) / (2*b3(3));                            %...place field center,
+sigma = sqrt(-1/(2*b3(3)));                         %...place field size,
+alpha = exp( b3(1) - ((b3(2)^2) / (4*b3(3))));      %...max firing rate.
 
 %% Plot occupancy normalized histogram for each direction of motion separately
 
@@ -591,6 +638,7 @@ pBeta3 = stats3.p(4);	%... and significance level.
 % Brown EN, Barbieri R, Ventura V, Kass RE, Frank LM. The time-rescaling
 % theorem and its application to neural spike train data analysis. Neural
 % Comput. 2002 Feb;14(2):325-46. PubMed PMID: 11802915.
+% *Available on D2L Course web site
 
 % Count the total # of spikes
 nSpikes = length(spikeTimes);
@@ -660,4 +708,51 @@ legend([h1,h2],{'KS Plot','95% CI'},'Location','Northwest');
 % Kolmogorov-Smirnov plots?
 %
 % ANSWER: Model #3 does a reasonably good job of capturing the structure in
-% our spike data, whereas model #2 does not.
+% our spike data, whereas model #2 does not. Note that this is a slightly
+% more powerful statement than what we could do with, e.g. AIC or CI's for
+% our beta parameters. These later metrics are helpful for deciding whether
+% one model is better than another in a relative sense, but they don't tell
+% us how well our model is doing at capturing the overall statisitcal
+% structure of our data in an absolute sense. The KS plots do exactly this,
+% so they are useful for reassuring us that our chosen framework--i.e the
+% Poisson point process model and a maximum likelihood approach--is a good
+% one for the type of data we are trying to explain.
+
+%% Bonus: Visualize the model's predicted rate on the raw data:
+
+figure('position',[50 50 1200 600]);
+yyaxis left
+plot(expTime,ratPosition);
+hold on
+hp=plot(expTime(spikeIndex),ratPosition(spikeIndex),'k.');
+set(hp,'MarkerSize',12);
+xlabel('Time (seconds)');
+ylabel('Position (cm)')
+title('Rat position and predicted spike rate vs. time');
+yyaxis right
+plot(expTime,lambda3.*1000);
+ylabel('Predicted rate (spikes/sec)')
+legend(hp,'Spikes','Location','Northwest');
+
+%% Bonus: Form the fit using logistic regression
+
+[b4,dev4,stats4] = glmfit([ratPosition,ratPosition.^2,ratDirection],...
+    spikeTrain,'binomial','link','logit');
+
+[pSpike, pCIlow, pCIhi] = glmval(b4,[ratPosition,ratPosition.^2,ratDirection],...
+    'logit',stats4);
+
+figure('position',[50 50 1200 600]);
+yyaxis left
+plot(expTime,ratPosition);
+hold on
+hp=plot(expTime(spikeIndex),ratPosition(spikeIndex),'k.');
+set(hp,'MarkerSize',12);
+xlabel('Time (seconds)');
+ylabel('Position (cm)')
+title('Rat position and predicted spike probability vs. time');
+yyaxis right
+%plot(expTime,[pSpike,pSpike-pCIlow,pSpike+pCIhi]);
+plot(expTime,pSpike);
+ylabel('Spiking probability')
+legend(hp,'Spikes','Location','Northwest');

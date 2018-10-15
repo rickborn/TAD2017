@@ -60,6 +60,7 @@ nr = 4;
 nc = 3;
 
 %% plot the rat's position over time
+
 main = figure('position',[50 50 1200 600]);
 subplot(nr,1,1)
 plot(expTime,ratPosition);
@@ -87,7 +88,7 @@ title('Fig. 1: Rat position vs. time');
 % fired. But we also know that rat's position at every moment in time, so
 % we can use these two pieces of information to derive what we want to
 % know. Because we are using these variables at subsequent stages of the
-% exercise, we will
+% exercise, we will generate them sequentially.
 
 % TODO: Make a binary variable that is size 177761 x 1 that has a 1 at each
 % time point where the neuron fired a spike and a 0 elsewhere. Name that
@@ -98,9 +99,9 @@ title('Fig. 1: Rat position vs. time');
 spikeTrain = ;
 
 % TODO: Using spikeTrain, find the time-based index of each spike and name
-% that variable 'spikeIndex' Hint: It should be 220 x 1, but instead of
-% having a time value, it will be the appropriate index into the 'expTime'
-% vector.
+% that variable 'spikeIndex' Hint: It should be #-of-spikes x 1, but
+% instead of having a time value, it will be the appropriate index into the
+% 'expTime' vector.
 spikeIndex = ;
 
 % We then use 'spikeIndex' to plot a dot of the rat's position at the time
@@ -148,6 +149,8 @@ axis([-10,110,ax(3),ax(4)]);
 % 'occupancyHist'
 subplot(nr,nc,nc+2)
 !!! YOUR CODE HERE
+occupancyHist = ;
+bar(positionBins,occupancyHist);
 
 xlabel('Position [cm]')			%Label the axes.
 ylabel('Time/bin (s)')
@@ -156,8 +159,9 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% TODO: Now make a histogram of the positions where spikes occurred that is 
-% adjusted for the rat's occupancy time in each position bin.
+% Now make a histogram of the positions where spikes occurred that is 
+% adjusted for the rat's occupancy time in each position bin. To do this,
+% we simply divide our 'spikeHist' by the 'occupancyHist':
 subplot(nr,nc,nc+3)
 bar(positionBins,spikeHist ./ occupancyHist);
 xlabel('Position [cm]')			%Label the axes.
@@ -309,8 +313,8 @@ alpha = exp(b2(1)-b2(2)^2/4/b2(3));   %...max firing rate.
 %
 %   -sum(log(poisspdf(y,lambda)))
 %
-% We then use 'fminsearch' to find the parameters, q, that minimize the
-% value returned by 'fitFunGauss2'.
+% We then use 'fminsearch' to find the values of the parameters, q, that
+% minimize the value returned by 'fitFunGauss2'.
 
 % THOUGHT QUESTION: Why do we have our function return *minus* the sum of
 % the log likelihood? HINT: Think about what 'fminsearch' is doing and the
@@ -514,10 +518,10 @@ alt_dAIC = (dev1 + 2*2) - (dev2 + 2*3);     % compare with dAIC above
 % QUESTION (Q15): What is the standard error for beta0 (i.e. the
 % y-intercept) in Model #1?
 
-% TODO: Calculate the 95% CI for the parameters of Model 1.
-% HINT: Recall that the linear model is a prediction of log(lambda). What
-% do we do to interpret our beta's in terms of spike rate?
-%
+% TODO: Calculate the 95% CI for the parameters of Model 1 using normal
+% assumptions. HINT: Recall that the linear model is a prediction of
+% log(lambda). What do we do to interpret our beta's in terms of spike
+% rate?
 !!! Your code here!
 CI1 = ;
 

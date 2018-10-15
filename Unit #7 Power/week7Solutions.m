@@ -57,10 +57,48 @@ FPrate = (sum(FP) / nSims) * 100;
 % is d' = 0.57. How many animals should you run in each group in order to
 % have an 80% probability of detecting an effect of this size?
 
+desiredPower = 0.80;
+dPrimeSim = 0.57;
 % In this case, we can use the formula:
-n = sampsizepwr('t2',[1,1],1.57,0.80);
-
+n = sampsizepwr('t2',[1,1],1+dPrimeSim,desiredPower);
 % ANSWER: 50
+
+% But we could also get an answer via simulation:
+% One strategy would be to first get a rough answer using coarse sampling,
+% then zoom in around it.
+coarseFlag = 0;
+if coarseFlag
+    nMin = 5; nMax = 105; sampInt = 10; nSims = 10000;
+else
+    nMin = 45; nMax = 55; sampInt = 1; nSims = 100000;
+end
+allN = [nMin:sampInt:nMax]';
+allPowSim = zeros(length(allN),1);
+rng default
+for k = 1:length(allN)
+    % Generate our samples:
+    allSamples = randn(allN(k),2,nSims);
+    % To simulate a real d-prime, we just add our dPrime to one of the samples.
+    allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
+    
+    % Now run our 2-sample t-test:
+    [h,~] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
+    % Calculate the power:
+    allPowSim(k) = sum(h) / nSims;
+end
+nReqd = min(allN(allPowSim >= desiredPower));
+
+% Plot the relationship between n and power
+figure
+plot(allN,allPowSim,'bo-');
+hold on
+xlabel('N');
+ylabel('Power');
+ax = axis;
+h1 = line([ax(1),ax(2)],[desiredPower,desiredPower]);
+set(h1,'Color','k','LineStyle','--')
+title(['Simulated effect size, dPrime = ' num2str(dPrimeSim)]);
+grid on
 
 %% QUESTION (Q3)
 
@@ -73,7 +111,7 @@ n = sampsizepwr('t2',[1,1],1.57,0.80);
 % gives us the desired power.
 
 dPrime = 0.50:0.001:1;
-pwrout = sampsizepwr('t2',[1,1],1+dPrime,[],20);
+pwrout = sampsizepwr('t2',[0,1],dPrime,[],20);
 dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
 
 % ANSWER: 0.91
@@ -167,3 +205,7 @@ powerSim = sum(h) / nSims;
 % simulation with a 2-tailed test, I get a simulated power value of 0.1075.
 pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5);
 % Ans. 0.1077
+
+% Or we could just tell the function to use a 1-tailed test:
+pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5,'Tail','right');
+% Ans. 0.1788

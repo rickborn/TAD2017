@@ -1,4 +1,6 @@
-%% Candy production ANOVA
+%% candyANOVAtest_withAnswers.m: ANOVA bootstrap for final exam
+% 
+% Candy production ANOVA
 % This exercise is based on data from the federal reserve, accessed via
 % kaggle: https://www.kaggle.com/rtatman/us-candy-production-by-month
 %
@@ -9,6 +11,7 @@
 % Questions: How does candy production vary throughout the year?
 %            Which months have the greatest candy production?
 %            Which season has the greatest candy production?
+
 %% Import and plot data
 
 % NOTE: RTB filled in the 2 NaN's with column means and converted it to an
@@ -82,8 +85,8 @@ hold on
 myAlpha=0.05;
 bootFsSorted = sort(bootFs);
 
-idxLo = ceil((myAlpha/2) * nPerm);   % index corresponding to lower bound
-idxHi = nPerm - idxLo;               % index corresponding to upper bound
+idxLo = floor((myAlpha/2) * nPerm);     % index corresponding to lower bound
+idxHi = ceil((1 - myAlpha/2) * nPerm);  % index corresponding to upper bound
 
 F95CIpercentileLow = bootFsSorted(idxLo);
 F95CIpercentileHi = bootFsSorted(idxHi);

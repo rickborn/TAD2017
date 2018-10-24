@@ -114,7 +114,7 @@ dPrime = 0.50:0.001:1;
 pwrout = sampsizepwr('t2',[0,1],dPrime,[],20);
 dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
 
-% ANSWER: 0.91
+% ANSWER: 0.9090
 
 %% QUESTION (Q4) Meta-analysis 1
 
@@ -165,7 +165,7 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 % statistically significant effect are going to get their paper published.
 % What will be the median *published* effect size? For this analysis,
 % determine your fitness for publication using a 1-tailed (i.e. right tail)
-% 2-sample t-test.
+% 2-sample t-test and a criterion for publication of p < 0.05.
 
 % Constants for now; would be passed as arguments to a function:
 n = 5;
@@ -185,7 +185,7 @@ allDprime = squeeze(diff(mean(allSamples)));    % SD = 1
     'Tail','Right');
 
 % median published effect size:
-medPubDprime = median (allDprime(logical(h')));
+medPubDprime = median(allDprime(logical(h')));
 % Ans.: 1.31
 
 %% QUESTION (Q7): Publication bias, effect size, and power
@@ -199,13 +199,12 @@ medPubDprime = median (allDprime(logical(h')));
 powerSim = sum(h) / nSims;
 % Ans.: 0.1777
 
-% NOTE: The MATLAB function gives a different answer, because we are only
-% evaluating a 1-tailed test above. I think this makes sense, but I need to
-% think about it more. YES! It makes sense. If I re-run the above
-% simulation with a 2-tailed test, I get a simulated power value of 0.1075.
+% NOTE: If we re-run the above simulation using a 2-tailed test, we get a
+% simulated power value of 0.1075.
 pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5);
 % Ans. 0.1077
 
-% Or we could just tell the function to use a 1-tailed test:
+% We could also compute the power using 'sampsizepwr' and specifying a
+% one-tailed test:
 pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5,'Tail','right');
 % Ans. 0.1788

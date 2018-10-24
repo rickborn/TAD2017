@@ -43,7 +43,7 @@ S2 = normrnd(1+dPrime,1,n,nSim);
 [~,pVals] = ttest2(S2,S1);
 
 % Idea is to base test on *published* p-values, so we are interested in
-% those <= 0.05. We want to know what percentage of p-values fall within
+% those p <= 0.05. We want to know what percentage of p-values fall within
 % intervals of:
 % 
 % [0 to 0.01],[0.01 to 0.02],[0.02 to 0.03], [0.03 to 0.04], [0.04 to 0.05]

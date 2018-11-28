@@ -64,7 +64,7 @@ if pFlag
     legend('Individual sims','Median');
     
     figure
-    bar(binCtrs,cumRunCounts ./ sum(cumRunCounts));
+    h1=bar(binCtrs,cumRunCounts ./ sum(cumRunCounts));
     hold on
     xlabel('Run length'); ylabel('Probability');
     title('Distribution of runs of heads');
@@ -73,7 +73,9 @@ if pFlag
     % parameter of one. In our case, a run of 'one' corresponds to a 'z' of
     % zero. This is the geometric distribution.
     yVals = nbinpdf(binCtrs-1,1,0.5);
-    plot(binCtrs,yVals,'ro-','MarkerFaceColor','r');
+    h2=plot(binCtrs,yVals,'ro-','MarkerFaceColor','r');
+    
+    legend([h1,h2],{'Empirical','Geometric'});
     
 end
 

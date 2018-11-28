@@ -26,7 +26,8 @@
 
 fileName = 'es5bRaw.xlsx'; % big effect
 %fileName = 'js25aRaw.xlsx'; % small effect; used in class
-ds = dataset('xlsfile',fileName);
+%ds = dataset('xlsfile',fileName);
+ds = readtable(fileName);
 
 % Each row is a single trial during which the animal viewed a stochastic
 % motion display whose signal strength is varied systematically (Coh) and
@@ -256,3 +257,43 @@ ax = axis;
 axis([ax(1),ax(2),0,1]);
 legend('Stim','No Stim','Location','Northwest');
 set(gca,'FontSize',14); % make text larger
+
+%% Bonus compare classification performance of LR, Linear Discrim and SVM
+
+rng shuffle
+
+% Train on 80% of data and test on remaining 20%
+kFold = 5;
+idx = crossvalind('Kfold',length(ds.Mstim),kFold);
+
+% Look at the average performance on the test data
+propCorrLR = zeros(kFold,1);
+propCorrLD = zeros(kFold,1);
+propCorrSVM = zeros(kFold,1);
+
+for k = 1:kFold
+    test = (idx == k);
+    train = ~test;
+    
+    % fit LR model to training data
+    modelspec = 'PDchoice ~ 1 + Mstim + Coh';
+    mdlLR = fitglm(ds(train,:),modelspec,'Distribution','binomial');
+    [yPred] = predict(mdlLR,ds(test,[1,2]));
+    propCorrLR(k) = sum((yPred >= 0.5) == ds.PDchoice(test)) / sum(test);
+    
+    % linear discriminant analysis using 'classify'
+    sample = [ds.Mstim(test),ds.Coh(test)];
+    training = [ds.Mstim(train),ds.Coh(train)];
+    group = [ds.PDchoice(train)];
+    % Can specify other discriminant functions:
+    % 'diaglinear','quadratic','diagquadratic','mahalanobis'
+    class = classify(sample,training,group,'linear');
+    propCorrLD(k) = sum((class == ds.PDchoice(test))) / sum(test);
+    
+    % support vector machine
+    % Can specify other kernel functions:
+    % 'gaussian' or 'rbf','linear','polynomial'
+    mdlSVM = fitcsvm(training,group,'KernelFunction','linear','ClassNames',[0,1]);
+    label = predict(mdlSVM,sample);
+    propCorrSVM(k) = sum((label == ds.PDchoice(test))) / sum(test);
+end

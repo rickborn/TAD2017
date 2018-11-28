@@ -73,6 +73,8 @@ for k=1:nPerm
     % re-format into original shape:
     
     % perform a 1-way ANOVA:
+    % NOTE: You can suppress the display of the ANOVA table:
+    % [] = anova1(data,[],'off');
     
     % extract the F-statistic:
     permFs(k) = Tbl{2,5};

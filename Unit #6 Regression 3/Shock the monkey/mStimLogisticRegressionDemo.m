@@ -12,6 +12,7 @@
 % for each condition. see: mstimdatagen.m
 %
 % RTB wrote it, 26 January 2017
+% RTB added classifier comparison, November 2018
 
 % Concepts covered: 
 % 1. Creating summary statistics (proportions) by matching rows in raw data 

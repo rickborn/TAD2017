@@ -61,7 +61,7 @@ muSqDiffExp = mean((muExp(1:20)- muCtrl(1:20)).^2);
 allData = num(:,3:22);
 
 % We want to randomly assign each subject to the rx vs. ctrl group
-nPerm = 100000;
+nPerm = 10000;
 allRho = zeros(nPerm,1);
 allDiff = zeros(nPerm,1);
 for k = 1:nPerm
@@ -136,7 +136,7 @@ text(1,200,tStr);
 %% Intuition about H0 distribution of chi2 statistic
 
 % Generate the null distribution under expectation of uniformity
-nSim = 100000;
+nSim = 10000;
 nBins = length(E);
 allChiSq = zeros(nSim,1);
 N = numel(allNum);

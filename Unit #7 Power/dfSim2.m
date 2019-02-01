@@ -31,6 +31,7 @@ function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
 % Elapsed time is 37.2 seconds on my Lenovo T61
 % Elapsed time is 28.0 seconds on my Dell Latitude E7440
 % Elapsed time is 21.9 seconds on my Dell Ultrabook
+% Elapsed time is 9.1 seconds on my MS Surface (15 Dec. 2018)
 
 % re-init random number generator
 rng shuffle;

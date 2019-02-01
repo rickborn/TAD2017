@@ -49,6 +49,7 @@ for k = 1:nSims
     % We use the 'conv' trick to find the end of runs of >= kStreak
     w = conv(x,u);
     t = find(w >= kStreak);
+    % need to make sure we don't run off of the end:
     if max(t) == length(x)
         t = t(1:end-1);
     end

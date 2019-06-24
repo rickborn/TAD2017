@@ -375,7 +375,7 @@ meanRSE = sum(rawResiduals.^2) / nPts;
 
 % The meanRSE is a measure of how well our model describes the data. But it
 % is overly optimistic, because it is measuring performance using the SAME
-% data that was used to fit the model. That is, the model is optimized to
+% data that were used to fit the model. That is, the model is optimized to
 % fit precisely this data. But how well would it do on another data set?
 % Well, we could either repeat the experiment, and see how well the model
 % fit to the first data set predicted the new experimental values.

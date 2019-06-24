@@ -155,7 +155,7 @@ end
 % P = 1 / 1 + exp[-(b0 + b1*stim + b2*corr)]
 !!! Your code here
 
-%% TODO: Determine the equivalent visual stimulus for microstimulation
+%% TODO: Determine the "equivalent visual stimulus" for microstimulation
 
 % We want to know not just "if" microstimulation had an effect; we would
 % also like to estimate the magnitude of the effect. Look at the plot you
@@ -192,3 +192,16 @@ end
 % choices? Give your answer as a positive percentage to 1 decimal place.
 
 % QUESTION (Q11): Upload your final figure to Learning Catalytics.
+
+%% Bonus questions
+
+% 1) The GLM is a beutiful framework, because we get so much "for free,"
+% such as standard errors on our betas as well as significance tests for
+% whether or not they are different from 0. But let's suppose this wasn't
+% the case. How would you design your own procedure to explicitly test our
+% primary null hypothesis, which is that microstimulation has no effect on
+% the monkey's choices?
+
+% 2) We have a nice point estimate an "effect size" (or "equivalent visual
+% stimulus") of 14.4% coh, but we would also like to know its precision.
+% Design a procedure to determine the standard error for the effect size.

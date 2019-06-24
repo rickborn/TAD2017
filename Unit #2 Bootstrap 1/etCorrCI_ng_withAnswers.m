@@ -437,8 +437,20 @@ ci = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha,'type','percentile'
 
 %% Extra: bias corrected and accelerated CI
 
-rng default
-ci2 = bootci(nBoot,{@corr,ds15.LSAT,ds15.GPA},'alpha',myAlpha,'type','bca');
+% create a version of 'corr' that only returns a scalar:
+myCorr = @(x)diag(corr(x),-1);
+
+% NOTE: Chronux has it's own 'jackknife' function that interferes with
+% MATLAB's 'jackknife' called by 'bootci' to do BCA. Solution is to remove
+% it from our path for this analysis.
+a = which('jackknife');
+if ~contains(a,'MATLAB')    % Chronux version is interfering
+    rmpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
+    ci2 = bootci(nBoot,{myCorr,[ds15.LSAT,ds15.GPA]},'alpha',myAlpha,'type','bca');
+    addpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
+else
+    ci2 = bootci(nBoot,{myCorr,[ds15.LSAT,ds15.GPA]},'alpha',myAlpha,'type','bca');
+end
 
 % TODO: Draw lines for the 95%CI on our histogram in dark blue ink:
 l3=line([ci2(1),ci2(1)],[bsAxis(3),bsAxis(4)],'Color',[0,0,0.5],'LineWidth',2);

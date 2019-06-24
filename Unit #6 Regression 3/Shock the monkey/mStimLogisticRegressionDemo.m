@@ -298,3 +298,5 @@ for k = 1:kFold
     label = predict(mdlSVM,sample);
     propCorrSVM(k) = sum((label == ds.PDchoice(test))) / sum(test);
 end
+
+mean([propCorrLR, propCorrLD, propCorrSVM])

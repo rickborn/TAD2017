@@ -187,6 +187,7 @@ allDprime = squeeze(diff(mean(allSamples)));    % SD = 1
 % median published effect size:
 medPubDprime = median(allDprime(logical(h')));
 % Ans.: 1.31
+% The mean is 1.34
 
 %% QUESTION (Q7): Publication bias, effect size, and power
 

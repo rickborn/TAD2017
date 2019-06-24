@@ -4,7 +4,7 @@ function [D,pHgH,pHgM] = GVTsim(nShots,kStreak,pHit,nSims,pFlag)
 % "Surprised by the Gambler's and Hot Hand Fallacies? A Truth in the Law of
 % Small Numbers"
 %
-% D = GVTsim(100,3,0.5,10000,1);
+% [D,pHgH,pHgM] = GVTsim(100,3,0.5,10000,1);
 %
 % Inputs:
 % - nShots: total # of tries in each simulation (default = 100)

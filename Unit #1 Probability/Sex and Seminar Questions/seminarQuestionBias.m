@@ -58,7 +58,7 @@ nMF = length(manFirst);
 nTotal = nWF + nMF;
 
 xBins = min(allSeminars):4:max(allSeminars);
-figure
+fig1 = figure('Position',[50 10 600 900],'Name','Sex and the Seminar');
 subplot(3,1,1);
 histogram(manFirst,xBins);
 hold on
@@ -349,15 +349,16 @@ text(xTxt,yTxt,txtStr);
 % Variables to hold the results of our simulations:
 allEffectSizes = zeros(nSims,1);
 allDPrimes = zeros(nSims,1);
+allQperSeminar = zeros(nSims,nSeminars);
 
 % Calculate the effect size the authors actually obtained:
 realEffectSize = mean(womanFirst) - mean(manFirst);
 
-rng('default');
+rng('shuffle');
 for k = 1:nSims
-    % How many questions were asked at each seminar?
-    allQperSeminar = poissrnd(nQperSeminar,1,nSeminars);
-    maxQ = max(allQperSeminar);
+    % How many questions were asked at each seminar for this simulation?
+    allQperSeminar(k,:) = poissrnd(nQperSeminar,1,nSeminars);
+    maxQ = max(allQperSeminar(k,:));
     
     % Simulate data: each row is a question, each column a seminar. Assume a
     % value of '1' means a woman asked the question; '0' means a man asked it.
@@ -368,18 +369,18 @@ for k = 1:nSims
     % we'll put them at the end:
     for j = 1:nSeminars
         % How many questions do we need to replace in the seminar (column)?
-        nReplace = maxQ - allQperSeminar(1,j);
+        nReplace = maxQ - allQperSeminar(k,j);
         % Create a column of NaN's of the appropriate size:
         thisNaNpad = ones(nReplace,1) .* NaN;
         % Paste this over the end of the data column, sparing the appropriate
         % number of questions (rows) above:
-        allData(allQperSeminar(1,j)+1:end,j) = thisNaNpad;
+        allData(allQperSeminar(k,j)+1:end,j) = thisNaNpad;
     end
     
     % Sort according to who asked the 1st questions. We can simulate either
     % with the original error (i.e. counting all rows) or with the 'fix',
     % which is just to exclude the 1st question.
-    fixFlag = 0;    % fix the bias (i.e. make it go away)
+    fixFlag = 0;    % 1 = fix the bias (i.e. make it go away)
     if fixFlag
         simManFirst = allData(2:end,allData(1,:) == 0);
         simWomanFirst = allData(2:end,allData(1,:) == 1);
@@ -405,7 +406,7 @@ for k = 1:nSims
 end
 
 % plot the results of our simlulation:
-figure
+fig2 = figure('Position',[700 10 600 900],'Name','Poisson Question Distribution');
 subplot(3,1,1);
 histogram(allEffectSizes);
 hold on
@@ -444,16 +445,24 @@ text(xTxt,yTxt,txtStr);
 % a mistake? To start to get some insight into this question, let's look at
 % the distribution of the actual number of questions asked:
 subplot(3,1,2);
-histogram(allQperSeminar);
-xlabel('# of Questions asked');
+histogram(allQperSeminar(:));
+xlabel(['Actual # of questions asked (\lambda = ' num2str(nQperSeminar) ')']);
 ylabel('# of Seminars');
 
-% This is the Poisson distribution for a lambda of 5. Right away we can see
-% that there is more mass for the smaller numbers of questions:
-% sum(allQperSeminar <= 5) is about 147 (will vary per simulation)
-% sum(allQperSeminar > 5) is about 102
-% So this pushes our biases towards bigger values than when we assumed that
-% all seminars had exactly 5 seminars.
+% This is the Poisson distribution for a lambda of 'nQperSeminar'. Right
+% away we can see that there is more mass for the smaller numbers of
+% questions. Compare these two:
+%
+%   sum(allQperSeminar(:) < nQperSeminar) 
+%   sum(allQperSeminar(:) > nQperSeminar)
+%
+% Or better:
+%
+%   (sum(allQperSeminar(:) < nQperSeminar) - sum(allQperSeminar(:) > nQperSeminar)) / nSims
+%
+% Compared to when we assumed all seminars had exactly the same number of
+% questions asked ('nQperSeminar'), we are now replacing more of those
+% values with smaller than with larger values.
 
 % But there is something else going on, too. Recall the formula we derived
 % for the mean bias as a function of the number of questions asked per
@@ -474,6 +483,11 @@ subplot(3,1,3);
 plot(xQuestions,yBias,'b-','LineWidth',2);
 xlabel('# of Questions asked');
 ylabel('Mean bias');
+
+% draw a line to indicate the value of lambda:
+ax = axis;
+hl = line([nQperSeminar,nQperSeminar],[ax(3),ax(4)]);
+set(hl,'Color','r','LineStyle','--');
 
 % I would never have come to these conclusions without having done the
 % simulations! In fact, my intution going in was that the mean of the

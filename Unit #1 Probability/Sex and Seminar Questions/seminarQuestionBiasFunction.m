@@ -1,5 +1,27 @@
-% seminarQuestionBias.m
+function [realEffectSize,biasEffectSize,pValue1] = seminarQuestionBiasFunction(nSeminars,nQperSeminar,nSims,pFlag)
+
+% seminarQuestionBiasFunction.m: simulation of biases due to sorting
 %
+% [rES,bES,p] = seminarQuestionBiasFunction(249,6,10000,1);
+%
+% Inputs:
+% - nSeminars: total # of seminars in our sample (default = 249)
+% - nQperSeminar: # of questions asked at each seminar (default = 6)
+% - nSims: # of simulations to run (default = 10,000)
+% - pFlag: 1 = make plots; 0 = no plots
+%
+% Outputs:
+% - realEffectSize: effect size obtained from actual data
+% - biasEffectSize: effect size due to the sorting bias
+% - pValue1: p-value for realEffectSize > biasEffectSize
+%
+% RTB wrote it, 14 December 2017
+% RTB revised for TAD answers, original name was sexQuestionDemo.m
+% RTB converted to a function, 27 June 2019 (Lamont library, killing time
+% before the Herchel Smith dinner)
+
+%% Introduction
+
 % Do women ask more questions at a seminar if a woman asks the 1st question?
 % 
 % Prompted by a tweet from Duncan Green referring to a post on his blog:
@@ -9,8 +31,7 @@
 % "Women’s visibility in academic seminars: women ask fewer questions than
 % men," Alecia Carter, Alyssa Croft, Dieter Lukas, Gillian Sandstrom
 %
-% RTB wrote it, 14 December 2017
-% RTB revised for TAD answers, original name was sexQuestionDemo.m
+
 
 % Concepts covered:
 % 1. histograms for summarizing data
@@ -57,18 +78,20 @@ nWF = length(womanFirst);
 nMF = length(manFirst);
 nTotal = nWF + nMF;
 
-xBins = min(allSeminars):4:max(allSeminars);
-fig1 = figure('Position',[50 10 600 900],'Name','Sex and the Seminar');
-subplot(3,1,1);
-histogram(manFirst,xBins);
-hold on
-histogram(womanFirst,xBins);
-xlabel({'Percentage of questions asked by women minus';...
-    'percentage of attendees who were women (% points)'});
-ylabel('Number of seminars');
-legend('Man 1st','Woman 1st');
-set(gca,'YGrid','on')
-title('University seminars, relative share of questions asked by women')
+if pFlag
+    xBins = min(allSeminars):4:max(allSeminars);
+    fig1 = figure('Position',[50 10 600 900],'Name','Sex and the Seminar');
+    subplot(3,1,1);
+    histogram(manFirst,xBins);
+    hold on
+    histogram(womanFirst,xBins);
+    xlabel({'Percentage of questions asked by women minus';...
+        'percentage of attendees who were women (% points)'});
+    ylabel('Number of seminars');
+    legend('Man 1st','Woman 1st');
+    set(gca,'YGrid','on')
+    title('University seminars, relative share of questions asked by women')
+end
 
 %% Calculate an effect size, d-prime
 
@@ -79,16 +102,18 @@ title('University seminars, relative share of questions asked by women')
 
 % NOTE: This formula assumes that the two distributions have the same
 % variance. We can test for this with an F-test:
-[h,p] = vartest2(womanFirst,manFirst);  % p = 0.1123
+[~,~] = vartest2(womanFirst,manFirst);  % p = 0.1123
 % We fail to reject H0 of equal variances, so we can proceed as if they are equal.
 
 % https://en.wikipedia.org/wiki/Sensitivity_index
 dPrimeReal = (mean(womanFirst) - mean(manFirst)) / ...
     sqrt(0.5*(var(womanFirst) + var(manFirst)));
 
-tStr = sprintf('dPrime = %0.2f',dPrimeReal);
-ax = axis;
-text(-70,2/3*ax(4),tStr);
+if pFlag
+    tStr = sprintf('dPrime = %0.2f',dPrimeReal);
+    ax = axis;
+    text(-70,2/3*ax(4),tStr);
+end
 
 %% Do women tend to ask more questions when a woman asks the first question?
 
@@ -184,9 +209,12 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 
 % Eventually, I would probably convert the script to a function, in which
 % case, the below would be variables passed to the function:
-nQperSeminar = 6;
-nSeminars = length(manFirst) + length(womanFirst); % i.e. 249 in original study
-nSims = 10000;
+if nargin < 4, pFlag = 0; end
+if nargin < 3, nSims = 10000; end
+if nargin < 2, nQperSeminar = 6; end
+if nargin < 1
+    nSeminars = length(manFirst) + length(womanFirst); % i.e. 249 in original study
+end
 
 % Variables to hold the results of our simulations:
 allEffectSizes = zeros(nSims,1);
@@ -198,7 +226,7 @@ realEffectSize = mean(womanFirst) - mean(manFirst);
 % Setting the random number generator to 'default' ensures that we will all
 % get the exact same answer (provided we run the simulation the same number
 % of times). You would ordinarily NOT do this. Why?
-rng('default');
+rng('shuffle');
 for k = 1:nSims
     % Simulate data: each row is a question, each column a seminar. Assume a
     % value of '1' means a woman asked the question; '0' means a man asked it.
@@ -230,32 +258,36 @@ for k = 1:nSims
     allDPrimes(k) = (mean(simWFscores) - mean(simMFscores)) / ...
         sqrt(0.5*(var(simWFscores) + var(simMFscores)));
 end
+% average effect size due to the sorting bias:
+biasEffectSize = mean(allEffectSizes);
 
 % plot the results of our simlulation:
-subplot(3,1,2);
-histogram(allEffectSizes);
-hold on
-ax = axis;
-
-% draw a solid black line for the actual effect size
-line([realEffectSize,realEffectSize],[ax(3),ax(4)],'Color','k','LineWidth',2);
-
-% Calculate a 95% confidence interval for the simulation:
-myAlpha = 0.05;     % MATLAB convention for determining 95% CI
-idxHi = ceil(nSims * (1 - myAlpha/2));
-idxLo = floor(nSims * (myAlpha/2));
-sortedEffectSizes = sort(allEffectSizes);
-simCI = [sortedEffectSizes(idxLo),sortedEffectSizes(idxHi)];
-line([simCI(1),simCI(1)],[ax(3),ax(4)],'Color','b','LineStyle','--');
-line([simCI(2),simCI(2)],[ax(3),ax(4)],'Color','b','LineStyle','--');
-
-xlabel('Effect size due to sorting bias');
-ylabel('# of simulations');
-tStr = sprintf('# of seminars: %d; Questions per seminar: %d',nSeminars,nQperSeminar);
-% NOTE: I am an old 'C' programmer, so I like 'sprintf'. But you could
-% generate the appropriate text string in a more MATLAB-y way with:
-%tStr = ['# of seminars: ' num2str(nSeminars) '; Questions per seminar: ' num2str(nQperSeminar)];
-title(tStr);
+if pFlag
+    subplot(3,1,2);
+    histogram(allEffectSizes);
+    hold on
+    ax = axis;
+    
+    % draw a solid black line for the actual effect size
+    line([realEffectSize,realEffectSize],[ax(3),ax(4)],'Color','k','LineWidth',2);
+    
+    % Calculate a 95% confidence interval for the simulation:
+    myAlpha = 0.05;     % MATLAB convention for determining 95% CI
+    idxHi = ceil(nSims * (1 - myAlpha/2));
+    idxLo = floor(nSims * (myAlpha/2));
+    sortedEffectSizes = sort(allEffectSizes);
+    simCI = [sortedEffectSizes(idxLo),sortedEffectSizes(idxHi)];
+    line([simCI(1),simCI(1)],[ax(3),ax(4)],'Color','b','LineStyle','--');
+    line([simCI(2),simCI(2)],[ax(3),ax(4)],'Color','b','LineStyle','--');
+    
+    xlabel('Effect size due to sorting bias');
+    ylabel('# of simulations');
+    tStr = sprintf('# of seminars: %d; Questions per seminar: %d',nSeminars,nQperSeminar);
+    % NOTE: I am an old 'C' programmer, so I like 'sprintf'. But you could
+    % generate the appropriate text string in a more MATLAB-y way with:
+    %tStr = ['# of seminars: ' num2str(nSeminars) '; Questions per seminar: ' num2str(nQperSeminar)];
+    title(tStr);
+end
 
 pValue1 = sum(allEffectSizes >= realEffectSize) / nSims;
 % Why do I do this? Can a p-value ever be 0?
@@ -264,10 +296,12 @@ if pValue1 == 0
 end
 
 % print p-value on plot
-xTxt = (floor(ax(1)/5) + 1) * 5;
-yTxt = 0.75 * ax(4);
-txtStr = sprintf('p = %0.3f',pValue1);
-text(xTxt,yTxt,txtStr);
+if pFlag
+    xTxt = (floor(ax(1)/5) + 1) * 5;
+    yTxt = 0.75 * ax(4);
+    txtStr = sprintf('p = %0.3f',pValue1);
+    text(xTxt,yTxt,txtStr);
+end
 
 % QUESTION: What is the mean effect size, rounded to the nearest whole
 % number, if there are only 4 questions asked at each seminar?
@@ -305,26 +339,28 @@ text(xTxt,yTxt,txtStr);
 % this would not take into account the variability due to sampling error.
 %% Bonus: Histogram of simulated d-primes
 
-subplot(3,1,3);
-histogram(allDPrimes);
-hold on
-ax = axis;
-line([dPrimeReal,dPrimeReal],[ax(3),ax(4)],'Color','k','LineWidth',2);
-xlabel('d-prime due to sorting bias');
-ylabel('# of simulations');
-tStr = sprintf('Questions per seminar = %d', nQperSeminar);
-title(tStr);
-
-pValue2 = sum(allDPrimes >= dPrimeReal) / nSims;
-if pValue2 == 0
-    pValue2 = 1 / (nSims + 1);
+if pFlag
+    subplot(3,1,3);
+    histogram(allDPrimes);
+    hold on
+    ax = axis;
+    line([dPrimeReal,dPrimeReal],[ax(3),ax(4)],'Color','k','LineWidth',2);
+    xlabel('d-prime due to sorting bias');
+    ylabel('# of simulations');
+    tStr = sprintf('Questions per seminar = %d', nQperSeminar);
+    title(tStr);
+    
+    pValue2 = sum(allDPrimes >= dPrimeReal) / nSims;
+    if pValue2 == 0
+        pValue2 = 1 / (nSims + 1);
+    end
+    
+    % print p-value on plot
+    xTxt = (0.1 * (ax(2) - ax(1))) + ax(1);
+    yTxt = 0.75 * ax(4);
+    txtStr = sprintf('p = %0.3f',pValue2);
+    text(xTxt,yTxt,txtStr);
 end
-
-% print p-value on plot
-xTxt = (0.1 * (ax(2) - ax(1))) + ax(1);
-yTxt = 0.75 * ax(4);
-txtStr = sprintf('p = %0.3f',pValue2);
-text(xTxt,yTxt,txtStr);
 
 %% Bonus: Variable number of questions per seminar
 
@@ -406,64 +442,68 @@ for k = 1:nSims
 end
 
 % plot the results of our simlulation:
-fig2 = figure('Position',[700 10 600 900],'Name','Poisson Question Distribution');
-subplot(3,1,1);
-histogram(allEffectSizes);
-hold on
-ax = axis;
-
-% draw a solid black line for the actual effect size
-line([realEffectSize,realEffectSize],[ax(3),ax(4)],'Color','k','LineWidth',2);
-
-% Calculate a 95% confidence interval for the simulation:
-myAlpha = 0.05;     % MATLAB convention for determining 95% CI
-idxHi = ceil(nSims * (1 - myAlpha/2));
-idxLo = floor(nSims * (myAlpha/2));
-sortedEffectSizes = sort(allEffectSizes);
-simCI = [sortedEffectSizes(idxLo),sortedEffectSizes(idxHi)];
-line([simCI(1),simCI(1)],[ax(3),ax(4)],'Color','b','LineStyle','--');
-line([simCI(2),simCI(2)],[ax(3),ax(4)],'Color','b','LineStyle','--');
-
-xlabel('Effect size due to sorting bias');
-ylabel('# of simulations');
-tStr = sprintf('# of seminars: %d; Avg. # Q per seminar: %d',nSeminars,nQperSeminar);
-title(tStr);
-
-pValue3 = sum(allEffectSizes >= realEffectSize) / nSims;
-% Why do I do this? Can a p-value ever be 0?
-if pValue3 == 0
-    pValue3 = 1 / (nSims + 1);
+if pFlag
+    fig2 = figure('Position',[700 10 600 900],'Name','Poisson Question Distribution');
+    subplot(3,1,1);
+    histogram(allEffectSizes);
+    hold on
+    ax = axis;
+    
+    % draw a solid black line for the actual effect size
+    line([realEffectSize,realEffectSize],[ax(3),ax(4)],'Color','k','LineWidth',2);
+    
+    % Calculate a 95% confidence interval for the simulation:
+    myAlpha = 0.05;     % MATLAB convention for determining 95% CI
+    idxHi = ceil(nSims * (1 - myAlpha/2));
+    idxLo = floor(nSims * (myAlpha/2));
+    sortedEffectSizes = sort(allEffectSizes);
+    simCI = [sortedEffectSizes(idxLo),sortedEffectSizes(idxHi)];
+    line([simCI(1),simCI(1)],[ax(3),ax(4)],'Color','b','LineStyle','--');
+    line([simCI(2),simCI(2)],[ax(3),ax(4)],'Color','b','LineStyle','--');
+    
+    xlabel('Effect size due to sorting bias');
+    ylabel('# of simulations');
+    tStr = sprintf('# of seminars: %d; Avg. # Q per seminar: %d',nSeminars,nQperSeminar);
+    title(tStr);
+    
+    pValue3 = sum(allEffectSizes >= realEffectSize) / nSims;
+    % Why do I do this? Can a p-value ever be 0?
+    if pValue3 == 0
+        pValue3 = 1 / (nSims + 1);
+    end
+    
+    % print p-value on plot
+    xTxt = (floor(ax(1)/5) + 1) * 5;
+    yTxt = 0.75 * ax(4);
+    txtStr = sprintf('p = %0.3f',pValue3);
+    text(xTxt,yTxt,txtStr);
 end
-
-% print p-value on plot
-xTxt = (floor(ax(1)/5) + 1) * 5;
-yTxt = 0.75 * ax(4);
-txtStr = sprintf('p = %0.3f',pValue3);
-text(xTxt,yTxt,txtStr);
 
 % This seems to have a very profound effect on our simulation. Did we make
 % a mistake? To start to get some insight into this question, let's look at
 % the distribution of the actual number of questions asked:
-subplot(3,1,2);
-histogram(allQperSeminar(:));
-xlabel(['Actual # of questions asked at any given seminar (\lambda = ' num2str(nQperSeminar) ')']);
-ylabel('# of Seminars');
-
-% This is the Poisson distribution for a lambda of 'nQperSeminar'. Right
-% away we can see that there is more mass for the smaller numbers of
-% questions. Compare these two:
-%
-%   sum(allQperSeminar(:) < nQperSeminar) 
-%   sum(allQperSeminar(:) > nQperSeminar)
-%
-% Or better:
-
-fewerQxs = (sum(allQperSeminar(:) < nQperSeminar) - ...
-            sum(allQperSeminar(:) > nQperSeminar)) / nSims;
-ax = axis;
-xText = ax(1) + 0.4*(ax(2)-ax(1));
-yText = ax(3) + 0.9*(ax(4) - ax(3));
-text(xText,yText,['Excess of low-Q seminars per sample: ',num2str(fewerQxs,3)]);
+if pFlag
+    subplot(3,1,2);
+    histogram(allQperSeminar(:));
+    xlabel(['Actual # of questions asked at any given seminar (\lambda = ' num2str(nQperSeminar) ')']);
+    ylabel('# of Seminars');
+    
+    % This is the Poisson distribution for a lambda of 'nQperSeminar'. Right
+    % away we can see that there is more mass for the smaller numbers of
+    % questions. Compare these two:
+    %
+    %   sum(allQperSeminar(:) < nQperSeminar)
+    %   sum(allQperSeminar(:) > nQperSeminar)
+    %
+    % Or better:
+    
+    fewerQxs = (sum(allQperSeminar(:) < nQperSeminar) - ...
+                sum(allQperSeminar(:) > nQperSeminar)) / nSims;
+    ax = axis;
+    xText = ax(1) + 0.4*(ax(2)-ax(1));
+    yText = ax(3) + 0.9*(ax(4) - ax(3));
+    text(xText,yText,['Excess of low-Q seminars per sample: ',num2str(fewerQxs,3)]);
+end
 
 % Compared to when we assumed all seminars had exactly the same number of
 % questions asked ('nQperSeminar'), we are now replacing more of those
@@ -485,15 +525,18 @@ text(xText,yText,['Excess of low-Q seminars per sample: ',num2str(fewerQxs,3)]);
 % Plot the effect of # Q per seminar on the mean bias:
 xQuestions = 1:maxQ;
 yBias = 100 ./ xQuestions;
-subplot(3,1,3);
-plot(xQuestions,yBias,'b-','LineWidth',2);
-xlabel('# of Questions asked');
-ylabel('Mean bias');
 
-% draw a line to indicate the value of lambda:
-ax = axis;
-hl = line([nQperSeminar,nQperSeminar],[ax(3),ax(4)]);
-set(hl,'Color','r','LineStyle','--');
+if pFlag
+    subplot(3,1,3);
+    plot(xQuestions,yBias,'b-','LineWidth',2);
+    xlabel('# of Questions asked');
+    ylabel('Mean bias');
+    
+    % draw a line to indicate the value of lambda:
+    ax = axis;
+    hl = line([nQperSeminar,nQperSeminar],[ax(3),ax(4)]);
+    set(hl,'Color','r','LineStyle','--');
+end
 
 % I would never have come to these conclusions without having done the
 % simulations! In fact, my intution going in was that the mean of the

@@ -452,3 +452,17 @@ text(xTxt,yTxt,tStr);
 % that obtained analytically by calculating the pooled variance for a
 % ratio. But when I asked Jan about this, he said that it was kind of hairy
 % and full of assumptions, and he would just do the bootstrap.
+
+%% %% Bonus: 95% Confidence Interval for our "effect size."
+
+myAlpha = 0.05; % for 95% CI
+idxHi = ceil(nBoot * (1 - myAlpha/2));
+idxLo = floor(nBoot * (myAlpha/2));
+sortedEVSstar = sort(EVSstar);
+ciHi = sortedEVSstar(idxHi);
+ciLo = sortedEVSstar(idxLo);
+
+hl = line([ciHi,ciHi],[ax(3),ax(4)]);
+set(hl,'Color','r','LineStyle','--');
+hl = line([ciLo,ciLo],[ax(3),ax(4)]);
+set(hl,'Color','r','LineStyle','--');

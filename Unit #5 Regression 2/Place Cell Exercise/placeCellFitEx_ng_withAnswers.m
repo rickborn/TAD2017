@@ -227,8 +227,7 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q6): What kind of statistical distribution does our model
-% resemble?
+% QUESTION: What kind of statistical distribution does our model resemble?
 % ANSWER: a Gaussian or normal distribution
 
 %% Re-cast the model for easier interpretation of beta coefficients
@@ -318,19 +317,19 @@ yyaxis right
 plot(expTime,ratPosition);
 ylabel('Position (cm)');
 
-% QUESTION (Q7): Describe the relationship between the residuals of our
+% QUESTION (Q6): Describe the relationship between the residuals of our
 % model and the position of the rat over time.
 
-% ANSWER (A7): The residuals increase when the rat moves in the
+% ANSWER (A6): The residuals increase when the rat moves in the
 % positive direction, don't change when the rat is not moving at either
 % ends of the track and then decrease when the rat moves in the negative
 % direction.
 
-% QUESTION (Q8): Describe the source of this relationship. Think about what
+% QUESTION (Q7): Describe the source of this relationship. Think about what
 % the current model "knows" (i.e. what predictor variables it contains) and
 % what the cell is actually doing.
 
-% ANSWER (A8): The firing rate of the cell depends on both position and
+% ANSWER (A7): The firing rate of the cell depends on both position and
 % direction of motion, but only position is accounted for in our current
 % model. At the same positions, the cell fires a lot when the rat moves in
 % one direction, but not at all when it moves in the opposite, so the model
@@ -339,10 +338,10 @@ ylabel('Position (cm)');
 % too high when it moves in the negative direction (which produces negative
 % residuals).
 
-% QUESTION (Q9): If we had the "correct" model, what should the cumulative
+% QUESTION (Q8): If we had the "correct" model, what should the cumulative
 % residuals look like in a similar plot?
 
-% ANSWER (A7): They would be randomly scattered and close to 0. Note that
+% ANSWER (A8): They would be randomly scattered and close to 0. Note that
 % even a "perfect" model would not produce residuals that were all zero,
 % because you always have some irreducible noise that is, by definition,
 % not fittable. What are the sources of such noise?
@@ -359,9 +358,9 @@ ratDirection = [0; diff(ratPosition) > 0];
 % or with 'fitglm' to get more diagnostics:
 mdl3 = fitglm([ratPosition,ratPosition.^2,ratDirection],spikeTrain,'linear','Distribution','Poisson');
 
-% QUESTION (Q10): Is the directional coefficient statistically significant?
+% QUESTION (Q9): Is the directional coefficient statistically significant?
 % Check the p value in our stats output variable for each predictor.
-%ANSWER
+% ANSWER (A9):
 pBeta3 = stats3.p(4);    % darn tootin'
 
 % and now re-do our cumulative residuals plot: much better
@@ -473,7 +472,7 @@ errorbar(positionBins,lambdaDown.*1000,CIloDown.*1000,CIhiDown.*1000,'r');
 xlabel('Position (cm)');
 ylabel('FR (spikes/s)');
 
-% QUESTION (Q19): Save this figure (fig. #1) as a jpeg and upload it to
+% QUESTION (Q10): Save this figure (fig. #1) as a jpeg and upload it to
 % Learning Catalytics.
 
 %%  Measures of goodness of fit
@@ -490,10 +489,10 @@ ylabel('FR (spikes/s)');
 % better models) and then add a penalty term "2*p," where p is the number
 % of parameters in the model.
 
-% QUESTION (Q12): Why do we include a penalty for the number of parameters
+% QUESTION (Q11): Why do we include a penalty for the number of parameters
 % in the model?
 
-% ANSWER (A12): We can always improve our fit by adding more parameters to
+% ANSWER (A11): We can always improve our fit by adding more parameters to
 % a model, so we need some sort of penalty that discourages such
 % overfitting. AIC is a principled way of doing this. It uses information
 % theory to balance between goodness-of-fit and model complexity. For more
@@ -521,20 +520,20 @@ AIC2 = -2 * logLikelihood2 + (2*3);
 % TODO: Calculate the difference in AIC values for Models 1 and 2:
 dAIC = AIC1 - AIC2;
 
-% QUESTION (Q13): What is the difference in AIC values between Model 1 and
+% QUESTION (Q12): What is the difference in AIC values between Model 1 and
 % Model 2?
 %
-% ANSWER: 636.
+% ANSWER (A12): 636.
 
-% QUESTION (Q14): What does this difference in AIC values mean? 
+% QUESTION (Q13): What does this difference in AIC values mean? 
 %
-% ANSWER: In general, we just pick the model with the lower AIC value, but
-% we can also think of it in terms of the parameter penalty: the fact that
-% model 2 has an AIC of ~636 less than the AIC of model 1 means that model
-% 2 would still be preferable to model 1 even if it had 636/2 (= 318) more
-% parameters than it actually does.
+% ANSWER (A13): In general, we just pick the model with the lower AIC
+% value, but we can also think of it in terms of the parameter penalty: the
+% fact that model 2 has an AIC of ~636 less than the AIC of model 1 means
+% that model 2 would still be preferable to model 1 even if it had 636/2 (=
+% 318) more parameters than it actually does.
 
-% NOTE: We can also more easily calculate AIC from the deviance 
+% NOTE: We can more easily calculate AIC from the deviance 
 % (The deviance is a generalization of the residual sum of squares for all 
 % exponential family distributions. Sum of squares is only appropriate for 
 % gaussian distributions.)
@@ -549,8 +548,10 @@ alt_dAIC = (dev1 + 2*2) - (dev2 + 2*3);     % compare with dAIC above
 % intervals, because maximum likelihood estimators are approximately normal
 % for sufficiently large n.
 
-% QUESTION (Q15): What is the standard error for beta0 (i.e. the
+% QUESTION (Q14): What is the standard error for beta0 (i.e. the
 % y-intercept) in Model #1?
+%
+% ANSWER (A14): 0.15
 
 % TODO: Calculate the 95% CI for the parameters of Model 1.
 CI1 =[b1 - 1.96*stats1.se, b1 + 1.96*stats1.se];
@@ -558,13 +559,14 @@ CI1 =[b1 - 1.96*stats1.se, b1 + 1.96*stats1.se];
 % do we do to interpret our beta's in terms of spike rate? 
 eCI1 = exp(CI1) .* 1000;	%Exponentiate Model 1 CIs.
 
-% QUESTION (Q16): For Model #1, what is the 95% confidence interval for the
+% QUESTION (Q15): For Model #1, what is the 95% confidence interval for the
 % neuron's spiking rate at position x=0, in spikes per second?
 %
-% ANSWER: [0.4401    0.7855]
+% ANSWER (A15): [0.4401    0.7855]
+%
 % Conceptually, this is one of the more important questions in this
-% exercise. Given the power of today's software, any moron can perform
-% regression. The tricky part is in understanding the physical
+% exercise. Given the power of today's software, any moron can fit fancy
+% regression models. The tricky part is in understanding the physical
 % interpretation of our fit parameters. The first critical insight is that,
 % for the Poisson point process model, we are predicting the logarithm of
 % the rate function, not the rate function itself. So we need to
@@ -577,25 +579,34 @@ eCI1 = exp(CI1) .* 1000;	%Exponentiate Model 1 CIs.
 % TODO: Compute the 95% CI for parameters of Model 2.
 CI2 = [b2 - 1.96*stats2.se, b2 + 1.96*stats2.se];
 
-% QUESTION (Q17): Based on your 95% CI, can we say that the
+% QUESTION (Q16): Based on your 95% CI, can we say that the
 % position-squared term significantly (at alpha < 0.05) improves the model
 % fit?
+%
+% ANSWER (A16): Yes. Since of 95% CI for the position-squared term [-0.0063
+% -0.0046] does not include the null value of 0, we can reject H0.
+%
+% NOTE: The null value of 0 only applies to the un-exponentiated CI for our
+% betas. Once we exponentiate, nothing can contain 0. If we are looking at
+% the exponentiated values, then we have to use a null value of 1.
 
 % We can also perform a direct signifcance test based on each parameter's
 % maximum likelihood estimate and its standard error. This is called the
 % 'Wald test', and we also get it for free with glmfit
 %
-% QUESTION (Q18): What is the p-value for the position-squared term in
+% QUESTION (Q17): What is the p-value for the position-squared term in
 % model #2?
+%
+% ANSWER (A17): 
 pBeta2 = stats2.p(3);
 
 
 %% Comparing model #3 (with direction term) vs. model #2
 
-% QUESTION (Q19): What is the difference in AIC values between Model 2 and
+% QUESTION (Q18): What is the difference in AIC values between Model 2 and
 % Model 3?
 %
-% ANSWER: 
+% ANSWER (A18): 
 dAIC = (dev2 + 2*3) - (dev3 + 2*4);
 
 % Model comparison with the Wald test: difference in deviances; the degrees
@@ -609,7 +620,11 @@ p2vs3 = 1 - chi2cdf(dev2-dev3,1);
 CI3 = [b3(4)-2*stats3.se(4), b3(4)+2*stats3.se(4)];
 pBeta3 = stats3.p(4);	%... and significance level.
 
-% QUESTION (Q20): What do these results tell us about our three models?
+% QUESTION (Q19): What do these results tell us about our three models?
+%
+% ANSWER (A19): All of our measures indicate that a) the direction
+% parameter significantly improves the model and b) model 3 is better than
+% both of the other models.
 
 %% Bonus: Kolmogorov-Smirnov plots to evalute models
 
@@ -704,19 +719,20 @@ axis([0,1,0,1]);
 title('KS plot of rescaled data for model #3');
 legend([h1,h2],{'KS Plot','95% CI'},'Location','Northwest');
 
-% QUESTION (Q21): What do you conclude from a comparison of the two
+% QUESTION (Q20): What do you conclude from a comparison of the two
 % Kolmogorov-Smirnov plots?
 %
-% ANSWER: Model #3 does a reasonably good job of capturing the structure in
-% our spike data, whereas model #2 does not. Note that this is a slightly
-% more powerful statement than what we could do with, e.g. AIC or CI's for
-% our beta parameters. These later metrics are helpful for deciding whether
-% one model is better than another in a relative sense, but they don't tell
-% us how well our model is doing at capturing the overall statisitcal
-% structure of our data in an absolute sense. The KS plots do exactly this,
-% so they are useful for reassuring us that our chosen framework--i.e the
-% Poisson point process model and a maximum likelihood approach--is a good
-% one for the type of data we are trying to explain.
+% ANSWER (A20): Model #3 does a reasonably good job of capturing the
+% structure in our spike data, whereas model #2 does not. Note that this is
+% a slightly more powerful statement than what we could do with, e.g. AIC
+% or CI's for our beta parameters. These later metrics are helpful for
+% deciding whether one model is better than another in a relative sense,
+% but they don't tell us how well our model is doing at capturing the
+% overall statisitcal structure of our data in an absolute sense. The KS
+% plots do exactly this, so they are useful for reassuring us that our
+% chosen framework--i.e the Poisson point process model and a maximum
+% likelihood approach--is a good one for the type of data we are trying to
+% explain.
 
 %% Bonus: Visualize the model's predicted rate on the raw data:
 

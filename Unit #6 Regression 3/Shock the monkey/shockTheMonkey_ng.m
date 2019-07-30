@@ -77,15 +77,15 @@ for k = 1:nConds
     allDataProp(k,PROP) = pHat;
     allDataProp(k,[CILO,CIHI]) = pCI;
 end
-% logical for indexing:
+% need to convert to a logical for indexing:
 stimIdx = logical(allDataProp(:,MSTIM));
 
 % NOTE: The 'errorbar' function plots error bars that are L(i) + U(i) long.
 % That is, it doesn't treat our CI as an interval, but rather as a distance
 % from the mean to the end of each error bar. So we need to subtract each
 % from the mean:
-allDataProp(:,CILO) = allDataProp(:,PROP) - allDataProp(:,CILO); % lower error bar
-allDataProp(:,CIHI) = allDataProp(:,CIHI) - allDataProp(:,PROP); % upper error bar
+allDataProp(:,CILO) = allDataProp(:,PROP) - allDataProp(:,CILO); % length of lower error bar
+allDataProp(:,CIHI) = allDataProp(:,CIHI) - allDataProp(:,PROP); % length of upper error bar
 
 % Now plot: stim trials in red; no-stim trials in black
 figure
@@ -205,3 +205,14 @@ end
 % 2) We have a nice point estimate an "effect size" (or "equivalent visual
 % stimulus") of 14.4% coh, but we would also like to know its precision.
 % Design a procedure to determine the standard error for the effect size.
+
+% 3) The logistic regression model you built can be used as a classifier.
+% The idea is that you would fit the model to some random subset of the
+% data, then ask how well that model predicts the animal's performance on
+% the remaining trials (i.e. those NOT used to fit the model). This is
+% referred to as the 'cross-validated performance' of our classifier
+% (similar to the cross-validation we did in week #4). Determine the
+% performance of the logistic regression model using 5-fold
+% cross-validation (HINT: 'crossvalind') and compare this performance with
+% that of a linear discriminant analysis ('classify') and that of a support
+% vector machine ('fitcsvm').

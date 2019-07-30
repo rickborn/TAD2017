@@ -33,7 +33,7 @@
 % corresponds to a 95% confidence interval, what is the probability that
 % the water exceeded the 51-foot height of the levee?
 
-p = 1 - normcdf(51,49,9/1.96);
+p1 = 1 - normcdf(51,49,9/1.96);
 % ANSWER: 0.33
 %
 % Explanation: In order to use 'normcdf' we need to convert the confidence
@@ -48,11 +48,12 @@ p = 1 - normcdf(51,49,9/1.96);
 % height of the levees, or 51 feet), so to find the probability of the
 % water level exceeding 51 feet, we subtract the area from the total area
 % of 1. We could also use:
-p = normcdf(51,49,9/1.96,'upper');
+p2 = normcdf(51,49,9/1.96,'upper');
 
 % Suppose you didn't know about 'normcdf' (or, for that matter, 'normpdf',
 % but you had extensive experience with 'randn'.
 nSim = 100000;
+% Normal distribution with a mean of 49 and an sd of 4.6:
 mySimHgts = (randn(nSim,1) .* (9/1.96)) + 49;
 pSim = sum(mySimHgts > 51) / nSim;
 
@@ -62,7 +63,7 @@ pSim = sum(mySimHgts > 51) / nSim;
 % QUESTION 2: What is the probability if the "margin of error" corresponds
 % to the standard error?
 
-p = normcdf(51,49,9,'upper');
+p3 = normcdf(51,49,9,'upper');
 % ANSWER: 0.41
 
 % Instead of giving away the error, let's calculate it from some fake
@@ -90,7 +91,7 @@ ylabel('# of Years');
 
 % calculate the measurement error:
 mySD = std(ds.Predicted - ds.Measured);
-p = 1 - normcdf(51,49,mySD);
+p4 = 1 - normcdf(51,49,mySD);
 % ANSWER: 0.336
 
 % BONUS: calculate confidence intervals for the parameters:

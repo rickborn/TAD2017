@@ -259,14 +259,12 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q6): What kind of statistical distribution does our model
-% resemble?
 
 %% Re-cast the model for easier interpretation of beta coefficients
 
-% We notice that model #2 looks sort of like a Gaussian (ans. to Q6 above!)
-% And if we compare the model to the formula for a Gaussian, we notice that
-% we can transform one into the other:
+% Notice that model #2 looks sort of like a Gaussian. And if we compare
+% the model to the formula for a Gaussian, we notice that we can transform
+% one into the other:
 %
 % Gaussian: lambda_t = alpha * exp((ratPosition - mu).^2 / (2*sigma.^2))
 % Model 2: lambda_t = exp(beta0 + beta1*ratPosition + beta2*ratPosition^2);
@@ -364,14 +362,14 @@ yyaxis right
 plot(expTime,ratPosition);
 ylabel('Position (cm)');
 
-% QUESTION (Q7): Describe the relationship between the residuals of our
+% QUESTION (Q6): Describe the relationship between the residuals of our
 % model and the position of the rat over time.
 
-% QUESTION (Q8): Describe the source of this relationship. Think about what
+% QUESTION (Q7): Describe the source of this relationship. Think about what
 % the current model "knows" (i.e. what predictor variables it contains) and
 % what the cell is actually doing.
 
-% QUESTION (Q9): If we had the "correct" model, what should the cumulative
+% QUESTION (Q8): If we had the "correct" model, what should the cumulative
 % residuals look like in a similar plot?
 
 %% Model #3: Add direction of motion to the model
@@ -385,7 +383,7 @@ ratDirection = ;
 % TODO: Add this to the model as another covariate:
 [b3,dev3,stats3] = glmfit();
 
-% QUESTION (Q10): Is the directional coefficient statistically significant?
+% QUESTION (Q9): Is the directional coefficient statistically significant?
 % Check the p-value in our stats output variable for each predictor. What
 % is the relevant p-value for ratDirection?
 
@@ -459,7 +457,7 @@ set(gca,'XTick',0:50:100);  % Easier to see
 ax = axis;
 axis([-10,110,ax(3),ax(4)]);
 
-% QUESTION (Q11): Save this figure (fig. #1) as a jpeg and upload it to
+% QUESTION (Q10): Save this figure (fig. #1) as a jpeg and upload it to
 % Learning Catalytics.
 
 %%  Measures of goodness of fit
@@ -476,7 +474,7 @@ axis([-10,110,ax(3),ax(4)]);
 % better models) and then add a penalty term "2*p," where p is the number
 % of parameters in the model.
 
-% QUESTION (Q12): Why do we include a penalty for the number of parameters
+% QUESTION (Q11): Why do we include a penalty for the number of parameters
 % in the model?
 
 % Recall that what we are actually predicting is the Poisson rate
@@ -497,10 +495,10 @@ AIC2 = ;
 % TODO: Calculate the difference in AIC values for Models 1 and 2:
 dAIC = AIC1 - AIC2;
 
-% QUESTION (Q13): What is the difference in AIC values between Model 1 and
+% QUESTION (Q12): What is the difference in AIC values between Model 1 and
 % Model 2?
 
-% QUESTION (Q14): What does this difference in AIC values mean? 
+% QUESTION (Q13): What does this difference in AIC values mean? 
 
 % NOTE: We can also more easily calculate AIC from the deviance 
 % (The deviance is a generalization of the residual sum of squares for all 
@@ -515,7 +513,7 @@ alt_dAIC = (dev1 + 2*2) - (dev2 + 2*3);     % compare with dAIC above
 % intervals, because maximum likelihood estimators are approximately normal
 % for sufficiently large n.
 
-% QUESTION (Q15): What is the standard error for beta0 (i.e. the
+% QUESTION (Q14): What is the standard error for beta0 (i.e. the
 % y-intercept) in Model #1?
 
 % TODO: Calculate the 95% CI for the parameters of Model 1 using normal
@@ -525,13 +523,13 @@ alt_dAIC = (dev1 + 2*2) - (dev2 + 2*3);     % compare with dAIC above
 !!! Your code here!
 CI1 = ;
 
-% QUESTION (Q16): For Model #1, what is the 95% confidence interval for the
+% QUESTION (Q15): For Model #1, what is the 95% confidence interval for the
 % neuron's spiking rate at position x=0, in spikes per second?
 
 % TODO: Compute the 95% CI for the parameters of Model 2.
 CI2 = ;
 
-% QUESTION (Q17): Based on your 95% CI, can we say that the
+% QUESTION (Q16): Based on your 95% CI, can we say that the
 % position-squared term significantly (at alpha < 0.05) improves the model
 % fit?
 
@@ -539,13 +537,13 @@ CI2 = ;
 % maximum likelihood estimate and its standard error. This is called the
 % 'Wald test', and we also get it for free with glmfit
 %
-% QUESTION (Q18): What is the p-value for the position-squared term in
+% QUESTION (Q17): What is the p-value for the position-squared term in
 % model #2?
 
 
 %% Comparing model #3 (with direction term) vs. model #2
 
-% QUESTION (Q19): What is the difference in AIC values between Model 2 and
+% QUESTION (Q18): What is the difference in AIC values between Model 2 and
 % Model 3?
 dAIC = ;
 
@@ -554,7 +552,7 @@ dAIC = ;
 CI3 = ;
 pBeta3 = ;	%... and significance level.
 
-% QUESTION (Q20): What do these results tell us about our three models?
+% QUESTION (Q19): What do these results tell us about our three models?
 
 %% Bonus: Kolmogorov-Smirnov plots to evalute models
 
@@ -652,5 +650,5 @@ axis([0,1,0,1]);
 title('KS plot of rescaled data for model #3');
 legend([h1,h2],{'KS Plot','95% CI'},'Location','Northwest');
 
-% QUESTION (Q21): What do you conclude from a comparison of the two
+% QUESTION (Q20): What do you conclude from a comparison of the two
 % Kolmogorov-Smirnov plots?

@@ -1,16 +1,17 @@
-function [D,pHgH,pHgM] = GVTsim(nShots,kStreak,pHit,nSims,pFlag)
+function [D,pHgH,pHgM] = GVTsim(nShots,kStreak,pHit,nSims,inverseSampleFlag,pFlag)
 
 % Simulation of bias in counting streaks after Miller & Sanjurjo 2016
 % "Surprised by the Gambler's and Hot Hand Fallacies? A Truth in the Law of
 % Small Numbers"
 %
-% [D,pHgH,pHgM] = GVTsim(100,3,0.5,10000,1);
+% [D,pHgH,pHgM] = GVTsim(100,3,0.5,10000,0,1);
 %
 % Inputs:
 % - nShots: total # of tries in each simulation (default = 100)
 % - kStreak: # of hits that constitute a "streak" (default = 3)
 % - pHit: probability of a hit on each try (default = 0.5)
 % - nSims: # of simulations to run (default = 10,000)
+% - inverseSampleFlag: use inverse sample to eliminate bias (default = 0)
 % - pFlag: 1 = plot histogram (default)
 %
 % Outputs:
@@ -28,11 +29,15 @@ function [D,pHgH,pHgM] = GVTsim(nShots,kStreak,pHit,nSims,pFlag)
 %
 % RTB wrote it, 09 November 2018, airplane trip from San Diego to Boston
 
-if nargin < 5, pFlag = 1; end
+if nargin < 6, pFlag = 1; end
+if nargin < 5, inverseSampleFlag = 0; end
 if nargin < 4, nSims = 10000; end
 if nargin < 3, pHit = 0.5; end
 if nargin < 2, kStreak = 3; end
 if nargin < 1, nShots = 100; end
+
+% shuffle the random number generator:
+rng shuffle
 
 % init variables to hold results of simulations:
 D = zeros(nSims,1);
@@ -48,7 +53,16 @@ for k = 1:nSims
     % calculate p(hit|k hits)
     % We use the 'conv' trick to find the end of runs of >= kStreak
     w = conv(x,u);
-    t = find(w >= kStreak);
+    
+    % Different ways to do sampling: biased vs. "inverse sampling"
+    % For the latter we don't count nested runs as multiple samples. That
+    % is, we only sample the first instance of each run of kStreak.
+    if inverseSampleFlag
+        L = w >= kStreak;
+        t = find(diff(L) == 1) + 1;
+    else
+        t = find(w >= kStreak);
+    end
     % need to make sure we don't run off of the end:
     if max(t) == length(x)
         t = t(1:end-1);
@@ -59,7 +73,13 @@ for k = 1:nSims
     % calculate p(hit|k misses)
     % same but first convert misses to hits to find miss streaks
     w = conv(~x,u);
-    t = find(w >= kStreak);
+    if inverseSampleFlag
+        L = w >= kStreak;
+        t = find(diff(L) == 1) + 1;
+    else
+        t = find(w >= kStreak);
+    end
+    
     if max(t) == length(x)
         t = t(1:end-1);
     end

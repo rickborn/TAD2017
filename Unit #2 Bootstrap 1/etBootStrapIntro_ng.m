@@ -204,7 +204,7 @@ rng default  % For reproducibility
 % of code to accomplish what we did earlier with the for loop: resample
 % from the sample of 15 graduate schools (ds15) nBoot times, generating a
 % correlation coefficient between GRE scores and GPA each time. The output
-% should be called 'bsRhos' and will be a 5000 x 1 matrix of correlation
+% should be called 'bsRhos' and will be a 10,000 x 1 matrix of correlation
 % coefficients.
 bsRhos = ;
 
@@ -217,7 +217,6 @@ bsAxis = axis;
 seRhoBoot = std(bsRhos);
 
 % QUESTION (Q9): What is the mean of this distribution to 2 decimal places?
-% mean(bsRhos)
 
 % QUESTION (Q10): What is the s.d. of this distribution to 4 decimal places?
 

@@ -22,9 +22,9 @@
 %% Read in the data from a Newsome lab microstimulation experiment
 
 % Load the file into a table structure called 'ds'
-fileName ='es5bRaw.xlsx';   % big effect
+%fileName ='es5bRaw.xlsx';   % big effect
 %fileName = 'js25aRaw.xlsx'; % small effect
-%fileName ='js92dRaw.xlsx';  % sig. interaction term
+fileName ='js92dRaw.xlsx';  % sig. interaction term
 %fileName ='js21aRaw.xlsx';  % whopper; brute force EVS breaks
 %fileName ='es2aRaw.xlsx';   % medium effect
 

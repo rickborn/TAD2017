@@ -2,6 +2,7 @@
 %
 % estimate GVT bias as a function of n and k
 % see GVTsim.m for details
+% adding silly comment
 
 allN = [50,100,200,500];
 allK = [1,2,3];

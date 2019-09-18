@@ -68,7 +68,9 @@ myAlpha = 0.05;
 nRx = 11037;        % number of patients in the treatment group (ASA)
 nStrokeRx = 119;    % number of Strokes in the treatment group
 nCtrl = 11034;      % number of patients in the control group (placebo)
-nStrokeCtrl = 98;  % number of MIs in the control group
+nStrokeCtrl = 98;  % number of Strokes in the control group
+figName = 'Stroke Data';
+
 nTotal = nRx + nCtrl;
 
 %% Calculate the actual ratio of rates of disease: an odds ratio
@@ -110,7 +112,7 @@ end
 
 %% Make a histogram of our bootstrap replicates of OR
 
-figure('Name','Stroke Data');
+figure('Name',figName);
 subplot(2,1,1);
 hist(orStar,20);
 hold on;
@@ -163,8 +165,17 @@ oddsratio = @(g1,g2) (sum(g1,'omitnan')/sum(1-g1,'omitnan'))...
 ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
 
 % now use 'bootci':
-rng default
-ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+% NOTE: Chronux has it's own 'jackknife' function that interferes with
+% MATLAB's 'jackknife' called by 'bootci' to do BCA. Solution is to remove
+% it from our path for this analysis.
+a = which('jackknife');
+if ~contains(a,'MATLAB')    % Chronux version is interfering
+    rmpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
+    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+    addpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
+else
+    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+end
 
 % The above is a good example of how a defect in MATLAB requires one to use
 % some ingenuity in coding. I intially did this in the logical way, which
@@ -189,6 +200,9 @@ ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
 % work of generating the bootstrap distribution and sorting it, so now we
 % just loop through and find the value of alpha that puts the null value of
 % 1 outside of the lower bound.
+
+% NOTE: This cell won't work for the MI data, since our bootstrapped
+% distribution won't contain the null value.
 ciLow = confInterval(1);
 pAlpha = myAlpha;
 
@@ -310,6 +324,11 @@ nRx = 11037;    % number of patients in the treatment group (ASA)
 nMIrx = 104;    % number of MIs in the treatment group
 nCtrl = 11034;  % number of patients in the control group (placebo)
 nMIctrl = 189;  % number of MIs in the control group
+nTotal = nRx + nCtrl;
+figName = 'MI Data';
+
+nBoot = 10000;
+myAlpha = 0.05;
 
 % Generate raw data
 rxGrp = [ones(nMIrx,1);zeros(nRx-nMIrx,1)];         % aspirin group for MI
@@ -318,7 +337,9 @@ ctrlGrp = [ones(nMIctrl,1);zeros(nCtrl-nMIctrl,1)]; % non-aspirin group for MI
 % Odds ratio for MI data:
 orHat = (sum(rxGrp) / sum(~rxGrp)) / (sum(ctrlGrp) / sum(~ctrlGrp));
 
-% TODO: Repeat the above analysis for the MI data.
+% TODO: Repeat the above analysis for the MI data. Go back to line 100 and
+% re-run the code with the new numbers as above.
+%
 % Be sure to compare you p-values and confidence intervals that you obtain
 % through bootstrapping to those obtained with Fisher's Exact Test.
 MIdata = table([nMIrx;nMIctrl],[nRx-nMIrx;nCtrl-nMIctrl],...

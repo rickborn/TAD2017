@@ -22,7 +22,7 @@
 % 
 % Original source of exercise:
 % Efron, B. & Tibshirani Robert, J. (1993) An introduction to the
-% bootstrap. Chapman & Hall, London u.a.Table 3.2 on p. 21
+% bootstrap. Chapman & Hall, London, see Table 3.2 on p. 21
 % 
 % RTB wrote it 07 July 2019 (Kinsale, Ireland; Cork Distance Week,
 % "Champion of Champions" day)
@@ -49,6 +49,14 @@ nBoot = 10000;
 ds82 = readtable('Grad_School_82.xlsx'); % All graduate programs (*census*)
 ds15 = readtable('Grad_School_15.xlsx'); % random sample of 15
 
+% Look at the original excel spreadsheet for one of the files and compare
+% it to the variable that 'readtable' created in MATLAB. Look up the MATLAB
+% documentation on the data type 'table'. What does this line of code
+% return?
+ds15.Properties.VariableNames
+
+% In the code below, note how we access individual varibles.
+
 %% Plot GPA and GRE scores
 main = figure('Position',[50 10 600 900],'Name','Grad School Correlations');
 subplot(3,1,1);
@@ -61,7 +69,29 @@ lsline
 legend('Census','Sample','Sample','Census','Location','NorthWest');
 
 %% TODO: Calculate the mean GRE score for your sample and its standard error (SE)
-% We start with something that is easy to compute directly:
+% We start with something that is easy to compute directly. The reason we
+% can do this is that, thanks to the Central Limit Theorem, we KNOW that
+% the sampling distribution of the mean, regardless of the distribution of
+% the original data from which the mean was calculated, will be normally
+% distributed. Furthermore, we know that the standard deviation of the
+% sampling distribution for the mean will be equal to the sample standard
+% deviation divided by the square-root of the number of samples. This is
+% the standard error of the mean.
+
+% NOTE: There are two standard deviations at play here. The first is the
+% standard deviation that we calculate from our sample--this is the sample
+% standard deviation. But, in the next sections, we will be explicitly
+% calculating the "sampling distribution of the mean," which is the
+% distribution of mean values we would get if we re-took our sample of 15
+% many different times and calculated a new sample mean each time. The
+% standard deviation of the sampling distribution of the mean is, by
+% definition, the standard error. In fact, and this is very important to
+% just flat out memorize until practice makes it intuitive: THE STANDARD
+% ERROR OF ANY STATISTIC IS THE STANDARD DEVIATION OF THE SAMPLING
+% DISTRIBUTION OF THAT STATISTIC. The mean is a special case where we can
+% use a handy-dandy formula to calculate the standard deviation of the
+% sampling distribution (i.e. the standard error of the mean) based on the
+% standard deviation of our single sample.
 
 meanGRE = ;
 semGRE = ;

@@ -74,7 +74,7 @@ title('University seminars, relative share of questions asked by women')
 
 % NOTE: You were not asked to do this in class, but it is a more common
 % measure of effect size than the simple difference in the means (which is
-% what we used. It is just the raw difference divided by a pooled estimate
+% what we used). It is just the raw difference divided by a pooled estimate
 % of the standard deviation.
 
 % NOTE: This formula assumes that the two distributions have the same
@@ -144,7 +144,6 @@ text(-70,2/3*ax(4),tStr);
 % Significant' is not Itself Statistically Significant", The American
 % Statistician (2006) 60:328-331
 
-
 % To establish a difference between the two groups, you need to directly
 % compare them. A simple way is with a 2-sample t-test
 [~,pDiff,~,stats] = ttest2(womanFirst,manFirst);    % p = 4.6e-16
@@ -184,7 +183,7 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 
 % Eventually, I would probably convert the script to a function, in which
 % case, the below would be variables passed to the function:
-nQperSeminar = 6;
+nQperSeminar = 5;
 nSeminars = length(manFirst) + length(womanFirst); % i.e. 249 in original study
 nSims = 10000;
 
@@ -257,6 +256,7 @@ tStr = sprintf('# of seminars: %d; Questions per seminar: %d',nSeminars,nQperSem
 %tStr = ['# of seminars: ' num2str(nSeminars) '; Questions per seminar: ' num2str(nQperSeminar)];
 title(tStr);
 
+% one-tailed p-value
 pValue1 = sum(allEffectSizes >= realEffectSize) / nSims;
 % Why do I do this? Can a p-value ever be 0?
 if pValue1 == 0
@@ -287,7 +287,7 @@ text(xTxt,yTxt,txtStr);
 
 % QUESTION: So then why do the simulation?
 % ANSWER: By simulating the conditions we used in our actual experiment
-% (i.e. nSeminars = 249), we get an idea of the random variability in the
+% (i.e. nSeminars = 249), we also get an idea of the variability in the
 % expected effect size under H0.
 
 % What would happen to our distribution of simulated effect sizes if there
@@ -465,22 +465,27 @@ xText = ax(1) + 0.4*(ax(2)-ax(1));
 yText = ax(3) + 0.9*(ax(4) - ax(3));
 text(xText,yText,['Excess of low-Q seminars per sample: ',num2str(fewerQxs,3)]);
 
-% Compared to when we assumed all seminars had exactly the same number of
-% questions asked ('nQperSeminar'), we are now replacing more of those
-% values with smaller than with larger values. The value 'fewerQxs' is the
+% There are two interesting things going on here, both of which tend to
+% make the bias larger.
+% 
+% The first is due to the nature of the Poisson distribution, which is
+% skewed for small values of n. Compared to when we assumed all seminars
+% had exactly the same number of questions asked ('nQperSeminar'), we are
+% now replacing more of those values with smaller than with larger values.
+% The value 'fewerQxs' is the
 % average surplus of fewer-question seminars in our sample of 249 seminars.
-
+% 
 % But there is something else going on, too. Recall the formula we derived
 % for the mean bias as a function of the number of questions asked per
 % seminar:
-%
+% 
 % meanBiasEffect = 100 / nQuestionsPerSeminar
-%
+% 
 % Because the # of questions asked is in the denominator, it means that
-% seminars in which very few questions were asked produce a HUGE bias,
-% while those with a large number of questions produce a progressively
-% smaller bias. This also skews the overall distribution towards larger
-% biases.
+% seminars at which a fewer-than-average number of questions were asked
+% produce a HUGE bias, while those with a large number of questions produce
+% a progressively smaller bias. This also shifts the overall distribution
+% towards larger biases.
 
 % Plot the effect of # Q per seminar on the mean bias:
 xQuestions = 1:maxQ;

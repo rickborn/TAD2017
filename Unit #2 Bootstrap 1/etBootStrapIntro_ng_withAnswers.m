@@ -22,7 +22,7 @@
 % 
 % Original source of exercise:
 % Efron, B. & Tibshirani Robert, J. (1993) An introduction to the
-% bootstrap. Chapman & Hall, London u.a.Table 3.2 on p. 21
+% bootstrap. Chapman & Hall, London. see Table 3.2 on p. 21
 % 
 % RTB wrote it 07 July 2019 (Kinsale, Ireland; Cork Distance Week,
 % "Champion of Champions" day)
@@ -89,8 +89,11 @@ allMeans = zeros(nBoot,1);
 
 rng 'default'; % for consistency across class; You would not normally do this.
 for k = 1:nBoot
-    %allMeans(k) = mean(ds82.GRE(randi(nCensus,nSamp,1)));
-    allMeans(k) = mean(datasample(ds82.GRE,nSamp,'Replace',true));
+    % There are several ways to accomplish "sampling with replacement" in
+    % MATLAB. Here are a few different ones:
+    allMeans(k) = mean(ds82.GRE(unidrnd(nCensus,nSamp,1)));
+    % allMeans(k) = mean(ds82.GRE(randi(nCensus,nSamp,1)));
+    % allMeans(k) = mean(datasample(ds82.GRE,nSamp,'Replace',true));
 end
 
 % look at the sampling distribution of the mean

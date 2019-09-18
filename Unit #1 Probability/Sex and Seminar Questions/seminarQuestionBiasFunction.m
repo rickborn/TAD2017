@@ -202,7 +202,7 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 % simlulate this to see how big the bias effect is.
 
 % Keys to the simulation:
-% Under what hypothesis should we peroform our simulation? Ans.: H0
+% Under what hypothesis should we perform our simulation? Ans.: H0
 % What is H0? Ans.: M/W equally likely to ask question regardless of who
 % asks the 1st question.
 % How do we simlulate this?

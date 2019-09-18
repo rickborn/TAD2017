@@ -44,12 +44,13 @@
 % will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
 % keys (PC) or 'command' and 'enter' keys (Mac).
 %
-% NOTE: If you are using version R2018a of MATLAB, you won't be able to use
-% the ctrl+enter feature, because it now checks the entire script for
-% errors, rather than just the cell you are trying to execute. This is
-% stupid, but we're stuck with it. What you can do instead is use the mouse
-% to highlight the code you want to run, then hit the F9 key (PC) or you
-% can also just copy the section and then paste it into the command line.
+% NOTE: If you are using version R2018a of MATLAB or newer, you won't be
+% able to use the ctrl+enter feature of cell scripts, because MATLAB now
+% checks the entire script for errors, rather than just the cell you are
+% trying to execute. This is stupid, but we're stuck with it. What you can
+% do instead is use the mouse to highlight the code you want to run, then
+% hit the F9 key (PC) or you can also just copy the section and then paste
+% it into the command line.
 
 %% Concepts covered:
 % 1. Test for proportions: odds ratio
@@ -67,10 +68,10 @@ nBoot = 10000;
 myAlpha = 0.05;
 
 % useful numbers for stroke data
-nRx = 11037;        % number of patients in the treatment group (ASA)
+nRx = 11037;        % total number of patients in the treatment group (ASA)
 nStrokeRx = 119;    % number of Strokes in the treatment group
-nCtrl = 11034;      % number of patients in the control group (placebo)
-nStrokeCtrl = 98;   % number of MIs in the control group
+nCtrl = 11034;      % total number of patients in the control group (placebo)
+nStrokeCtrl = 98;   % number of Strokes in the control group
 nTotal = nRx + nCtrl;
 
 %% Calculate the actual ratio of rates of disease: an odds ratio
@@ -87,13 +88,14 @@ orHat = ;
 
 %% Create a population from which to resample:
 
-% The general approach in bootstrapping is to resample from our original
-% sample. Thus far, we only have proportions, but we want to have the full
-% information in the original sample, as if we had the raw data.
+% The general approach in bootstrapping is to resample from our *original
+% sample*. But you've been given only proportions, so you have to
+% *re-create* the raw data based on the proportions. It's alarmingly
+% simple, but you might have to think about it for a bit.
 
-% TODO: Create a column vector that is the size of each treatment group and
-% that contains 1s for each person who had stroke and 0s for each person
-% that did not: 1=had stroke; 0=no stroke
+% TODO: Re-create the raw data.
+% HINT: When you're done, the 'size' command for 'rxGrp' should return
+% 11037,1. And 'size' for 'ctrlGrp' should return 11034,1
 rxGrp = ;    % aspirin group for strokes
 ctrlGrp = ;  % placebo group for strokes
 

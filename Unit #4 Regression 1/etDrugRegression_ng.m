@@ -50,12 +50,13 @@
 % turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter' keys
 % (PC) or 'command' and 'enter' keys (Mac).
 %
-% NOTE: If you are using version R2018a of MATLAB, you won't be able to use
-% the ctrl+enter feature, because it now checks the entire script for
-% errors, rather than just the cell you are trying to execute. This is
-% stupid, but we're stuck with it. What you can do instead is use the mouse
-% to highlight the code you want to run, then hit the F9 key (PC) or you
-% can also just copy the section and then paste it into the command line.
+% NOTE: If you are using version R2018a of MATLAB or newer, you won't be
+% able to use the ctrl+enter feature, because it now checks the entire
+% script for errors, rather than just the cell you are trying to execute.
+% This is stupid, but we're stuck with it. What you can do instead is use
+% the mouse to highlight the code you want to run, then hit the F9 key (PC)
+% or you can also just copy the section and then paste it into the command
+% line.
 
 %% Concepts covered:
 % 1. plotting grouped data with 'gscatter'
@@ -340,7 +341,7 @@ legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','so
 % derive these values for our two models. HINT: We get these for free from
 % both 'fitglm' and 'fitlme'.
 
-% QUESTION (Q13): Based on the AIC values, which is the "better" model?
+% QUESTION (Q12): Based on the AIC values, which is the better model?
 
 %% Application of the bootstrap to regression models
 
@@ -415,6 +416,7 @@ X = [const,ds.hrs];
 
 rng default
 for k = 1:nBoot
+    !!! Your code here
     yStar = ;
     [allBeta(k,:)] = regress(yStar,X);
 end

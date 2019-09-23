@@ -598,8 +598,7 @@ bsSEpairs = std(allBeta);
 %% Which is better?
 
 % E & T state that "Bootstrapping pairs is less sensitive to assumptions
-% than bootstrapping residuals." Bootstrapping residuals assumes that the
-% error distribution (i.e. residuals) does not depend on x_i, and this is
-% not always the case. It depends a lot on how good our assumption of
-% linearity is and on the homoscedasticity of the data. See fig. 9.2 on p.
-% 114 of E&T
+% than bootstrapping residuals." BS of residuals assumes that the error
+% distribution (i.e. residuals) does not depend on x_i, and this is not
+% always the case. It depends a lot on how good our assumption of linearity
+% is and on the homoscedasticity of the data. See fig. 9.2 on p. 114 of E&T

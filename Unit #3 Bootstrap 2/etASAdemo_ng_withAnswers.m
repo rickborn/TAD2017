@@ -317,6 +317,27 @@ strokeData = table([nStrokeRx;nStrokeCtrl],[nRx-nStrokeRx;nCtrl-nStrokeCtrl],...
 %              OddsRatio: 1.2163
 %     ConfidenceInterval: [0.9297 1.5912]
 
+%% Compare with a Chi-square test
+
+observedData = [nStrokeRx,nRx-nStrokeRx;nStrokeCtrl,nCtrl-nStrokeCtrl];
+
+% Calculate our expected table based on row and column totals:
+CT = sum(observedData,1);   % column totals
+RT = sum(observedData,2);   % row totals
+GT = sum(RT);               % grand total
+expectedData = (repmat(CT,length(RT),1) ./ GT) .* repmat(RT,1,length(CT));
+
+% Calculate our chi2 statistic:
+chi2stat = sum(((expectedData(:) - observedData(:)).^2) ./ expectedData(:));
+
+% Calculate our degrees of freedom:
+df = (size(observedData,1)-1) * (size(observedData,2)-1);
+% or, more cleverly:
+%df = prod(size(observedData)-1);
+
+% Use MATLAB's built-in chi2 distribution to get a p-value:
+pChi2 = chi2cdf(chi2stat,df,'upper');
+
 %% Repeat calculations for the heart attack data:
 
 % useful numbers for heart attack data

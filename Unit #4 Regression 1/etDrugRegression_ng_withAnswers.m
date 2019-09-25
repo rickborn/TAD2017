@@ -452,6 +452,7 @@ legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','so
 
 kFold = 5;
 rng default
+% MATLAB helps us to partition our data set:
 cvIdx = crossvalind('Kfold',nPts,kFold);
 MSEcv = 0;
 for k = 1:kFold

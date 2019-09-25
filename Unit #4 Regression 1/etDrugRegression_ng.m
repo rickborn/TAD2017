@@ -96,7 +96,7 @@ set(gca,'FontSize',14);
 % variable:
 nPts = length(ds.hrs);  % number of data points, useful for many things
 const = ones(nPts,1);
-[betaFit,betaCI,rawResiduals,~,stats] = regress();
+[~,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
 
 % QUESTION (Q2): Do the confidence intervals for our beta coefficients
 % indicate a significant linear relationship between amount of

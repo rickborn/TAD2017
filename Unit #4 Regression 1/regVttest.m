@@ -10,7 +10,7 @@
 % Each row is one patient
 % Each column is a variable:
 % col 1: age in years
-% col 2: bpf ( = 'brain parenchymal fraction')
+% col 2: bpf ( = 'brain parenchymal fraction') How much of your head is brain?
 % col 3: gender (M,F)
 
 % Scenario: In a sample of patients with multiple sclerosis (MS), we have
@@ -40,16 +40,16 @@ hold on
 ylabel('brain parenchymal fraction');
 set(gca,'XTickLabel',['F';'M'])
 
-% Superimpose raw data on the box plots
-
-% To do this, we need to know the numeric values associated with the two
-% groups. This can be obtained using the 'gca' command
-xVals = get(gca,'XTick');
-
+% Add mean +/- sem
 semMale = std(ds.bpf(ds.male)) / sqrt(nMale);
 semFemale = std(ds.bpf(~ds.male)) / sqrt(nFemale);
 he = errorbar(xVals,[mean(ds.bpf(~ds.male)),mean(ds.bpf(ds.male))],[semFemale,semMale],'rs');
 set(he,'LineWidth',2,'MarkerSize',10,'MarkerFaceColor','r');
+
+% Superimpose raw data on the box plots
+% To do this, we need to know the numeric values associated with the two
+% groups. This can be obtained using the 'gca' command
+xVals = get(gca,'XTick');
 
 % To prevent nearby values from superimposing, we can jitter the data along
 % the x-axis. If we don't jitter too much, it will still be clear to which
@@ -68,7 +68,7 @@ const = ones(length(ds.bpf),1);
 [betaFit,betaCI,resid,residInt,rStats] = regress(ds.bpf,[const,ds.male]);
 
 modelSpec = 'bpf ~ male';
-mdl1 = fitglm(ds,modelSpec,'Distribution','normal')
+mdl1 = fitglm(ds,modelSpec,'Distribution','normal');
 
 %% Plot the regression line
 
@@ -119,7 +119,7 @@ yData = betaFit2(1) + betaFit2(2).*(xData);
 
 % same thing using 'fitglm':
 modelSpec = 'bpf ~ age + male';
-mdl2 = fitglm(ds,modelSpec,'Distribution','normal')
+mdl2 = fitglm(ds,modelSpec,'Distribution','normal');
 
 % plot model as if m/f difference mattered:
 mData = betaFit2(1) + betaFit2(2).*(xData) + betaFit2(3).*[1,1];
@@ -143,8 +143,9 @@ fData = betaFit3(1) + betaFit3(2).*(xData) + betaFit3(3).*[0,0];
 line(xData,mData,'Color','b','LineStyle','-')
 line(xData,fData,'Color','r','LineStyle','-')
 
-% using fitglm
+% using fitglm:
+% The formula for the model is expressed in Wilkinson notation:
 modelSpec = 'bpf ~ age + male + age:male';
-mdl3 = fitglm(ds,modelSpec,'Distribution','normal')
+mdl3 = fitglm(ds,modelSpec,'Distribution','normal');
 
 % [betaFit3, betaCI3]

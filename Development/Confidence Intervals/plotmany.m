@@ -1,6 +1,6 @@
 function [pwr] = plotmany(nPlots,dPrime,n)
 
-if nargin < 1, nPlots = 3; end
+if nargin < 1, nPlots = 4; end
 if nargin < 2, dPrime = 0.6; end
 if nargin < 3, n = 22; end
 

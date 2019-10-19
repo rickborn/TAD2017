@@ -29,17 +29,17 @@
 % Refined by RTB, September 2017
 
 % % Concepts covered:
-% 1. Working with spike data: times to indices
+% 1. Working with spike data: spike times to sparse matrix indices
 % 2. Occupancy normalized histogram for place fields
 % 3. Using glmfit to form a Poisson point-process model
 % 4. Model selection through analysis of residuals
 % 5. Model comparison through measures of goodness of fit: AIC,
-%       Chi-square, parameter CIs, Kolmogorov-Smirnov 
+%       Chi-square, parameter CIs, Kolmogorov-Smirnov plot
 %
 % Scenario: A rat runs back and forth in a linear maze, incentivized by a
 % morsel of chocolate each time she reaches the end of the maze. While she
 % is running we are recording the action potentials from a single neuron in
-% the rat's hippocampus.
+% her hippocampus.
 %
 % Data: 
 % - expTime: time axis for entire experiment
@@ -195,6 +195,8 @@ axis([-10,110,ax(3),ax(4)]);
 
 % When the position is 0:
 % E(Spikes | x = 0) = exp(intercept + b1(2)*0) = exp(intercept).
+% Recall that the time-scale of our data is in 1-ms bins, so in order to
+% get the answer in spikes/sec, we need to multiply by 1000.
 rate0 = exp(b1(1)) * 1000;  % 0.5879 spikes/sec
 
 %re-plot occupancy norm. hist.

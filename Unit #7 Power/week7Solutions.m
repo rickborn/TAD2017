@@ -4,6 +4,7 @@
 % week #7.
 %
 % RTB created this file on 19 September 2018
+% Updated by RTB on 19 October 2019
 
 %% QUESTION (Q1)
 
@@ -116,7 +117,34 @@ dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
 
 % ANSWER: 0.9090
 
-%% QUESTION (Q4) Meta-analysis 1
+%% QUESTION (Q4)
+
+% Assuming no effect (i.e. H0 is true), if the same experiment were
+% repeated many times, what would the distribution of p-values be?
+
+% This is one of the most important concepts of the week, and it is the
+% basis of many advances in the branch of statistics that are sometimes
+% referred to as "Empirical Bayes." It is the foundation for the work of
+% Benjamini & Hochberg (1995) and of Storey (2002) on false discovery
+% rates. It's very counter-intuitive (at least it was to me), but the
+% distribution of p-values under H0 is FLAT (i.e. uniform).
+n = 50;
+nSims = 100000;
+dPrimeSim = 0;
+
+% Generate our samples:
+allSamples = randn(n,2,nSims);
+% To simulate a real d-prime, we just add our dPrime to one of the samples.
+allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
+
+% Now run a t-test. Does it matter which test we use?
+[~,pVals] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
+
+figure, histogram(pVals);
+xlabel('p-value');
+ylabel('#');
+
+%% QUESTION (Q5) Meta-analysis 1
 
 % Suppose that a large number of labs have done the same experiment: 50
 % animals per group with a "true" effect size of d' = 0.57. Further suppose
@@ -128,7 +156,8 @@ dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
 % Constants for now; would be passed as arguments to a function:
 n = 50;
 nSims = 100000;
-dPrimeSim = 0.57;
+%dPrimeSim = 0.57;
+dPrimeSim = 0;
 
 % Generate our samples:
 allSamples = randn(n,2,nSims);
@@ -143,9 +172,9 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 
 % ANSWER: 73%
 
-%% QUESTION (Q5) Meta-analysis 2
+%% QUESTION (Q6) Meta-analysis 2
 
-% What would your answer to question #4 be if there were really no effect?
+% What would your answer to question #5 be if there were really no effect?
 % (i.e. d' = 0)
 
 % You shouldn't need to run a simulation to get this one. Under H0, we
@@ -157,9 +186,9 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 % But you can also go ahead and run the simulation above for Q4 but setting
 % 'dPrimeSim' to 0 and see that you get the same answer.
 
-%% QUESTION (Q6): Publication bias and effect size
+%% QUESTION (Q7): Publication bias and effect size
 
-% As for Q4, suppose that a large number of labs have done the same
+% As for Q5, suppose that a large number of labs have done the same
 % experiment but this time with just 5 animals per group and a "true"
 % effect size of d' = 0.5. Further suppose that only the labs that got a
 % statistically significant effect are going to get their paper published.
@@ -189,9 +218,9 @@ medPubDprime = median(allDprime(logical(h')));
 % Ans.: 1.31
 % The mean is 1.34
 
-%% QUESTION (Q7): Publication bias, effect size, and power
+%% QUESTION (Q8): Publication bias, effect size, and power
 
-% Based on your simulation for Q6, what is the statistical power for n=5
+% Based on your simulation for Q7, what is the statistical power for n=5
 % and an effect size of dPrime = 0.5?
 
 % In the above simulation, we generated our simulated populations with two

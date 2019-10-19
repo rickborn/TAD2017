@@ -97,7 +97,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 % variable:
 nPts = length(ds.hrs);  % number of data points, useful for many things
 const = ones(nPts,1);
-[betaFit,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
+[~,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
 
 % QUESTION (Q2): Do the confidence intervals for our beta coefficients
 % indicate a significant linear relationship between amount of time
@@ -454,10 +454,13 @@ kFold = 5;
 rng default
 % MATLAB helps us to partition our data set:
 cvIdx = crossvalind('Kfold',nPts,kFold);
+allCVresid = zeros(nPts,1);
+
 MSEcv = 0;
 for k = 1:kFold
     test = (cvIdx == k);
     train = ~test;
+    % size of this test partition:
     nK = sum(test);
     
     % fit model to training data:
@@ -466,9 +469,35 @@ for k = 1:kFold
     MSEk = sum((ds.amount(test) - (betaFit(1) + betaFit(2).*ds.hrs(test))).^2) / nK;
     % Each partition contributes to the total MSE in proportion to its size
     MSEcv = MSEcv + (MSEk * (nK/nPts));
+    
+    % For plotting (below), let's store the individual residuals:
+    allCVresid(test) = ds.amount(test) - (betaFit(1) + betaFit(2).*ds.hrs(test));
 end
 
 % MSEcv = 6.42
+
+%% Plot the residuals for our different partitions:
+
+% different color for each partition:
+hCols = ['r','g','b','c','k'];
+
+figure
+h1 = plot(ds.hrs,rawResiduals,'ko');
+hold on;
+
+for k = 1:kFold
+    test = (cvIdx == k);
+    h2 = plot(ds.hrs(test),allCVresid(test),[hCols(k),'*']);
+end
+
+xlabel('Time implanted (hrs)'); ylabel('residual');
+title('Full-model vs. CV Residuals');
+set(gca,'FontSize',14);
+
+ax = axis;
+% This corresponds to the regression line:
+line([ax(1),ax(2)],[0,0]);
+legend([h1,h2],'Full-model residuals','Cross-validated residuals','Location','southeast');
 
 %% Other estimates of prediction error
 

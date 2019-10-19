@@ -4,7 +4,7 @@
 % Chapter 9, of "Case studies in neural data analysis" by Kramer & Eden 2016
 % 
 % What to do: Login to Learning Catalytics (LC) and join the session for
-% the module entitled "Place Cell Regression". You will answer a series of
+% the module entitled "Place Cell Regression." You will answer a series of
 % questions based on the guided programming below. Each section begins with
 % a '%%'. Read through the comments and follow the instructions provided.
 % In some cases you will be asked to answer a question, clearly indicated
@@ -29,17 +29,17 @@
 % Refined by RTB, September 2017
 
 % % Concepts covered:
-% 1. Working with spike data: times to indices
+% 1. Working with spike data: spike times to sparse matrix indices
 % 2. Occupancy normalized histogram for place fields
 % 3. Using glmfit to form a Poisson point-process model
 % 4. Model selection through analysis of residuals
 % 5. Model comparison through measures of goodness of fit: AIC,
-%       Chi-square, parameter CIs, Kolmogorov-Smirnov 
+%       Chi-square, parameter CIs, Kolmogorov-Smirnov plot
 %
 % Scenario: A rat runs back and forth in a linear maze, incentivized by a
 % morsel of chocolate each time she reaches the end of the maze. While she
 % is running we are recording the action potentials from a single neuron in
-% the rat's hippocampus.
+% the her hippocampus.
 %
 % Data: 
 % - expTime: time axis for entire experiment
@@ -55,7 +55,7 @@
 % make sure placeCellData.mat is in your path
 load placeCellData.mat
 
-% for plotting
+% for plotting: # of rows and colums in our master figure
 nr = 4;
 nc = 3;
 

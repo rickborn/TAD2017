@@ -10,7 +10,7 @@
 
 %% Generate data using a polynomial of order 3 and add Gaussian noise:
 
-% nPts = 15;
+% nPts = 50;
 % pTrue = [0, 0.0105, -0.5849, 1.2220];
 % x = 1:nPts;
 % y = polyval(pTrue,x) + 2*randn(1,nPts);
@@ -19,7 +19,7 @@
 %% Read in some mystery data
 
 load mysteryData
-nPts = length(x);
+nPts = length(x);   % 50 data points
 
 %% Plot the data:
 

@@ -2,6 +2,19 @@ function [p,CI,pwr] = citest(n,dPrime,myAlpha,pFlag)
 
 % citest.m: explores relationship between confidence intervals and signifcance testing
 %
+% [p,CI,pwr] = citest(22,0.6,0.05,1);
+%
+% Inputs:
+% - n, number of observations in each sample (default = 22)
+% - dPrime, effect size (default = 0.6)
+% - myAlpha, criterion (default = 0.05, correpsonds to 95% CI)
+% - pFlag, 1 = make plots, 0 = suppress plots
+%
+% Outputs:
+% - p, p-value of 2-sample ttest
+% - CI, confidence interval from t distribution
+% - power, statistical power
+%
 % motivated by an article that Brian Healy sent me:
 %
 % Greenland S, Senn SJ, Rothman KJ, Carlin JB, Poole C, Goodman SN, Altman
@@ -10,6 +23,12 @@ function [p,CI,pwr] = citest(n,dPrime,myAlpha,pFlag)
 % 10.1007/s10654-016-0149-3.
 %
 % RTB wrote it 13 Oct. 2018, cold, raniy autumn day
+% RTB updated it, 30 Sept. 2019, dinner at Local 149 prior to L St. meeting
+
+if nargin < 4, pFlag = 0; end
+if nargin < 3, myAlpha = 0.05; end
+if nargin < 2, dPrime = 0.6; end
+if nargin < 1, n = 22; end
 
 % Generate our samples:
 allSamples = randn(n,2);

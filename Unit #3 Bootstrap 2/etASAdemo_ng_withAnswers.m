@@ -6,6 +6,7 @@
 % RTB modified it 30 Jan 2017: combined etASAhypoth.m and etASAstats.m into
 % one file that is modular for my stats class.
 % RTB modified it to emphasize stroke data (13 September 2018)
+% RTB added riff on relative vs. absolute measures of efficacy (14 Jan 2020)
 
 % Concepts covered:
 % 1. Test for proportions: odds ratio
@@ -375,6 +376,59 @@ MIdata = table([nMIrx;nMIctrl],[nRx-nMIrx;nCtrl-nMIctrl],...
 % stats = 
 %              OddsRatio: 0.5458
 %     ConfidenceInterval: [0.4290 0.6944]
+
+%% Bonus: absolute vs. relative measures of efficacy (added 14 Jan 2020)
+
+% The take-home message here is from an interesting book by Jacob Stegenga
+% called "Medical Nihilism" (Oxford Univ. Press, 2018): relative risk
+% factors, such as our odds ratio, relative risk and relative risk
+% reduction tend to inflate the apparent effectiveness of a treatment,
+% because they fail to take into account the base rate. The "risk" such as
+% (nMIrx/nRx) is a posterior probability, which takes into account the
+% (usually low) base rate of an outcome such as MI. However, when we take a
+% ratio of posterior probabilities, we effectively cancel out the base rate
+% (which is in both the numerator and the denominator of the ratio). Take
+% for example two measures of the efficacy of ASA for preventing MI:
+
+% 1. Risk difference (an absolute measure):
+riskDiffMI = (nMIrx/nRx) - (nMIctrl/nCtrl);
+% -0.0077, meaning that ASA gives less than a 1% reduction in risk
+
+% 2. Relative risk reduction (a relative measure):
+relativeRiskReductionMI = ((nMIrx/nRx) - (nMIctrl/nCtrl)) / (nMIctrl/nCtrl);
+% -0.4499, meaning that ASA reduces relative risk by 45% This seems much
+% more impressive, doesn't it? The reason for the apparent discrepancy is
+% that the base rate for heart attacks is low: you are pretty unlikely to
+% have an MI regardless of whether or not you take aspirin.
+
+% Stegenga cites one study (King, Harper & Young 2012) that analyzed a
+% large sample of articles from medical and epidemiology journals and found
+% that 75% of articles reported ONLY relative outcome measures. See pp. 119
+% to 125 of Stegenga (2018) for more details.
+
+% Example on pp. 122-3 from a study on the efficacy of alendronate
+% (Fosamax) on preventing hip fractures in women. He only gave percentages,
+% so I made up the raw numbers:
+
+% made up numbers for Fosamax trial
+nRx = 10000;    % number of patients in the treatment group (Fosamax)
+nFxRx = 100;    % number of hip fractures in the treatment group
+nCtrl = 10000;  % number of patients in the control group (placebo)
+nFxCtrl = 200;  % number of hip fractures in the control group
+nTotal = nRx + nCtrl;
+
+fxData = table([nFxRx;nFxCtrl],[nRx-nFxRx;nCtrl-nFxCtrl],...
+    'VariableNames',{'Fx','NoFx'},'RowNames',{'Fosamax','Placebo'});
+
+% Fisher Exact Test: 
+[hFx,pFx,statsFx] = fishertest(fxData,'Tail','both','Alpha',0.05);
+
+% Risk difference is only 1%:
+riskDiffFx = (nFxRx/nRx) - (nFxCtrl/nCtrl);
+
+% Relative risk reduction is a whopping 50%:
+relativeRiskReductionFx = ((nFxRx/nRx) - (nFxCtrl/nCtrl)) / (nFxCtrl/nCtrl);
+
 
 %% Final thoughts
 % 

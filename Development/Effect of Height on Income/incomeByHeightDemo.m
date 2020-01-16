@@ -11,6 +11,7 @@ ds = dataset('xlsfile',fileName);
 figure
 plot(ds.Hgt, ds.Income, 'b.');
 hold on
+% draw the least-squares regression line:
 lsline
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
@@ -46,7 +47,7 @@ legend([h1,h2],{'Male','Female'},'Location','NorthWest');
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
 
-% Get predictions and CIs for stim trials
+% Get predictions and CIs for men:
 xVals = (min(ds.Hgt):max(ds.Hgt))';
 men = ones(size(xVals));
 
@@ -56,7 +57,7 @@ plot(xVals,yMen,'k-','LineWidth',2);
 plot(xVals,yMenCI(:,1),'k--');
 plot(xVals,yMenCI(:,2),'k--');
 
-% Get predictions and CIs for stim trials
+% Get predictions and CIs for women:
 [yWomen,yWomenCI] = predict(mdl2,[xVals,~men]);
 % Plot 'em
 plot(xVals,yWomen,'r-','LineWidth',2);

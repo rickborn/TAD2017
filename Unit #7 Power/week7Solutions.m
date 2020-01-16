@@ -42,6 +42,8 @@ for jSim = 1:nSims
     allSims = randn(nMax,2);
     for k = 1:length(allNdx)
         if ttest2(allSims([1:allNdx(k)],1), allSims([1:allNdx(k)],2),'Alpha',myAlpha)
+            % Jump out of our inner 'for' loop as soon as we get a
+            % significant result.
             FP(jSim) = 1;
             break
         end
@@ -67,7 +69,7 @@ n = sampsizepwr('t2',[1,1],1+dPrimeSim,desiredPower);
 % But we could also get an answer via simulation:
 % One strategy would be to first get a rough answer using coarse sampling,
 % then zoom in around it.
-coarseFlag = 0;
+coarseFlag = 1;
 if coarseFlag
     nMin = 5; nMax = 105; sampInt = 10; nSims = 10000;
 else
@@ -156,18 +158,17 @@ ylabel('#');
 % Constants for now; would be passed as arguments to a function:
 n = 50;
 nSims = 100000;
-%dPrimeSim = 0.57;
-dPrimeSim = 0;
+dPrimeSim = 0.57;
 
 % Generate our samples:
 allSamples = randn(n,2,nSims);
 % To simulate a real d-prime, we just add our dPrime to one of the samples.
 allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
 
-% Now run our t-test:
+% Now run our t-test (default is alpha = 0.05):
 [h,pVals] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
 
-% Find the proportion of published p-values less-than-or-equal to 0.01:
+% Find the proportion of *published* p-values less-than-or-equal to 0.01:
 perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 
 % ANSWER: 73%
@@ -183,8 +184,24 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 % selected for p-values < 0.05, which, under H0, should be 5%. So we would
 % expect 1%/5% = 0.20, or 20%.
 
-% But you can also go ahead and run the simulation above for Q4 but setting
-% 'dPrimeSim' to 0 and see that you get the same answer.
+% But you can also go ahead and run the simulation above for Q5 but setting
+% 'dPrimeSim' to 0 and see that you get the same answer:
+n = 50;
+nSims = 100000;
+dPrimeSim = 0;
+
+% Generate our samples:
+allSamples = randn(n,2,nSims);
+% To simulate a real d-prime, we just add our dPrime to one of the samples.
+allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
+
+% Now run our t-test:
+[h,pVals] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
+
+% Find the proportion of published p-values less-than-or-equal to 0.01:
+perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
+
+% ANSWER: 20%
 
 %% QUESTION (Q7): Publication bias and effect size
 
@@ -217,6 +234,19 @@ allDprime = squeeze(diff(mean(allSamples)));    % SD = 1
 medPubDprime = median(allDprime(logical(h')));
 % Ans.: 1.31
 % The mean is 1.34
+
+% This exercise nicely illustrates one of the most pernicious, but least
+% appreciated, consequences of under-powered science: the inflation of
+% published effect sizes. You can grasp this intuitively. By definition,
+% when you have low power, you have a low probability of detecting a real
+% effect. This means that only when you happen to get a whopper of an
+% effect (through sampling error) do you achieve statistical significance.
+% Because of effect-size inflaction, subsequent investigators who might try
+% to replicate the result will necessarily under-power their replications,
+% because they will base their power calculations on an artificially high
+% effect size.
+%
+% see my effectSizeDemo.m
 
 %% QUESTION (Q8): Publication bias, effect size, and power
 

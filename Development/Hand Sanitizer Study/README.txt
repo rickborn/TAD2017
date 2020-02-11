@@ -1,0 +1,3 @@
+Laskowski, Kate L.; Montiglio, Pierre-Olivier; Pruitt, Jonathan N. (2016), Data from: Retracted: Individual and group performance suffers from social niche disruption, v2, Dryad, Dataset, https://doi.org/10.5061/dryad.33f0n
+
+The authors have identified biologically unlikely patterns in the original data underlying the results reported in the article. The dataset archived with Dryad, provided to the other authors by Dr. Jonathan Pruitt, contains an excess of exactly duplicated response times, spanning social groups and time points and treatments. Hence, the authors have concluded that the data may be incorrect and the validity of the results could not be verified, so the article has been retracted. Further use of this data is not recommended.

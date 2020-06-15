@@ -429,6 +429,10 @@ riskDiffFx = (nFxRx/nRx) - (nFxCtrl/nCtrl);
 % Relative risk reduction is a whopping 50%:
 relativeRiskReductionFx = ((nFxRx/nRx) - (nFxCtrl/nCtrl)) / (nFxCtrl/nCtrl);
 
+% As an interesting coda, in the chapter where Stegenga wants to point out
+% how woefully the drug companies underestimate the side effects of their
+% drugs, he pretty much exclusively uses . . . relative risk!
+
 
 %% Final thoughts
 % 

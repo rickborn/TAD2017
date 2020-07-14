@@ -6,6 +6,7 @@
 % http://datacolada.org/88
 %
 % My favorite fact for this post: calibration of massiveness of hot hand fallacy
+%
 % It is worth noting that expecting r=.40 for consecutive shots
 % (see chart above) implies implausibly strong hand-hotness. As a
 % calibration, I simulated a player that when cold (previous shot was

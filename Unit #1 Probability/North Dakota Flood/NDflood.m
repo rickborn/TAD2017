@@ -8,7 +8,7 @@
 %
 % Heading: "The Importance of Communicating Uncertainty"
 %
-% "In April 1997, the Red River of the North flooded Grank Forks, North
+% "In April 1997, the Red River of the North flooded Grand Forks, North
 % Dakota, overtopping the town's levees and spilling more than two miles
 % into the city. Although there was no loss of life, nearly all of the
 % city's 50,000 residents had to be evacuated, cleanup costs ran into the
@@ -17,7 +17,7 @@
 %
 % . . . Residents of Grand Forks had been aware of the flood threat for
 % months. Snowfall had been especially heavy in the Great Plains that
-% winter, and the National Weather Service, anticpating runoff as the snow
+% winter, and the National Weather Service, anticipating runoff as the snow
 % melted, had predicted the waters of the Red River would crest to
 % forty-nine feet, close to the all-time record.
 %

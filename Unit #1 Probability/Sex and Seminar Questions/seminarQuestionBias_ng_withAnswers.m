@@ -1,4 +1,4 @@
-% seminarQuestionBias.m
+% seminarQuestionBias_ng_withAnswers.m
 %
 % Do women ask more questions at a seminar if a woman asks the 1st question?
 % 
@@ -472,8 +472,8 @@ text(xText,yText,['Excess of low-Q seminars per sample: ',num2str(fewerQxs,3)]);
 % skewed for small values of n. Compared to when we assumed all seminars
 % had exactly the same number of questions asked ('nQperSeminar'), we are
 % now replacing more of those values with smaller than with larger values.
-% The value 'fewerQxs' is the
-% average surplus of fewer-question seminars in our sample of 249 seminars.
+% The value 'fewerQxs' is the average surplus of fewer-question seminars in
+% our sample of 249 seminars.
 % 
 % But there is something else going on, too. Recall the formula we derived
 % for the mean bias as a function of the number of questions asked per

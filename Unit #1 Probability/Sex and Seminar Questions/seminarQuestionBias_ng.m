@@ -154,7 +154,7 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 % simlulate this to see how big the bias effect is.
 
 % Keys to the simulation:
-% Under what hypothesis should we peroform our simulation? Ans.: H0
+% Under what hypothesis should we perform our simulation? Ans.: H0
 % What is H0? Ans.: M/W equally likely to ask question regardless of who
 % asks the 1st question.
 % How do we simlulate this?
@@ -170,7 +170,7 @@ nSeminars = length(manFirst) + length(womanFirst);
 % I generally set this number to something smallish, like 1000. Then, when
 % I am confident that it is running correctly, I increase the number to
 % 10,000 or 100,000.
-nSims = 10000;  
+nSims = 1000;  
 
 % Variables to hold the results of our simulations:
 allEffectSizes = zeros(nSims,1);

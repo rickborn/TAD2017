@@ -1,0 +1,45 @@
+% CLTdemo2.m
+%
+% RTB wrote it, 03 September 2020, NEH, Maine
+
+rng shuffle
+
+R = 10;
+nSum = [2,5,10,25,50,100];
+nSim = 100000;
+whichDist = 'unidrnd';
+
+semMean = zeros(length(nSum),1);
+muMean = zeros(length(nSum),1);
+stdMean = zeros(length(nSum),1);
+ctr = 0;
+figure;
+for thisSum = nSum
+    ctr = ctr+1;
+    allSims = unidrnd(R,[thisSum,nSim]);
+    allMeans = mean(allSims);
+    
+    % calculate the average SEM
+    semMean(ctr) = mean(std(allSims) ./ sqrt(thisSum));
+    
+    subplot(2,3,ctr);
+    histogram(allMeans);
+    tStr = sprintf('%s R = %d, nSim = %d',whichDist,R,nSim); title(tStr);
+    xStr = sprintf('Sum of %d random draws',thisSum); xlabel(xStr);
+    ylabel('#');
+    
+    muMean(ctr) = mean(allMeans);
+    % SD of the sampling distribution of the mean, which is, by definition,
+    % the standard error of the mean:
+    sdMean(ctr) = std(allMeans);
+    
+end
+
+figure
+plot(semMean,sdMean,'ro');
+xlabel('SEM formula');
+ylabel('SD of Sampling Dist of Mean');
+hold on
+ax = axis;
+xyMin = min([ax(1),ax(3)]);
+xyMax 

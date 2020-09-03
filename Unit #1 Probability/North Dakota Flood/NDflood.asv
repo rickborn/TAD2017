@@ -58,8 +58,7 @@ mySimHgts = (randn(nSim,1) .* (9/1.96)) + 49;
 pSim = sum(mySimHgts > 51) / nSim;
 
 % or can cheat as use 'normrnd'
-mySimHgts = normrnd(49,9/1.96,nSim,1);
-pSim = sum(mySimHgts > 51) / nSim;
+mySimHgts = normrnd(49,9/1.96
 
 % Follow-up (Silver's book): "In fact, the river crested to fifty-four
 % feet."

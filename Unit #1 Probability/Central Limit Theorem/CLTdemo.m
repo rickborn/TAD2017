@@ -10,8 +10,8 @@ function [] = CLTdemo(R,nSum,nSim,whichDist)
 %
 % Inputs:
 % - R, the parameter for the discrete uniform distribution (default = 5)
-% - nSim, the number of draws to make (default = 10000)
 % - nSum, the number of random values to sum (default = [1:5])
+% - nSim, the number of draws to make (default = 10000)
 % - whichDist, the random distribution to use (default = discrete uniform)
 %
 % see chapter 7 in Vickers "What is a p-value anyway?"
@@ -47,23 +47,23 @@ for thisSum = nSum
 end
 
 % Another fun variant: sum up a bunch of DIFFERENT distributions
-nReps = 10;                      % number of each type to sum
-nSim = 10000;
-a = round(rand(nReps,nSim));    % 0s & 1s
-figure, hist(a',[0,1]);
-tempSum = sum(a);
-
-xBins = min(tempSum):max(tempSum);
-myHist = hist(tempSum, xBins);
-normHist = myHist ./ sum(myHist);
-figure, bar(xBins, normHist); hold on;
-
-muSum = mean(tempSum);
-sdSum = std(tempSum);
-x = min(tempSum):0.01:max(tempSum);
-y = normpdf(x,muSum,sdSum);
-plot(x,y,'r-');
-
-b = binornd(5,0.4,nReps,nSim);
-c = exprnd(2,nReps,nSim);
-figure, hist(sum([a;b;c]));
+% nReps = 10;                      % number of each type to sum
+% nSim = 10000;
+% a = round(rand(nReps,nSim));    % 0s & 1s
+% figure, hist(a',[0,1]);
+% tempSum = sum(a);
+% 
+% xBins = min(tempSum):max(tempSum);
+% myHist = hist(tempSum, xBins);
+% normHist = myHist ./ sum(myHist);
+% figure, bar(xBins, normHist); hold on;
+% 
+% muSum = mean(tempSum);
+% sdSum = std(tempSum);
+% x = min(tempSum):0.01:max(tempSum);
+% y = normpdf(x,muSum,sdSum);
+% plot(x,y,'r-');
+% 
+% b = binornd(5,0.4,nReps,nSim);
+% c = exprnd(2,nReps,nSim);
+% figure, hist(sum([a;b;c]));

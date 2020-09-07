@@ -19,6 +19,7 @@ sdMean = zeros(length(nSum),1);
 muMean = zeros(length(nSum),1);
 ctr = 0;
 figure('Name','Sampling Distribution of the Mean');
+nStr = {};
 for thisSum = nSum
     ctr = ctr+1;
     allSims = unidrnd(R,[thisSum,nSim]);
@@ -40,6 +41,9 @@ for thisSum = nSum
     tStr = sprintf('R = %d, SD = %.2f',R,sdMean(ctr)); title(tStr);
     xStr = sprintf('Mean of %d random draws',thisSum); xlabel(xStr);
     ylabel('#');
+    
+    % for labeling data points in figure #2
+    nStr = [nStr,{[' n=',num2str(thisSum)]}];
       
 end
 
@@ -49,6 +53,10 @@ xlabel('SEM formula');
 ylabel('SD of Sampling Dist of Mean');
 title('Comparison of Std. Error of the Mean');
 hold on
+
+% label data points:
+text(semMean,sdMean,nStr);
+
 axis square
 ax = axis;
 xyMin = min([ax(1),ax(3)]);

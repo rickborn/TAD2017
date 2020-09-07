@@ -183,7 +183,7 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 
 % Eventually, I would probably convert the script to a function, in which
 % case, the below would be variables passed to the function:
-nQperSeminar = 5;
+nQperSeminar = 6;
 nSeminars = length(manFirst) + length(womanFirst); % i.e. 249 in original study
 nSims = 10000;
 

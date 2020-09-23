@@ -1,7 +1,6 @@
 % incomeByHeightDemo.m
 %
 % RTB trying to emulate Gelman & Nolan demo (pp. 49-51)
-% "Teaching Statistics: A Bag of Tricks"
 
 %% Load and plot data
 
@@ -10,14 +9,10 @@ fileName = 'IncomeByHgtData.xlsx';
 ds = dataset('xlsfile',fileName);
 
 figure
-% jitter x-values for better viewing:
-jFactor = 0.5;
-jitterX = (rand(length(ds.Hgt),1) .* jFactor) - (jFactor/2);
 
 % We want to use actual height for regression, but jittered height for
 % plotting:
-jHgt = ds.Hgt+jitterX;
-plot(jHgt, ds.Income, 'b.');
+plot(ds.Hgt, ds.Income, 'b.');
 hold on
 % draw the least-squares regression line:
 lsline
@@ -33,8 +28,8 @@ mdl1 = fitglm(ds,modelspec1,'Distribution','normal');
 % men taller than women and make more $$$
 
 ds.Male = logical(ds.Male);
-h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'k+');
-h2 = plot(jHgt(~ds.Male),ds.Income(~ds.Male),'ro');
+h1 = plot(ds.Hgt(ds.Male),ds.Income(ds.Male),'k+');
+h2 = plot(ds.Hgt(~ds.Male),ds.Income(~ds.Male),'ro');
 legend([h1,h2],{'Male','Female'},'Location','NorthWest');
 
 %% Add sex to regression
@@ -46,9 +41,9 @@ mdl2 = fitglm(ds,modelspec2,'Distribution','normal');
 
 % re-plot original data:
 figure
-h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'k+');
+h1 = plot(ds.Hgt(ds.Male),ds.Income(ds.Male),'k+');
 hold on
-h2 = plot(jHgt(~ds.Male),ds.Income(~ds.Male),'ro');
+h2 = plot(ds.Hgt(~ds.Male),ds.Income(~ds.Male),'ro');
 %legend([h1,h2],{'Male','Female'},'Location','NorthWest');
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
@@ -57,6 +52,7 @@ ylabel('Income (thousands of $)');
 
 xVals = (min(ds.Hgt):max(ds.Hgt))';
 men = ones(size(xVals));
+const = zeros(size(xVals));
 
 [yMen,yMenCI] = predict(mdl2,[xVals,men]);
 % Plot 'em

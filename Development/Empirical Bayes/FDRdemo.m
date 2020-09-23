@@ -67,7 +67,7 @@ xlabel('p-value'); ylabel('count');
 title('P-values for Prostrate Data');
 
 % P-value plot after Schweder & Spjotvoll 1982:
-PvalPlot(dataPvals,1);
+PvalPlot(dataPvals,0.3,1);
 
 %figure, plot(dataPvalsSorted);
 % hold on;
@@ -77,7 +77,7 @@ PvalPlot(dataPvals,1);
 
 % Given that the distribution of p-values under H0 is uniform, the expected
 % # of false positives (numerator) is just n x p_i. Work this out: Let's
-% just see what happens as we change our criterion
+% just see what happens as we change our criterion (under H0!)
 % crit = [0.0005,0.001,0.005, 0.01, 0.05, 0.10];
 crit = logspace(-4,-1,10);
 H0pValsLessThanCrit = zeros(size(crit));
@@ -186,6 +186,8 @@ figure
 
 % We control the proportion of null and non-null z-values
 % See fig. 4.4, pp. 55-56 of Efron's book on Empirical Bayes
+%
+% In progress!
 
 nNull = 2850; nNonNull = 150;
 Pi0true = nNull / (nNull + nNonNull);

@@ -44,13 +44,15 @@
 % will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
 % keys (PC) or 'command' and 'enter' keys (Mac).
 %
-% NOTE: If you are using version R2018a of MATLAB or newer, you won't be
-% able to use the ctrl+enter feature of cell scripts, because MATLAB now
-% checks the entire script for errors, rather than just the cell you are
-% trying to execute. This is stupid, but we're stuck with it. What you can
-% do instead is use the mouse to highlight the code you want to run, then
-% hit the F9 key (PC) or you can also just copy the section and then paste
-% it into the command line.
+% NOTE: If you are using version R2018a (or later) of MATLAB, you won't be
+% able to use the ctrl+enter feature, because it now checks the entire
+% script for errors, rather than just the cell you are trying to execute.
+% This is stupid, but we're stuck with it. What you can do instead is use
+% the mouse to highlight the code you want to run, then hit the F9 key (PC)
+% or Shift+F7 (Mac). You can always find what the "Evaluate" shortcut is
+% for your system by right-clicking the highlighted code in your script
+% window. If this is too confusing, you can just copy the section in your
+% editor and then paste it into the command line.
 
 %% Concepts covered:
 % 1. Test for proportions: odds ratio
@@ -96,6 +98,9 @@ orHat = ;
 % TODO: Re-create the raw data.
 % HINT: When you're done, the 'size' command for 'rxGrp' should return
 % 11037,1. And 'size' for 'ctrlGrp' should return 11034,1
+% HINT-HINT: You should be able to re-calculate your original odds ratio
+% with this formula:
+% orHat2 = (sum(rxGrp) / sum(~rxGrp)) / (sum(ctrlGrp) / sum(~ctrlGrp));
 rxGrp = ;    % aspirin group for strokes
 ctrlGrp = ;  % placebo group for strokes
 

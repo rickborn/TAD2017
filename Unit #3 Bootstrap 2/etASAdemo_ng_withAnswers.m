@@ -54,12 +54,15 @@
 % will turn yellow.) and then simultaneously hitting the 'ctrl' and 'enter'
 % keys (PC) or 'command' and 'enter' keys (Mac).
 %
-% NOTE: If you are using version R2018a of MATLAB, you won't be able to use
-% the ctrl+enter feature, because it now checks the entire script for
-% errors, rather than just the cell you are trying to execute. This is
-% stupid, but we're stuck with it. What you can do instead is use the mouse
-% to highlight the code you want to run, then hit the F9 key (PC) or you
-% can also just copy the section and then paste it into the command line.
+% NOTE: If you are using version R2018a (or later) of MATLAB, you won't be
+% able to use the ctrl+enter feature, because it now checks the entire
+% script for errors, rather than just the cell you are trying to execute.
+% This is stupid, but we're stuck with it. What you can do instead is use
+% the mouse to highlight the code you want to run, then hit the F9 key (PC)
+% or Shift+F7 (Mac). You can always find what the "Evaluate" shortcut is
+% for your system by right-clicking the highlighted code in your script
+% window. If this is too confusing, you can just copy the section in your
+% editor and then paste it into the command line.
 
 %% Constants: these would normally be passed as arguments to a function
 nBoot = 10000;
@@ -159,11 +162,14 @@ legend([h1,h2],{'orHat','95% CI'},'Location','NorthEast');
 % built-in function to calculate an odds ratio. So what do we do? We make
 % one up! We do this using what is known as an 'anonymous function'--a kind
 % of on-the-fly function that we create in one line of code:
+
 oddsratio = @(g1,g2) (sum(g1,'omitnan')/sum(1-g1,'omitnan'))...
     /(sum(g2,'omitnan')/sum(1-g2,'omitnan'));
 
+% oddsratio = @(g1,g2) (sum(g1)/sum(~g1))/(sum(g2)/sum(~g2));
+
 % We have to make g1 and g2 be the same size:
-ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
+ctrlGrpPadded = [ctrlGrp;NaN;NaN;NaN];
 
 % now use 'bootci':
 % NOTE: Chronux has it's own 'jackknife' function that interferes with
@@ -172,10 +178,10 @@ ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
 a = which('jackknife');
 if ~contains(a,'MATLAB')    % Chronux version is interfering
     rmpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
-    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrpPadded},'alpha',myAlpha,'type','bca');
     addpath('C:\usr\rick\mat\chronux_2_11\spectral_analysis\helper');
 else
-    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrp},'alpha',myAlpha,'type','bca');
+    ci = bootci(nBoot,{oddsratio,rxGrp,ctrlGrpPadded},'alpha',myAlpha,'type','bca');
 end
 
 % The above is a good example of how a defect in MATLAB requires one to use
@@ -187,20 +193,32 @@ end
 % get an error: 'Nonscalar arguments to BOOTFUN must have the same number
 % of rows.' That is, I can't have g1 and g2 be different lengths. So then I
 % figure I'll just pad the shorter vector with NaN's:
-% ctrlGrp = [ctrlGrp;NaN;NaN;NaN];
+% ctrlGrpPadded = [ctrlGrp;NaN;NaN;NaN];
 % So now they're both the same length, but then I get a different error: I
 % can't use the tilde ('~') negation trick with NaN's in the vector. So now
 % I have to change the function to use '1-g1' instead of '~g1' in the
 % denominator of each odds calculation. So then it works, but it is rather
 % unsatisfying to have to kluge things in this way!
 
+% NOTE: The confidence intervals I get in this way are much too narrow. I
+% suspect the padding with NaN's is introducing some weirdness. I will
+% investigate. (RTB 15 September 2020)
+
 %% Bonus: 2-sided p-value from the bootstrap distribution
 
-% We can get a more exact 2-sided p-value by gradually shrinking our % CI
+% We can get a more exact 2-sided p-value by gradually shrinking our CI
 % until the null value falls just outside. We have already done the hard
 % work of generating the bootstrap distribution and sorting it, so now we
 % just loop through and find the value of alpha that puts the null value of
 % 1 outside of the lower bound.
+
+% NOTE: In the code below, we are taking advantage of our prior knowledge
+% that it is the lower bound of the CI that we should be testing. But
+% realize that we are effectively *shrinking* the CI in the 'while' loop:
+% the upper bound of the CI would be decreasing, just as the lower bound is
+% increasing. We just aren't bothering to calculate it, because it doesn't
+% matter. If our calculated odds ratio was below 1, then we would test the
+% upper bound as we shrunk the CI.
 
 % NOTE: This cell won't work for the MI data, since our bootstrapped
 % distribution won't contain the null value.
@@ -208,8 +226,11 @@ ciLow = confInterval(1);
 pAlpha = myAlpha;
 
 while ciLow < 1
+    % increment alpha
     pAlpha = pAlpha + 0.001;
+    % calculate new index corresponding to lower %ile:
     idxLo = floor((pAlpha/2) * nBoot);
+    % grab the corresponding value from our sorted bootstrap distribution:
     ciLow = orStarSorted(idxLo);
 end
 % pAlpha: 0.1620; compare with Fisher Exact value of 0.1723
@@ -253,7 +274,7 @@ axis(ax);
 h3=line([orHat,orHat],[ax(3),ax(4)],'Color','g','LineWidth',2);
 legend(h3,'orHat','Location','NorthEast');
 
-%% Calcualte a 1-tailed p-value
+%% Calculate a 1-tailed p-value
 
 % This is a one-tailed test:
 if orHat < 1
@@ -320,7 +341,10 @@ strokeData = table([nStrokeRx;nStrokeCtrl],[nRx-nStrokeRx;nCtrl-nStrokeCtrl],...
 
 %% Compare with a Chi-square test
 
+% Stroke Data:
 observedData = [nStrokeRx,nRx-nStrokeRx;nStrokeCtrl,nCtrl-nStrokeCtrl];
+% MI Data:
+%observedData = [nMIrx,nRx-nMIrx;nMIctrl,nCtrl-nMIctrl];
 
 % Calculate our expected table based on row and column totals:
 CT = sum(observedData,1);   % column totals

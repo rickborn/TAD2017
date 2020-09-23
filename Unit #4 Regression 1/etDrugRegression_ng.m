@@ -158,7 +158,8 @@ hold on;
 % model that allows for both 'fixed' and 'random' effects is called a
 % "linear mixed effects model." We have a fixed effect for the slope (i.e.
 % 'hrs') and the intercept, but we also allow a random addition to the
-% intercept for each lot.
+% intercept for each lot. In other words, we are allowing each lot to have
+% its own y-intercept.
 
 % NOTE: MATLAB online help:
 % https://www.mathworks.com/help/stats/relationship-between-formula-and-design-matrix-.html
@@ -175,6 +176,7 @@ hold on;
 % remaining and random effect of lot (see above for how to write the model
 % specification. Also note that column titles are used when assigning model
 % specification.)
+% (The text in magenta is the Wilkonson notation for specifying our model.)
 lme = fitlme(ds,'amount ~ hrs + (1|lot)');
 
 % Now we need to read out the individual intercepts from the model

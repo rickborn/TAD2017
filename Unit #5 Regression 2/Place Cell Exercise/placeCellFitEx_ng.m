@@ -105,8 +105,9 @@ spikeTrain = ;
 spikeIndex = ;
 
 % We then use 'spikeIndex' to plot a dot of the rat's position at the time
-% of that spike.
-hp=plot(expTime(logical(spikeTrain)),ratPosition(logical(spikeTrain)),'r.');
+% of that spike. (Note that we could also use 'spikeTrain' to index into
+% our arrays, but we would first have to conver it to the type 'logical'.)
+hp=plot(expTime(spikeIndex),ratPosition(spikeIndex),'r.');
 set(hp,'MarkerSize',10);    % make dots bigger
 
 % QUESTION (Q3): When does the cell fire? Is it just a place cell?
@@ -328,7 +329,9 @@ q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
 qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
 % Compare qFit with alpha, mu and sigma calculated above:
-[qFit; [alpha,mu,sigma]]
+T = table(qFit',[alpha;mu;sigma],...
+    'VariableNames',{'Direct','MLE'},'RowNames',{'alpha','mu','sigma'});
+display(T);
 
 % But to see the down side of this approach, try making initial guesses
 % that are less well guided by the histogram (e.g. q0 = [0,0,0]). 
@@ -339,7 +342,9 @@ qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 %
 % ANSWER: glmfit is faster, we are guaranteed to get the right answer, and
 % we automatically get all sorts of useful information, such as standard
-% errors and confidence intervals.
+% errors and confidence intervals. But note that we could get standard
+% errors and CIs by bootstrapping if we chose to use the direct fit of a
+% Gaussian model.
 
 %% Analysis of residuals
 

@@ -58,7 +58,7 @@
 % or you can also just copy the section and then paste it into the command
 % line.
 
-%% Concepts covered:
+% % Concepts covered:
 % 1. plotting grouped data with 'gscatter'
 % 2. simple linear regression using 'regress'
 % 3. simple linear regression using 'fitglm'

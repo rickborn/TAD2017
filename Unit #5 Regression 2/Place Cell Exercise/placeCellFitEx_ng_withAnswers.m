@@ -54,6 +54,7 @@
 %% load data
 % make sure placeCellData.mat is in your path
 load placeCellData.mat
+% These are just for figure layout:
 nr = 4;
 nc = 3;
 
@@ -72,10 +73,12 @@ title('Fig. 1: Rat position vs. time');
 % QUESTION (Q1): 
 % What was the duration of the entire experiment, in seconds (rounded to
 % nearest second)?
+% round(max(expTime)) % ans = 178
 
 % QUESTION (Q2):
 % How many action potentials did the hippocampal neuron fire during the
 % entire experiment?
+% length(spikeTimes)    % ans = 220
 
 %% Plot spikes on top of position trace.
 
@@ -293,7 +296,9 @@ q0 = [20/1000,30,30];   % reasonable guesses for alpha, mu, sigma
 qFit = fminsearch(@(q)fitFunGauss2(q,ratPosition,spikeTrain),q0,OPTIONS);
 
 % Compare qFit with alpha, mu and sigma calculated above:
-[qFit', [alpha;mu;sigma]]
+T = table(qFit',[alpha;mu;sigma],...
+    'VariableNames',{'Direct','MLE'},'RowNames',{'alpha','mu','sigma'});
+display(T);
 
 % But to see the down side of this approach, try making initial guesses
 % that are less well guided by the histogram (e.g. q0 = [0,0,0]). 

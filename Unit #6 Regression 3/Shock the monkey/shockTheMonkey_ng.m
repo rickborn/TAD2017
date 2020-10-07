@@ -25,6 +25,9 @@
 fileName ='es5bRaw.xlsx';
 ds = readtable(fileName);
 
+% To see the names of the 3 variables (= columns):
+ds.Properties.VariableNames
+
 % Each row is data from a single trial during which the monkey viewed a
 % stochastic motion display whose signal strength was varied systematically
 % (Coh) and whose direction was chosen according to the preferred direction
@@ -152,7 +155,7 @@ end
 % line for the stim (red line) and no-stim (black line) predictions.
 % Remember that our y-axis is in units of 'proportion preferred decisions'
 % and NOT in log(P/1-P). HINT: You need to solve for 'P':
-% P = 1 / 1 + exp[-(b0 + b1*stim + b2*corr)]
+% P = 1 / {1 + exp[-(b0 + b1*stim + b2*corr)]}
 !!! Your code here
 
 %% TODO: Determine the "equivalent visual stimulus" for microstimulation
@@ -183,7 +186,8 @@ end
 % 2) Brute force. We have the regression equation, so we can input a very
 % finely spaced set of coh values and find the one that gives us a value of
 % 0.5. Since we're unlikely to get exactly 0.5, we would choose some narrow
-% range straddling 0.5 and then take the average.
+% range straddling 0.5 and then take the average. You'll need to use your
+% indexing chops on this one.
 
 !!! Your code here
 
@@ -195,7 +199,7 @@ end
 
 %% Bonus questions
 
-% 1) The GLM is a beutiful framework, because we get so much "for free,"
+% 1) The GLM is a beautiful framework, because we get so much "for free,"
 % such as standard errors on our betas as well as significance tests for
 % whether or not they are different from 0. But let's suppose this wasn't
 % the case. How would you design your own procedure to explicitly test our
@@ -214,5 +218,5 @@ end
 % (similar to the cross-validation we did in week #4). Determine the
 % performance of the logistic regression model using 5-fold
 % cross-validation (HINT: 'crossvalind') and compare this performance with
-% that of a linear discriminant analysis ('classify') and that of a support
+% that of linear discriminant analysis ('classify') and that of a support
 % vector machine ('fitcsvm').

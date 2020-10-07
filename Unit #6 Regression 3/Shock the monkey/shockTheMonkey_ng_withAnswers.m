@@ -22,13 +22,14 @@
 %% Read in the data from a Newsome lab microstimulation experiment
 
 % Load the file into a table structure called 'ds'
-%fileName ='es5bRaw.xlsx';   % big effect
-fileName = 'js25aRaw.xlsx'; % small effect
+fileName ='es5bRaw.xlsx';   % big effect
+%fileName = 'js25aRaw.xlsx'; % small effect
 %fileName ='js92dRaw.xlsx';  % sig. interaction term
 %fileName ='js21aRaw.xlsx';  % whopper; brute force EVS breaks
 %fileName ='es2aRaw.xlsx';   % medium effect
 
 ds = readtable(fileName);
+ds.Properties.VariableNames
 
 % Each row is a single trial during which the monkey viewed a stochastic
 % motion display whose signal strength is varied systematically (Coh) and
@@ -236,6 +237,7 @@ else
     pStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*mStim + b(3).*coh)));
 end
 plot(coh,pStim,'r-');
+
 pNoStim = 1 ./ (1 + exp(-(b(1).*const + b(2).*~mStim + b(3).*coh)));
 plot(coh,pNoStim,'k-');
 
@@ -270,6 +272,8 @@ EVS1 = b(2) / b(3);
 % finely spaced set of coh values and find the one that gives us a value of
 % 0.5. Since we're unlikely to get exactly 0.5, we would choose some narrow
 % range straddling 0.5 and then take the average.
+% Note that we already calculated these in order to plot our regression
+% lines, so we just need to select the appropriate values here:
 EVS2 = mean(coh(pNoStim < 0.505 & pNoStim > 0.495)) - ...
       mean(coh(pStim < 0.505 & pStim > 0.495));
 
@@ -327,7 +331,11 @@ for k = 1:kFold
     train = ~test;
     
     % fit LR model to training data
-    modelspec = 'PDchoice ~ 1 + Mstim + Coh';
+    if iSig
+        modelspec = 'PDchoice ~ 1 + Mstim*Coh';
+    else
+        modelspec = 'PDchoice ~ 1 + Mstim + Coh';
+    end
     mdlLR = fitglm(ds(train,:),modelspec,'Distribution','binomial');
     [yPred] = predict(mdlLR,ds(test,[1,2]));
     propCorrLR(k) = sum((yPred >= 0.5) == ds.PDchoice(test)) / sum(test);

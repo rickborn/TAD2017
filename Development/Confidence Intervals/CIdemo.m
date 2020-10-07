@@ -16,6 +16,8 @@ function [trueCIinex,mitCIinex] = CIdemo(nSamp,alpha,nSims,pFlag)
 %
 % RTB wrote it, 29 September 2020, NE Harbor, grey, foggy morning
 
+% cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\TAD\TAD Code\Development\Confidence Intervals'
+
 % This demo was inspired by a mistake in a beautiful study at MIT on the
 % effects of college scholarships. See:
 % https://evaluatingcollegesupport.mit.edu/

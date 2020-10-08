@@ -158,7 +158,7 @@ end
 %
 % P = 1 / {1 + exp[-(b0 + b1*stim + b2*coh)]}
 %
-% We want a continuous line, so we'll create a vector of possible values.
+% We want a continuous line, so we'll create a vector of possible values:
 % Range for coherence:
 coh = [min(ds.Coh):0.01:max(ds.Coh)]';  % column vector
 

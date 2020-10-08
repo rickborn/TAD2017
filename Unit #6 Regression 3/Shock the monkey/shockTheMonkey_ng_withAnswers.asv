@@ -22,8 +22,8 @@
 %% Read in the data from a Newsome lab microstimulation experiment
 
 % Load the file into a table structure called 'ds'
-fileName ='es5bRaw.xlsx';   % big effect
-%fileName = 'js25aRaw.xlsx'; % small effect
+%fileName ='es5bRaw.xlsx';   % big effect
+fileName = 'js25aRaw.xlsx'; % small effect
 %fileName ='js92dRaw.xlsx';  % sig. interaction term
 %fileName ='js21aRaw.xlsx';  % whopper; brute force EVS breaks
 %fileName ='es2aRaw.xlsx';   % medium effect
@@ -322,10 +322,8 @@ title(tStr);
 % because it uses the probabilities calculated from the appropriate fit. In
 % terms of parameters, the formula with a significant interaction term is
 % not so pretty:
-%
 % (-b(1)/b(3)) - ((-b(1) - b(2))/(b(3) + b(4)))
-%
-% But it does give the correct answer!
+% but it does still give the correct answer!
   
 % We can encourage the students to break this down into steps. First create
 % a logical selection vector that has ones where the y-value (pNoStim or
@@ -427,7 +425,6 @@ end
 histogram(allB1s);
 xlabel('Permuted value of \beta_1');
 ylabel('#');
-title('Permutation test for H0: \beta_1 = 0');
 
 % draw line at actual value of beta1 +/- std. error:
 ax = axis;
@@ -450,7 +447,8 @@ pValPerm = sum(allB1s > b(2)) / nPerm;
 if pValPerm == 0
     pValPerm = 1 / (nPerm + 1);
 end
-display(pValPerm);
+
+title(['Permutation test for H0: \beta_1 = 0');
 
 %% Bonus: Standard error for our "effect size."
 

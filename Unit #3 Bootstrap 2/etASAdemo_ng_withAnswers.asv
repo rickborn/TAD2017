@@ -1,4 +1,4 @@
-function [rT,dT,orHat,bCoef] = etASAdemo_ng_withAnswers(miFlag)
+function [resT] = etASAdemo_ng_withAnswers(miFlag)
 
 % etASAdemo_ng_withAnswers.m: Bootstrap test for odds ratio
 %
@@ -465,8 +465,8 @@ relativeRiskReductionFx = ((nFxRx/nFosRx) - (nFxCtrl/nFosCtrl)) / (nFxCtrl/nFosC
 
 %% Super Bonus: Using the linear model
 
-% There is a binary outcome variable and a binary treatment, so this is
-% just logistic regression with an indicator variable. Let's try:
+% There is a binary outcome variable, so one might think that we could also
+% solve the problem with logistic regression. Let's try:
 
 % We first need to create our 'x' (treatment) and 'y' (outcome) variables:
 % outcomes for treatment group (1 = had event):
@@ -483,20 +483,20 @@ Y = [yRx;yCtrl];
 X = [xRx;xCtrl];
 
 % Fit the model using the GLM:
-[bCoef,~,stats] = glmfit(X,Y,'binomial','link','logit');
+[b,dev,stats] = glmfit(X,Y,'binomial','link','logit');
 
 % Plot the results:
 % P = 1 / {1 + exp[-(b0 + b1*rx)]}
 x = [0,1];
-y = 1 ./ (1 + exp(-(bCoef(1) + bCoef(2).*x)));
+y = 1 ./ (1 + exp(-(b(1) + b(2).*x)));
 figure('Name',figName);
 bar(x,y);
 hold on
 xlabel('treatment');
 ylabel('proportion of Events');
 
-yEBhi = (1 ./ (1 + exp(-((bCoef(1)+stats.se(1)) + (bCoef(2)+stats.se(2)).*x)))) - y;
-yEBlo = y - (1 ./ (1 + exp(-((bCoef(1)-stats.se(1)) + (bCoef(2)-stats.se(2)).*x))));
+yEBhi = (1 ./ (1 + exp(-((b(1)+stats.se(1)) + (b(2)+stats.se(2)).*x)))) - y;
+yEBlo = y - (1 ./ (1 + exp(-((b(1)-stats.se(1)) + (b(2)-stats.se(2)).*x))));
 errorbar(x,y,yEBlo,yEBhi,'r.');
 
 % Looks good, but how do we interpret the results? Well, remember that
@@ -513,8 +513,8 @@ errorbar(x,y,yEBlo,yEBhi,'r.');
 
 % Calculate a confidence interval:
 ciLR = zeros(1,2);
-ciLR(1) = exp(bCoef(2) - stats.se(2)*norminv(1-myAlpha/2)); % lower CI
-ciLR(2) = exp(bCoef(2) + stats.se(2)*norminv(1-myAlpha/2)); % upper CI
+ciLR(1) = exp(b(2) - stats.se(2)*norminv(1-myAlpha/2)); % lower CI
+ciLR(2) = exp(b(2) + stats.se(2)*norminv(1-myAlpha/2)); % upper CI
 % Ans: ciLR = [0.4290 0.6944];
 % 
 % Compare with bootstrap estimate: 'confInterval':
@@ -522,9 +522,9 @@ ciLR(2) = exp(bCoef(2) + stats.se(2)*norminv(1-myAlpha/2)); % upper CI
 
 % Compare p-value and 95% confidence interval using Fisher's
 % Exact Test:
-dT = table([nErx;nEctrl],[nRx-nErx;nCtrl-nEctrl],...
+Edata = table([nErx;nEctrl],[nRx-nErx;nCtrl-nEctrl],...
     'VariableNames',{'Event','No Event'},'RowNames',{'ASA','No ASA'});
-[~,pE,statsE] = fishertest(dT,'Tail','both','Alpha',0.05);
+[~,pE,statsE] = fishertest(Edata,'Tail','both','Alpha',0.05);
 % h = 1
 % p = 5.0328e-07
 % stats = 
@@ -533,9 +533,9 @@ dT = table([nErx;nEctrl],[nRx-nErx;nCtrl-nEctrl],...
 
 %% Make a pretty table to compare our results
 
-rT = table([confInterval(1);statsE.ConfidenceInterval(1);NaN;ciLR(1)],...
+resT = table([confInterval(1);statsE.ConfidenceInterval(1);NaN;ciLR(1)],...
     [confInterval(2);statsE.ConfidenceInterval(2);NaN;ciLR(2)],...
     [pVal2t;pE;pChi2;stats.p(2)],...
     'VariableNames',{'CI_lo','CI_hi','p-val'},...
     'RowNames',{'Bootstrap','FET','Chi2','LR'});
-%display(resultsTable);
+%display(resT);

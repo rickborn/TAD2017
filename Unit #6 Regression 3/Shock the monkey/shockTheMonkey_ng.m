@@ -203,6 +203,12 @@ coh = [min(ds.Coh):0.01:max(ds.Coh)]';  % column vector
 
 % QUESTION (Q11): Upload your final figure to Learning Catalytics.
 
+% Be sure to also answer questions 12-14 on LC. They refer to the same
+% analysis on a differet data set (js92dRaw.xlsx); one where there is a
+% significant interaction term. You don't need to do any additional coding,
+% just think about the resulting model and answer the 3 questions about the
+% interaction term. Hint: Write down the equation!!!
+
 %% Bonus questions
 
 % 1) The GLM is a beautiful framework, because we get so much "for free,"

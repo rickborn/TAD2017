@@ -233,7 +233,9 @@ end
 % TODO: Plot the regression lines on top of the raw data. Make a separate
 % line for the stim (red line) and no-stim (black line) predictions.
 % Remember that our y-axis is in units of 'proportion preferred decisions'
-% and NOT in log(P/1-P). HINT: You need to solve for 'P'
+% and NOT in log(P/1-P). HINT: You need to solve for 'P':
+%
+% P = 1 / {1 + exp[-(b0 + b1*stim + b2*coh)]}
 
 % Range for coherence:
 coh = [min(ds.Coh):0.01:max(ds.Coh)]';  % column vector

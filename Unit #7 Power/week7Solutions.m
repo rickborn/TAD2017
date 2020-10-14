@@ -29,8 +29,8 @@ rng default;
 
 nSims = 10000;
 myAlpha = 0.05;
-nMax = 100;
-nAddObs = 10;
+nMax = 50;
+nAddObs = 5;
 nInit = 20;
 
 % The logic for this simulation is that we generate all nMax pairs of
@@ -50,18 +50,19 @@ for jSim = 1:nSims
     end
 end
 FPrate = (sum(FP) / nSims) * 100;
-% ANSWER: 16.73, which rounds to 17
+% ANSWER for 10/100: 16.73, which rounds to 17
+% ANSWER for 5/50: 13.4
 
 %% QUESTION (Q2)
 
 % Chastened by Uri Simonsohn, you and your PI decide to play it straight.
 % Before you do your experiment, you do some research and decide that the
 % smallest effect size, measured as d-prime, that would be worth publishing
-% is d' = 0.57. How many animals should you run in each group in order to
+% is d' = 0.4. How many animals should you run in each group in order to
 % have an 80% probability of detecting an effect of this size?
 
 desiredPower = 0.80;
-dPrimeSim = 0.57;
+dPrimeSim = 0.4;
 % In this case, we can use the formula:
 n = sampsizepwr('t2',[1,1],1+dPrimeSim,desiredPower);
 % ANSWER: 50
@@ -107,17 +108,17 @@ grid on
 
 % For the same experiment, how big would d-prime have to be for you to have
 % the same power (i.e. an 80% chance of detecting the effect) with an n of
-% only 20 in each group? Give your answer to 2 decimal places.
+% only 30 in each group? Give your answer to 2 decimal places.
 
 % In this case, we can do it by brute force by getting the power for a
 % large range of possible values of d-prime, then finding the one that
 % gives us the desired power.
 
-dPrime = 0.50:0.001:1;
-pwrout = sampsizepwr('t2',[0,1],dPrime,[],20);
+dPrime = 0.40:0.001:1;
+pwrout = sampsizepwr('t2',[0,1],dPrime,[],30);
 dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
 
-% ANSWER: 0.9090
+% ANSWER: 0.736
 
 %% QUESTION (Q4)
 
@@ -149,7 +150,7 @@ ylabel('#');
 %% QUESTION (Q5) Meta-analysis 1
 
 % Suppose that a large number of labs have done the same experiment: 50
-% animals per group with a "true" effect size of d' = 0.57. Further suppose
+% animals per group with a "true" effect size of d' = 0.7. Further suppose
 % that only the labs that got a statistically significant effect are going
 % to get their paper published. If you now survey this literature and
 % collect all of the reported p-values, what percentage of these should be
@@ -158,7 +159,7 @@ ylabel('#');
 % Constants for now; would be passed as arguments to a function:
 n = 50;
 nSims = 100000;
-dPrimeSim = 0.57;
+dPrimeSim = 0.7;
 
 % Generate our samples:
 allSamples = randn(n,2,nSims);
@@ -171,7 +172,7 @@ allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
 % Find the proportion of *published* p-values less-than-or-equal to 0.01:
 perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 
-% ANSWER: 73%
+% ANSWER: 86%
 
 %% QUESTION (Q6) Meta-analysis 2
 
@@ -207,7 +208,7 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 
 % As for Q5, suppose that a large number of labs have done the same
 % experiment but this time with just 5 animals per group and a "true"
-% effect size of d' = 0.5. Further suppose that only the labs that got a
+% effect size of d' = 0.57. Further suppose that only the labs that got a
 % statistically significant effect are going to get their paper published.
 % What will be the median *published* effect size? For this analysis,
 % determine your fitness for publication using a 1-tailed (i.e. right tail)
@@ -216,7 +217,7 @@ perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
 % Constants for now; would be passed as arguments to a function:
 n = 5;
 nSims = 100000;
-dPrimeSim = 0.5;
+dPrimeSim = 0.57;
 
 % Generate our samples:
 allSamples = randn(n,2,nSims);
@@ -232,8 +233,8 @@ allDprime = squeeze(diff(mean(allSamples)));    % SD = 1
 
 % median published effect size:
 medPubDprime = median(allDprime(logical(h')));
-% Ans.: 1.31
-% The mean is 1.34
+% Ans.: 1.33
+% The mean is 1.37
 
 % This exercise nicely illustrates one of the most pernicious, but least
 % appreciated, consequences of under-powered science: the inflation of
@@ -251,20 +252,20 @@ medPubDprime = median(allDprime(logical(h')));
 %% QUESTION (Q8): Publication bias, effect size, and power
 
 % Based on your simulation for Q7, what is the statistical power for n=5
-% and an effect size of dPrime = 0.5?
+% and an effect size of dPrime = 0.57?
 
 % In the above simulation, we generated our simulated populations with two
 % different means, so we know that ALL samples are truly different. So
 % power is very easy to calculate:
 powerSim = sum(h) / nSims;
-% Ans.: 0.1777
+% Ans.: 0.2064
 
 % NOTE: If we re-run the above simulation using a 2-tailed test, we get a
 % simulated power value of 0.1075.
 pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5);
-% Ans. 0.1077
+% Ans. 0.1254
 
 % We could also compute the power using 'sampsizepwr' and specifying a
 % one-tailed test:
 pwrout = sampsizepwr('t2',[0,1],dPrimeSim,[],5,'Tail','right');
-% Ans. 0.1788
+% Ans. 0.2065

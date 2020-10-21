@@ -53,6 +53,22 @@ FPrate = (sum(FP) / nSims) * 100;
 % ANSWER for 10/100: 16.73, which rounds to 17
 % ANSWER for 5/50: 13.4
 
+% Note: Using 'rng default' does not guarantee that everyone will get the
+% exact same answer. In fact, it can create fixed differences depending on
+% the order in which random draws are assigned to different variables. In
+% the above code, I assign the maximum number of draws to each of our two
+% groups each time through the 'nSim' loop. However, one could add draws on
+% an only as needed basis, in which case we would not use up those random
+% draws on each simulation. Alternatively, we could assign all random draws
+% outside of the 'nSim' for loop:
+%
+% gp1 = randn(nMax,nSims);
+% gp2 = randn(nMax,nSims);
+%
+% And then just loop through the columns in the 'nSims' loop. The point is
+% that the different orders in which draws from the rng are assigned to
+% different groups will create small differences in the outcome.
+
 %% QUESTION (Q2)
 
 % Chastened by Uri Simonsohn, you and your PI decide to play it straight.

@@ -143,7 +143,7 @@ muCtrl = [0,0,0,0,0];   % normalized mean of control group
 mySigma = (ones(5,5) .* myCorr) + (eye(5) .* (1 - myCorr));
 
 % Q20: What is the probability of at least one false positive?
-% Key is to draw both samples from the SAME distribution.
+% Key is to draw both samples from the SAME distribution (i.e. H0 is True)
 nSim = 10000;
 nFP = 0;
 rng default
@@ -168,7 +168,9 @@ mySigma = eye(5);   % and repeat lines 119-130
 % This gives 0.2279
 
 % But it is easy to calculate exactly with independent tests, since the
-% probability of one or more FPs is just 1 - all True Positives:
+% probability of one or more FPs is just 1 - P(all True Positives). Since
+% the probability of a true positive for each of the tests is (1-alpha),
+% and the tests are independent, the latter is just 0.95^5.
 FWERuncorr = 1 - 0.95^nTests;
 % This gives 0.2262
 
@@ -179,6 +181,6 @@ mySigma = ones(5,5);    % and repeat lines 119-130
 % This gives 0.0504
 % Or you can just realize that if the scores all are perfectly correlated,
 % we have really only done one test, so FWER = alpha for single test.
-% (Brian Healy gave an example in his multiple comparisons lecture of
+% Brian Healy gave an example in his multiple comparisons lecture of
 % comparing heights between two groups, but coding the heights (single
 % measurement) in five different ways: cm., in., ft., m., yds.

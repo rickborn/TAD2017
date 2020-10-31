@@ -217,7 +217,7 @@ Y = [ctrlGrp,rxGrp];
 X = [iCtrl,iRx];
 
 % Now just fit the linear model and look at the beta1 coeff for a p-value:
-[~,~,stats] = glmfit(X,Y);
+[b,dev,stats] = glmfit(X,Y);
 pLM1 = stats.p(2);
 display(pLM1);
 
@@ -225,17 +225,12 @@ display(pLM1);
 % exactly double the value for our 1-sided t-test. If we run a 2-sided
 % t-test . . .
 [hT,pValTtest,ci,statsT] = ttest2(rxGrp,ctrlGrp,'Tail','both');
-display(pValTtest);
 % . . . we get exactly the same answer. Amazing!
 
 % Now let's do the same thing, but on ranked data, and compare this to the
-% 2-sided Wilcoxon Rank Sum Test. Note that the LM approximation will only
-% be exact for n >= 11 in each group.
+% 2-sided Wilcoxon Rank Sum Test:
 [rnkY,tiedJ] = tiedrank(Y);
 
-[~,~,stats] = glmfit(X,rnkY);
+[b,dev,stats] = glmfit(X,rnkY);
 pLM2 = stats.p(2);
 display(pLM2);
-
-[pValWRST,hRS,statsRS] = ranksum(rxGrp,ctrlGrp,'Tail','both');
-display(pValWRST);

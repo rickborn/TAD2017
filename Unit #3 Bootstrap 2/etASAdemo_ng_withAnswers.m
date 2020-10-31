@@ -503,7 +503,7 @@ errorbar(x,y,yEBlo,yEBhi,'r.');
 % beta1 [= b(2)] is the change in the log-odds of having a heart attack,
 % for a one-unit change in our treatment variable. The difference of two
 % logs is equal to the log of the ratio, so if we exponentiate our beta1 we
-% get . . . the odds ratio! Amazing!
+% get . . . the odds ratio! Amazing!!!
 % display(exp(b(2)));
 % Ans: 0.5458
 

@@ -148,7 +148,7 @@ for k = 1:length(allN)
             ['Power = ' num2str(powerSim(k),2)],'FontSize',12);
         
         text(maxAx(1)+0.2,(0.8*(ax(4)-ax(3))+ax(3)),...
-            ['Median Published Effect Size = ' num2str(pubESright(k),2)],'FontSize',12);
+            ['Median Pub''d Effect Size = ' num2str(pubESright(k),2)],'FontSize',12);
         
         %pubESleft = median(allDprime(h==1 & allDprime' < 0));
         %     line([pubESright,pubESright],[ax(3),ax(4)],'Color','b','LineStyle','--');
@@ -160,20 +160,22 @@ for k = 1:length(allN)
     end
 end
 
-relBiasFlag = 0;
+relBiasFlag = 1;
 
 % Make a plot of "effect size inflation" as a function of power
 figure('Name','Effect Size Inflation');
-hold on
-
 if relBiasFlag
-    plot(powerSim,(pubESright - dPrimeSim) ./ dPrimeSim,'b*-');
+    hp=plot(powerSim,(pubESright - dPrimeSim) ./ dPrimeSim,'bo-');
+    set(hp,'MarkerFaceColor','b','LineWidth',2);
     ylabel('Relative bias');
     ax = axis;
     line([ax(1),ax(2)],[0,0],'Color','r','LineStyle','--');
 else
-    plot(powerSim,pubESright ./ dPrimeSim,'b*-');
+    hp=semilogy(powerSim,pubESright ./ dPrimeSim,'bo-');
+    set(hp,'MarkerFaceColor','b','LineWidth',2);
+    hold on
     ylabel('Effect size inflation');
+    axis([0.1, 0.85, 0.9, 2.8]);
     ax = axis;
     line([ax(1),ax(2)],[1,1],'Color','r','LineStyle','--');
 end
@@ -181,5 +183,5 @@ xlabel('Power');
 
 % Hah! I independently discovered a cool thing. See:
 % https://www.nature.com/articles/nrn3475/figures/5
-% They express their y-axis as "relative bias", which, in my exaample would
+% They express their y-axis as "relative bias", which, in my example would
 % be: (pubESright - dPrimeSim) ./ dPrimeSim

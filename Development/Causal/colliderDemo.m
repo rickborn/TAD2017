@@ -28,8 +28,8 @@ lsline
 %% Decide who gets accepted: 
 % normalize each metric, add them together, then accept the top half
 
-nlGPA = nl(gpa);
-nlGRE = nl(gre);
+nlGPA = (gpa - min(gpa)) ./ (max(gpa) - min(gpa));
+nlGRE = (gre - min(gre)) ./ (max(gre) - min(gre));
 totScore = nlGPA + nlGRE;
 acc = totScore > median(totScore);
 

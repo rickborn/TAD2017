@@ -1,3 +1,5 @@
+function [allTh, allProp] = MetropolisDemo(nSims)
+
 % MetropolisDemo.m: simple algorithm for Markov Chain Monte Carlo (MCMC)
 %
 % A 1D instantiation of the Metropolis Algorithm
@@ -33,35 +35,44 @@
 
 % The plot re-capitulates Figure 7.2 of Kruschke
 
-rng shuffle
+if nargin < 1
+    nSims = 10000;
+end
+rng default
+
 th = 0:8;   % which island
-%pTh = [0:7,0];   % population of the island
-%pTh = [0,4,3,2,1,2,3,4,0];
-pTh = [0,round(rand(1,7).*7),0];
+pTh = [0,round(rand(1,7).*7),0];    % population of each island
 
 % The original algorithm fails with something like this, because we are
 % only able to jump 1 island, which means having a 0 in the middle acts as
 % an insurmountable barrier. It can be fixed by allowing for larger jumps.
-%pTh = [0,4,3,2,0,2,3,4,0];
+%pTh = [4,3,2,0,2,3,4];
 
 figure;
-subplot(3,1,3);
-bar(th,pTh);
+subplot(3,1,1);
+bar(th(2:8),pTh(2:8));
 xlabel('\theta');
 ylabel('P(\theta)');
 title('Target distribution');
 
-nSims = 10000;
 allTh = zeros(nSims,1);
+allProp = zeros(nSims,1);
 thisTh = 4;     % start on island #4; could be random
-allTh(1) = thisTh;   
+allTh(1) = thisTh; 
+allProp(1) = thisTh;
 
 for k = 2:nSims
-    % "proposal distribution"
-    dirMove = randsample([-2,-1,1,2],1); % 1 or -1 with p = 0.5
-    propTh = thisTh + dirMove;
+    % We propose to jump to a random island: "proposal distribution"
+    propTh = thisTh + randsample([-2,-1,1,2],1);
+%     while propTh < 1 || propTh > 7
+%         propTh = thisTh + randsample([-3,-2,-1,1,2,3],1);
+%     end
+    allProp(k) = propTh;
+    % If the population is greater on the proposed island, we go there:
     if pTh(th==propTh) > pTh(th==thisTh)
         allTh(k) = propTh;
+    % If not, we go to the proposed island with probability:
+    % population_proposed / population_current
     else
         if rand < (pTh(th==propTh)/pTh(th==thisTh))
             allTh(k) = propTh;
@@ -72,24 +83,26 @@ for k = 2:nSims
     thisTh = allTh(k);
 end
 
-n=500;
+if nSims < 500
+    n = nSims;
+else
+    n=500;
+end
 subplot(3,1,2);
 semilogy(allTh(1:n),1:n,'bo-');
-ax = axis;
-axis([ax(1)-1,ax(2)+1,1,n]);
 xlabel('\theta');
 ylabel('Time step');
-title('Random walk');
+title('Biased Random walk');
 
-subplot(3,1,1);
-xBins = 0:8;
+subplot(3,1,3);
+xBins = 1:7;
 allCounts = hist(allTh,xBins);
 bar(xBins,allCounts);
 ax = axis;
 axis([ax(1),ax(2),ax(3),max(allCounts)]);
 xlabel('\theta');
 ylabel('Frequency');
-title('Sampled distribution');
+title(['Sampled distribution, n = ' num2str(nSims)]);
 
 % Post hoc thoughts. To make this work, we only need to be able to do 3
 % things:

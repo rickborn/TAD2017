@@ -3,7 +3,8 @@ function [FPrate] = dfSim2(nInit,nAddObs,nMax,myAlpha,nSims,pFlag)
 % dfSim2: Simulation of expected false positive rates when data collection
 % ends upon obtaining significance, as a function of the frequency with
 % which significance tests are performed. This replicates figure 1 from
-% Simmons et al. 2011.
+% Simmons et al. 2011. Version 2 is functionally identical to version 1,
+% but is algorithmically more elegant and faster.
 %
 % Inputs:
 % - nInit, # of initial observations prior to first t-test (default, 10)
@@ -44,6 +45,7 @@ if nargin < 3, nMax = 50; end
 if nargin < 2, nAddObs = [1,5,10,20]; end
 if nargin < 1, nInit = 10; end
 
+% Initialize the variable that will hold our results:
 FPrate = ones(length(nInit),length(nAddObs)) .* NaN;
 
 % The logic for this simulation is that we generate all nMax pairs of

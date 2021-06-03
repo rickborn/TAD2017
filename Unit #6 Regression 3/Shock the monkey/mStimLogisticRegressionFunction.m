@@ -160,6 +160,8 @@ if pFlag
     coh = min(ds.Coh):max(ds.Coh);
     mStim = ones(size(coh));
     [yStim,yStimCI] = predict(mdl,[mStim',coh']);
+    % for standard error, use the 67% CI instead of the 95%
+    %[yStim,yStimCI] = predict(mdl,[mStim',coh'],'alpha',0.33);
     % Plot 'em
     plot(coh',yStim,'r-','LineWidth',2);
     plot(coh',yStimCI(:,1),'r--');

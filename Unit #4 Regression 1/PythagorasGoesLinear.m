@@ -32,6 +32,9 @@ y = sqrt(x1.^2 + x2.^2);
 const = ones(length(y),1);
 [betaFit,betaCI,resid,residInt,stats] = regress(y,[const,x1,x2]);
 
+% 'stats' contains the R2 statistic, the F-statistic and its p-value,
+% and an estimate of the error variance.
+
 %% Plot residuals vs. fitted
 
 % model predictions:
@@ -46,3 +49,21 @@ title(tStr);
 %% Q-Q Plot of residuals
 
 figure, qqplot(resid);
+title('QQ Plot of Residuals vs. Standard Normal');
+
+%% Finally, plot the data and the fit:
+
+figure, hp=plot3(x1,x2,y,'ro');
+set(hp,'MarkerFaceColor','r');
+hold on
+ax = axis;
+
+x = linspace(ax(1),ax(2),length(x1));
+y = linspace(ax(3),ax(4),length(x2));
+[X,Y] = meshgrid(x,y);
+Z = betaFit(1) + betaFit(2).*X + betaFit(3).*Y;
+surf(X,Y,Z);
+xlabel('x1');
+ylabel('x2');
+zlabel('y');
+title(tStr);
